@@ -1,18 +1,24 @@
 window.MAIN_VIEW = 'MAIN_VIEW';
 window.GAME_VIEW = 'GAME_VIEW';
+window.LOADING_VIEW = 'LOADING_VIEW';
+window.ERROR_VIEW = 'ERROR_VIEW';
 
 const initialState = {
-    view: MAIN_VIEW
+    view: MAIN_VIEW,
+    game: null,
+    message: ''
 };
 
 function viewState(state = initialState, action) {
     switch (action.type) {
         case SET_VIEW_ACTION:
             return { ...state, view: action.payload};
-        case CREATE_GAME_REQUEST:
-            return { ...state, fetching: true};
-        case CREATE_GAME_SUCCESS:
-            return { ...state, game: action.payload, fetching: false, view: GAME_VIEW};
+        case GET_GAME_REQUEST:
+            return { ...state, view: LOADING_VIEW};
+        case GET_GAME_SUCCESS:
+            return { ...state, game: action.payload, view: GAME_VIEW};
+        case GET_GAME_ERROR:
+            return { ...state, message: action.payload, view: ERROR_VIEW};
         default:
             return state;
     }

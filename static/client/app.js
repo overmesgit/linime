@@ -1,5 +1,5 @@
 class AppClass extends React.Component {
-    setGameView(e) {
+    createGame(e) {
         this.props.appActions.createGame();
     }
     setMainView(e) {
@@ -7,15 +7,22 @@ class AppClass extends React.Component {
     }
 
     render() {
-        const view = this.props.app.view;
-        if (view === MAIN_VIEW) {
-            return <div>Main window
-                <button onClick={this.setGameView.bind(this)}>Game view</button>
-            </div>
-        } else {
-            return <div>Game window
-                <button onClick={this.setMainView.bind(this)}>Main view</button>
-            </div>
+        const { view, game, message } = this.props.app;
+        switch (view) {
+            case MAIN_VIEW:
+                return <div>Home
+                    <button onClick={this.createGame.bind(this)}>Create game</button>
+                </div>
+            case LOADING_VIEW:
+                return <div>Loading</div>
+            case GAME_VIEW:
+                return <div>Game {game}
+                    <button onClick={this.setMainView.bind(this)}>Main view</button>
+                </div>
+            case ERROR_VIEW:
+                return <div>Error {message}
+                    <button onClick={this.setMainView.bind(this)}>Main view</button>
+                </div>
         }
     }
 }

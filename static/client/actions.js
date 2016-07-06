@@ -1,6 +1,7 @@
 window.SET_VIEW_ACTION = 'SET_VIEW';
-window.CREATE_GAME_REQUEST = 'CREATE_GAME_REQUEST';
-window.CREATE_GAME_SUCCESS = 'CREATE_GAME_SUCCESS';
+window.GET_GAME_REQUEST = 'GET_GAME_REQUEST';
+window.GET_GAME_SUCCESS = 'GET_GAME_SUCCESS';
+window.GET_GAME_ERROR = 'GET_GAME_ERROR';
 
 window.setView = function (view) {
     return {
@@ -12,13 +13,37 @@ window.setView = function (view) {
 window.createGame = function () {
     return (dispatch) => {
         dispatch({
-            type: CREATE_GAME_REQUEST
+            type: GET_GAME_REQUEST
         });
-        setTimeout(() => {
+        $.post('/game', (data) => {
             dispatch({
-                type: CREATE_GAME_SUCCESS,
-                payload: 'new game data'
+                type: GET_GAME_SUCCESS,
+                payload: data
             })
-        }, 1000)
+        }).fail(() => {
+            dispatch({
+                type: GET_GAME_ERROR,
+                payload: data
+            })
+        });
+    }
+};
+
+window.getGame = function (gameId) {
+    return (dispatch) => {
+        dispatch({
+            type: GET_GAME_REQUEST
+        });
+        $.get('/game?gameId='+gameId, (data) => {
+            dispatch({
+                type: GET_GAME_SUCCESS,
+                payload: data
+            })
+        }).fail(() => {
+            dispatch({
+                type: GET_GAME_ERROR,
+                payload: data
+            })
+        });
     }
 };
