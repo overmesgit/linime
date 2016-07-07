@@ -35,6 +35,7 @@ func serveGame(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
 			game, err := GetGame(gameUUID)
 			if err != nil {
+				w.WriteHeader(http.StatusNotFound)
 				w.Write(ErrorMessage{err.Error()}.AsJson())
 			} else {
 				w.Write(game.AsJson())

@@ -49,7 +49,7 @@ func GetGame(uuid string) (*Game, error) {
 	game := NewGame()
 	err := mongoDB.C("game").FindId(uuid).One(game)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	return game, err
 }

@@ -20,10 +20,10 @@ window.createGame = function () {
                 type: GET_GAME_SUCCESS,
                 payload: data
             })
-        }).fail(() => {
+        }).fail((xhr) => {
             dispatch({
                 type: GET_GAME_ERROR,
-                payload: data
+                payload: 'Error create new game ' + xhr.responseText
             })
         });
     }
@@ -39,10 +39,10 @@ window.getGame = function (gameId) {
                 type: GET_GAME_SUCCESS,
                 payload: data
             })
-        }).fail(() => {
+        }).fail((xhr,a,b) => {
             dispatch({
                 type: GET_GAME_ERROR,
-                payload: data
+                payload: xhr.responseJSON['Message']
             })
         });
     }

@@ -3,10 +3,19 @@ window.GAME_VIEW = 'GAME_VIEW';
 window.LOADING_VIEW = 'LOADING_VIEW';
 window.ERROR_VIEW = 'ERROR_VIEW';
 
+var urlHash = window.location.hash.substr(1);
+var gameId = '';
+var initialView = MAIN_VIEW;
+if (urlHash.search('game') > -1) {
+    gameId = urlHash.split('/')[1];
+    initialView = LOADING_VIEW;
+}
+
 const initialState = {
-    view: MAIN_VIEW,
+    view: initialView,
     game: null,
-    message: ''
+    message: '',
+    fetchingGame: gameId
 };
 
 function viewState(state = initialState, action) {

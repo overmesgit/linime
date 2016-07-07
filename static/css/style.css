@@ -1,0 +1,52 @@
+.content {
+    margin: auto;
+    width: 900px;
+    height: 900px;
+    text-align: center;
+    border: 5px solid #bababa;
+    background-color: lightgray;
+    border-radius: 50px;
+}
+
+#newGame {
+    margin: auto;
+    width: 700px;
+    height: 50px;
+    border-radius: 20px;
+    line-height: 50px;
+    cursor: pointer;
+}
+
+.btn {
+    /*border: 5px solid #6d92ba;*/
+    background-color: #7aa6cf;
+}
+
+.btn:hover {
+    background-color: #82b0d8;
+}
+
+.leftCol.fieldCell {
+    width: 95px;
+    border-left: 5px hidden #bababa;
+}
+.rightCol.fieldCell {
+    width: 95px;
+    border-right: 5px hidden #bababa;
+}
+.topRow.fieldCell {
+    height: 95px;
+    border-top: 5px hidden #bababa;
+}
+.bottomRow.fieldCell {
+    height: 95px;
+    border-bottom: 5px hidden #bababa;
+}
+
+.fieldCell {
+    width: 90px;
+    height: 90px;
+    float: left;
+    border: 5px solid #bababa;
+}
+
