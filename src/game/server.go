@@ -67,6 +67,10 @@ func StartServer() {
 	mongoDB = mongoSession.DB("mal")
 
 	fmt.Println("start")
+
+	char_fs := http.FileServer(http.Dir("/home/overmes/PycharmProjects/maspy/char_images"))
+	http.Handle("/static/char/", http.StripPrefix("/static/char/", char_fs))
+
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/game", serveGame)

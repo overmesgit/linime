@@ -9,7 +9,7 @@ import (
 )
 
 type GameCharPosition struct {
-	GroupId int `bson:"groupid"`
+	GroupId int `bson:"groupid" json:"-"`
 	CharId  int `bson:"charid"`
 	Row     int `bson:"row"`
 	Col     int `bson:"col"`

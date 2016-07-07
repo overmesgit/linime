@@ -1,12 +1,19 @@
-class Game extends React.Component {
-    createGame(e) {
-        this.props.createGame();
+class Character extends React.Component {
+    render() {
+        var cellWidth = 100;
+        var cellHeight = 100;
+        const {CharId, Row, Col} = this.props.char;
+        var img = '/static/char/' + CharId + '.jpg';
+        return <div className="char"
+                    style={{ left: cellWidth*Col, top: cellHeight*Row, backgroundImage: 'url(' + img + ')'}}></div>
     }
+}
 
+class Game extends React.Component {
     render() {
         const game = this.props.game;
 
-        var body = [];
+        var fieldCell = [];
         for(var i = 0; i < game.Width; i++) {
             for(var j = 0; j < game.Height; j++) {
                 var fieldClasses = ["fieldCell"];
@@ -22,12 +29,16 @@ class Game extends React.Component {
                 if (j == game.Height - 1) {
                     fieldClasses.push('rightCol')
                 }
-                body.push(<div key={'' + i + j} className={ fieldClasses.join(' ') }></div>)
+                fieldCell.push(<div key={'' + i + j} className={ fieldClasses.join(' ') }></div>)
             }
         }
+        var characters = game.Field.map((charData) => {
+            return <Character key={charData.CharId} char={charData} />
+        });
 
         return <div id="game" className="content">
-            {body}
+            {fieldCell}
+            {characters}
         </div>
     }
 }
