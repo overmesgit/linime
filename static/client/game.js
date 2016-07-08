@@ -1,18 +1,29 @@
 class Character extends React.Component {
+    selectChar() {
+        this.props.selectChar(this.props.char);
+    }
+
     render() {
         var cellWidth = 100;
         var cellHeight = 100;
-        const {CharId, Row, Col} = this.props.char;
-        var img = '/static/char/' + CharId + '.jpg';
-        return <div className="char"
-                    style={{ left: cellWidth*Col, top: cellHeight*Row, backgroundImage: 'url(' + img + ')'}}></div>
+        const {Img, Row, Col} = this.props.char;
+        const {selectedChar} = this.props;
+        var selected = false;
+        if (selectedChar && selectedChar.Row == Row && selectedChar.Col == Col) {
+            selected = true;
+        }
+        return <div className={"char-cell " + (selected ? "selected":"")}
+                    style={{ left: cellWidth*Col, top: cellHeight*Row}}
+                    onClick={this.selectChar.bind(this)}>
+                <div className="char" style={{ backgroundImage: 'url(' + Img + ')'}}></div>
+            </div>
     }
 }
 
 class Game extends React.Component {
     render() {
-        const game = this.props.game;
-
+        const {game, selectedChar, selectChar} = this.props;
+        console.log(selectChar)
         var fieldCell = [];
         for(var i = 0; i < game.Width; i++) {
             for(var j = 0; j < game.Height; j++) {
@@ -33,7 +44,8 @@ class Game extends React.Component {
             }
         }
         var characters = game.Field.map((charData) => {
-            return <Character key={charData.CharId} char={charData} />
+            return <Character key={'' + charData.Col + charData.Row} char={charData}
+                               selectedChar={selectedChar} selectChar={selectChar} />
         });
 
         return <div id="game" className="content">

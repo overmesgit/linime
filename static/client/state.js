@@ -15,7 +15,8 @@ const initialState = {
     view: initialView,
     game: null,
     message: '',
-    fetchingGame: gameId
+    fetchingGame: gameId,
+    selectedChar: null
 };
 
 function viewState(state = initialState, action) {
@@ -28,6 +29,8 @@ function viewState(state = initialState, action) {
             return { ...state, game: action.payload, view: GAME_VIEW};
         case GET_GAME_ERROR:
             return { ...state, message: action.payload, view: ERROR_VIEW};
+        case CHAR_SELECTED:
+            return { ...state, selectedChar: action.payload};
         default:
             return state;
     }

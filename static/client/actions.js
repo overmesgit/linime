@@ -2,11 +2,19 @@ window.SET_VIEW_ACTION = 'SET_VIEW';
 window.GET_GAME_REQUEST = 'GET_GAME_REQUEST';
 window.GET_GAME_SUCCESS = 'GET_GAME_SUCCESS';
 window.GET_GAME_ERROR = 'GET_GAME_ERROR';
+window.CHAR_SELECTED = 'CHAR_SELECTED';
+
+window.selectChar = function (char) {
+    return {
+        type: CHAR_SELECTED,
+        payload: char
+    }
+};
 
 window.setView = function (view) {
     return {
-    type: SET_VIEW_ACTION,
-    payload: view
+        type: SET_VIEW_ACTION,
+        payload: view
   }
 };
 

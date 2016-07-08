@@ -53,14 +53,24 @@
     border: 5px solid #bababa;
 }
 
-.char {
-    width: 60px;
-    height: 80px;
+.char-cell {
+    width: 100px;
+    height: 100px;
     position: absolute;
+}
+
+.char {
+    width: 58px;
+    height: 90px;
+    margin: 5px auto auto;
     background-repeat: no-repeat;
     background-size: contain;
-    margin-left: 20px;
-    margin-top: 10px;
     border-radius: 15px;
 }
+
+.char-cell.selected .char {
+    box-shadow: 0 0 3pt 2pt red;
+}
+
+
 
