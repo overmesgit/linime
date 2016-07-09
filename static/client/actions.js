@@ -13,21 +13,39 @@ window.moveCharacter = function (char, row, col) {
     }
 };
 
+var moveCharacterPath = (dispatch, char) => {return (data) => {
+    var path = data.Path;
+    var callBack = () => {
+        var current = path.pop();
+        var row = current[0];
+        var col = current[1];
+        dispatch({
+            type: MOVE_CHARACTER,
+            payload: {char, row, col}
+        });
+        if (path.length > 0) {
+            char.Row = row;
+            char.Col = col;
+            setTimeout(callBack, 100);
+        } else {
+            moveLock = false;
+        }
+    };
+    callBack();
+}};
+
 var moveLock = false;
-window.moveSelected = function (gameId, Char, Row, Col) {
+window.moveSelected = function (gameId, char, Row, Col) {
     return (dispatch) => {
         if (!moveLock) {
             moveLock = true;
             $.ajax({
                 method: "PUT",
-                url: '/game?gameId='+gameId+'&action=move',
-                data: JSON.stringify({Char, Row, Col}),
+                url: '/game?gameId=' + gameId + '&action=move',
+                data: JSON.stringify({char, Row, Col}),
                 contentType: 'application/json',
                 dataType: 'json'
-            }).done((data) => {
-                console.log(data);
-                moveLock = false;
-            }).fail((xhr) => {
+            }).done(moveCharacterPath(dispatch, char)).fail((xhr) => {
                 console.log('Error move char ' + xhr.responseText);
                 moveLock = false;
             });
@@ -47,7 +65,7 @@ window.setView = function (view) {
     return {
         type: SET_VIEW_ACTION,
         payload: view
-  }
+    }
 };
 
 window.createGame = function () {
@@ -74,15 +92,15 @@ window.getGame = function (gameId) {
         dispatch({
             type: GET_GAME_REQUEST
         });
-        $.get('/game?gameId='+gameId, (data) => {
+        $.get('/game?gameId=' + gameId, (data) => {
             dispatch({
                 type: GET_GAME_SUCCESS,
                 payload: data
             })
-        }).fail((xhr,a,b) => {
+        }).fail((xhr) => {
             dispatch({
                 type: GET_GAME_ERROR,
-                payload: xhr.responseJSON ? xhr.responseJSON['Message']: ''
+                payload: xhr.responseJSON ? xhr.responseJSON['Message'] : ''
             })
         });
     }

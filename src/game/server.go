@@ -35,11 +35,11 @@ type MoveMessage struct {
 }
 
 type MoveResponse struct {
-	Path         [][2]int
-	Completed    [][2]int
-	NewItems     []GameCharPosition
-	CompletedNew [][2]int
-	GameScore    string
+	Path      [][2]int
+	Completed [][2]int
+	//NewItems     []GameCharPosition
+	//CompletedNew [][2]int
+	//GameScore    string
 }
 
 func serveGame(w http.ResponseWriter, r *http.Request) {
@@ -75,10 +75,14 @@ func serveGame(w http.ResponseWriter, r *http.Request) {
 					w.Write(ErrorMessage{err.Error()}.AsJson())
 				} else {
 					completed := game.CheckCompleted()
-					newChars := game.CreateNewChars()
-					completedNew := game.CheckCompleted()
-					w.Write(MoveResponse{path, completed, newChars, completedNew})
-					w.Write(MoveResponse{path, completed})
+					//newChars := game.CreateNewChars()
+					//completedNew := game.CheckCompleted()
+					//w.Write(MoveResponse{path, completed, newChars, completedNew})
+					jsonResp, err := json.Marshal(MoveResponse{path, completed})
+					if err != nil {
+						panic(err)
+					}
+					w.Write(jsonResp)
 				}
 			}
 		}

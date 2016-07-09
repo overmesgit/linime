@@ -58,6 +58,8 @@
     height: 100px;
     position: absolute;
     cursor: pointer;
+    transition: top 1s, left 1s;
+    -webkit-transition: top 1s, left 1s;
 }
 
 .char {

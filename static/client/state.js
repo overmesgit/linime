@@ -21,45 +21,46 @@ const initialState = {
 function viewState(state = initialState, action) {
     switch (action.type) {
         case SET_VIEW_ACTION:
-            return { ...state, view: action.payload};
+            return {...state, view: action.payload};
         case GET_GAME_REQUEST:
-            return { ...state, view: LOADING_VIEW};
+            return {...state, view: LOADING_VIEW};
         case GET_GAME_SUCCESS:
-            return { ...state, game: action.payload, view: GAME_VIEW};
+            return {...state, game: action.payload, view: GAME_VIEW};
         case GET_GAME_ERROR:
-            return { ...state, message: action.payload, view: ERROR_VIEW};
+            return {...state, message: action.payload, view: ERROR_VIEW};
         case CHAR_SELECTED:
             var newField = state.game.Field.map((char) => {
-                if(char.selected) {
-                    return { ...char, selected: false}
+                if (char.selected) {
+                    return {...char, selected: false}
                 }
-                if(char.Row == action.payload.Row && char.Col == action.payload.Col) {
-                    return { ...char, selected: true}
+                if (char.Row == action.payload.Row && char.Col == action.payload.Col) {
+                    return {...char, selected: true}
                 }
                 return char
             });
-            return { ...state, game: { ...state.game, Field: newField}};
-        case MOVE_SELECTED:
-            return { ...state};
+            return {...state, game: {...state.game, Field: newField}};
         case MOVE_CHARACTER:
             var newField = state.game.Field.map((char) => {
-                if(char.Row == action.payload.row && char.Col == action.payload.col) {
-                    return { ...char, Row: action.payload.row, Col: action.payload.col }
+                if (char.Row == action.payload.char.Row && char.Col == action.payload.char.Col) {
+                    return {
+                        ...char, Row: action.payload.row, Col: action.payload.col,
+                        prevRow: char.Row, prevCol: char.Col
+                    }
                 }
                 return char
             });
-            return { ...state, game: { ...state.game, Field: newField}};
+            return {...state, game: {...state.game, Field: newField}};
 
         default:
             return state;
     }
 }
 
-function thunkMiddleware({ dispatch, getState }) {
-  return next => action =>
-    typeof action === 'function' ?
-      action(dispatch, getState) :
-      next(action);
+function thunkMiddleware({dispatch, getState}) {
+    return next => action =>
+        typeof action === 'function' ?
+            action(dispatch, getState) :
+            next(action);
 }
 
 window.Store = Redux.createStore(viewState, initialState, Redux.applyMiddleware(thunkMiddleware));
