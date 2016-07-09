@@ -2,10 +2,10 @@ package game
 
 import (
 	"encoding/json"
+	"github.com/syndtr/goleveldb/leveldb/errors"
 	"gopkg.in/mgo.v2/bson"
 	"mal/parser"
 	"math/rand"
-	"sort"
 )
 
 type GameCharPosition struct {
@@ -26,21 +26,56 @@ type Game struct {
 	currentRandomPos int
 }
 
-func (g *Game) ShuffleField() {
-	for i := range g.Field {
-		j := rand.Intn(i + 1)
-		g.Field[i], g.Field[j] = g.Field[j], g.Field[i]
+func (g *Game) CheckCompleted() [][2]int {
+	fieldsMap := make(map[int]map[int]GameCharPosition, g.Height)
+	for i := 0; i < g.Height; i++ {
+		fieldsMap[i] = make(map[int]GameCharPosition, 0)
 	}
+	for i := range g.Field {
+		fieldsMap[g.Field[i].Row][g.Field[i].Col] = g.Field[i]
+	}
+
+	completedChar := make(map[int]GameCharPosition, 0)
+	checkCompleted := func(completed []GameCharPosition) {
+		if len(completed) > 2 {
+			for c := range completed {
+				completedChar[completed[c].Id] = completed[c]
+			}
+		}
+	}
+	for i := range g.Field {
+		prev := make([]GameCharPosition, 0)
+		prev = append(prev, g.Field[i])
+		checkCompleted(checkLeft(fieldsMap, g.Field[i], prev))
+		checkCompleted(checkLeftTop(fieldsMap, g.Field[i], prev))
+		checkCompleted(checkTop(fieldsMap, g.Field[i], prev))
+		checkCompleted(checkTopRight(fieldsMap, g.Field[i], prev))
+	}
+
+	result := make([][2]int, 0)
+	for _, char := range completedChar {
+		result = append(result, [2]int{char.Row, char.Col})
+	}
+	return result
 }
 
-func (g *Game) GetRandomPositions() (int, int) {
-	if g.positions == nil {
-		g.positions = GetAllPositions(g.Width, g.Height)
-		g.randomPos = rand.Perm(g.Width * g.Height)
+func (g *Game) MoveCharacter(char GameCharPosition, row, col int) ([][2]int, error) {
+	path := make([][2]int, 0)
+	for i := range g.Field {
+		currentChar := &g.Field[i]
+		if currentChar.Row == char.Row && currentChar.Col == char.Col {
+			path = g.FindPath(currentChar.Row, currentChar.Col, row, col)
+			if len(path) > 0 {
+				currentChar.Row, currentChar.Col = row, col
+				return path, nil
+			} else {
+				return path, errors.New("Path not found")
+			}
+
+		}
 	}
-	res := g.positions[g.randomPos[g.currentRandomPos]]
-	g.currentRandomPos++
-	return res[0], res[1]
+	return path, errors.New("Character not found")
+
 }
 
 func (g *Game) AddCharactersToRandomPos(characters parser.CharacterSlice, titleId int) {
@@ -54,6 +89,13 @@ func (g *Game) AddCharactersToRandomPos(characters parser.CharacterSlice, titleI
 
 func (g *Game) Save() {
 	err := mongoDB.C("game").Insert(g)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (g *Game) Update() {
+	err := mongoDB.C("game").UpdateId(g.Id, g)
 	if err != nil {
 		panic(err)
 	}
@@ -80,16 +122,6 @@ func GetGame(uuid string) (*Game, error) {
 	return game, err
 }
 
-func GetAllPositions(row, col int) [][2]int {
-	result := make([][2]int, row*col)
-	for i := 0; i < row; i++ {
-		for j := 0; j < col; j++ {
-			result[i*col+j] = [2]int{i, j}
-		}
-	}
-	return result
-}
-
 func GetRandomImage(char parser.Character) string {
 	return char.Images[rand.Intn(len(char.Images))]
 }
@@ -98,64 +130,6 @@ type AnimeGroupMembers struct {
 	Id         bson.M `bson:"_id"`
 	Members    int    `bson:"members"`
 	Characters []int  `bson:"characters"`
-}
-
-type AnimeGroupMembersSlice []AnimeGroupMembers
-
-func (a AnimeGroupMembersSlice) Len() int {
-	return len(a)
-}
-
-func (a AnimeGroupMembersSlice) Swap(i, j int) {
-	a[i], a[j] = a[j], a[i]
-}
-
-func (a AnimeGroupMembersSlice) Less(i, j int) bool {
-	return a[i].Members < a[j].Members
-}
-
-func (a AnimeGroupMembersSlice) GetRandomByMembers() AnimeGroupMembers {
-	sort.Sort(sort.Reverse(a))
-	fullMembersSum := 0
-	for _, a := range a {
-		fullMembersSum += a.Members
-	}
-	randomInt := rand.Intn(fullMembersSum)
-	currentSum := 0
-	for _, a := range a {
-		currentSum += a.Members
-		if currentSum >= randomInt {
-			return a
-		}
-	}
-	return a[len(a)-1]
-}
-
-func GetRandomCharactersByFavorites(c parser.CharacterSlice, n int) parser.CharacterSlice {
-	sort.Sort(sort.Reverse(c))
-	fullFavoritesSum := 0
-	for _, a := range c {
-		fullFavoritesSum += a.Favorites
-	}
-
-	resultIndexes := make(map[int]bool, 0)
-	for i := 0; i < n; i++ {
-		randomInt := rand.Intn(fullFavoritesSum)
-		currentSum := 0
-		for charIndex, char := range c {
-			currentSum += char.Favorites
-			if _, ok := resultIndexes[charIndex]; currentSum >= randomInt && !ok {
-				resultIndexes[charIndex] = true
-				break
-			}
-		}
-	}
-
-	result := make(parser.CharacterSlice, 0)
-	for index, _ := range resultIndexes {
-		result = append(result, c[index])
-	}
-	return result
 }
 
 func CreateNewGame() *Game {

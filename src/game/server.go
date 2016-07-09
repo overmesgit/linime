@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gopkg.in/mgo.v2"
 	"html/template"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -27,24 +28,60 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 	homeTempl.Execute(w, r.Host)
 }
 
+type MoveMessage struct {
+	Char GameCharPosition
+	Row  int
+	Col  int
+}
+
+type MoveResponse struct {
+	Path         [][2]int
+	Completed    [][2]int
+	NewItems     []GameCharPosition
+	CompletedNew [][2]int
+	GameScore    string
+}
+
 func serveGame(w http.ResponseWriter, r *http.Request) {
 	getParams := r.URL.Query()
 	gameUUID := getParams.Get("gameId")
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	if gameUUID != "" {
-		if r.Method == "GET" {
-			game, err := GetGame(gameUUID)
-			if err != nil {
-				w.WriteHeader(http.StatusNotFound)
-				w.Write(ErrorMessage{err.Error()}.AsJson())
-			} else {
-				w.Write(game.AsJson())
-			}
-		} else {
-			//action
-			//MakeAction(action)
+		game, err := GetGame(gameUUID)
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write(ErrorMessage{err.Error()}.AsJson())
 		}
-
+		switch r.Method {
+		case "GET":
+			w.Write(game.AsJson())
+		case "PUT":
+			body, err := ioutil.ReadAll(r.Body)
+			if err != nil {
+				panic(err)
+			}
+			defer r.Body.Close()
+			action := getParams.Get("action")
+			switch action {
+			case "move":
+				var message MoveMessage
+				err := json.Unmarshal(body, &message)
+				if err != nil {
+					panic(err)
+				}
+				path, err := game.MoveCharacter(message.Char, message.Row, message.Col)
+				if err != nil {
+					w.WriteHeader(http.StatusNotFound)
+					w.Write(ErrorMessage{err.Error()}.AsJson())
+				} else {
+					completed := game.CheckCompleted()
+					newChars := game.CreateNewChars()
+					completedNew := game.CheckCompleted()
+					w.Write(MoveResponse{path, completed, newChars, completedNew})
+					w.Write(MoveResponse{path, completed})
+				}
+			}
+		}
 	} else {
 		if r.Method == "POST" {
 			game := CreateNewGame()

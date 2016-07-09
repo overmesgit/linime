@@ -17,21 +17,24 @@ class Character extends React.Component {
 
 class FieldCell extends React.Component {
     moveSelected() {
-        this.props.moveSelected(this.props.row, this.props.col);
+        var char = this.props.game.Field.find((char) => { if (char.selected) {return char}});
+        if (char) {
+            this.props.moveSelected(this.props.game.Id, char, this.props.row, this.props.col);
+        }
     }
     render() {
-        const {row, col, width, height} = this.props;
+        const {row, col, game} = this.props;
         var fieldClasses = ["fieldCell"];
         if (row == 0) {
             fieldClasses.push('topRow')
         }
-        if (row == width - 1) {
+        if (row == game.Width - 1) {
             fieldClasses.push('bottomRow')
         }
         if (col == 0) {
             fieldClasses.push('leftCol')
         }
-        if (col == height - 1) {
+        if (col == game.Height - 1) {
             fieldClasses.push('rightCol')
         }
         return <div onClick={this.moveSelected.bind(this)} className={ fieldClasses.join(' ') }></div>
@@ -45,7 +48,7 @@ class Game extends React.Component {
         for(var row = 0; row < game.Width; row++) {
             for(var col = 0; col < game.Height; col++) {
                 fieldCell.push(<FieldCell key={'' + row + col} row={row} col={col}
-                    width={game.Width} height={game.Height} moveSelected={moveSelected}>
+                    game={game} moveSelected={moveSelected}>
                 </FieldCell>)
             }
         }

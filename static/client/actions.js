@@ -4,11 +4,35 @@ window.GET_GAME_SUCCESS = 'GET_GAME_SUCCESS';
 window.GET_GAME_ERROR = 'GET_GAME_ERROR';
 window.CHAR_SELECTED = 'CHAR_SELECTED';
 window.MOVE_SELECTED = 'MOVE_SELECTED';
+window.MOVE_CHARACTER = 'MOVE_CHARACTER';
 
-window.moveSelected = function (row, col) {
+window.moveCharacter = function (char, row, col) {
     return {
-        type: MOVE_SELECTED,
-        payload: {row: row, col: col}
+        type: MOVE_CHARACTER,
+        payload: {char, row, col}
+    }
+};
+
+var moveLock = false;
+window.moveSelected = function (gameId, Char, Row, Col) {
+    return (dispatch) => {
+        if (!moveLock) {
+            moveLock = true;
+            $.ajax({
+                method: "PUT",
+                url: '/game?gameId='+gameId+'&action=move',
+                data: JSON.stringify({Char, Row, Col}),
+                contentType: 'application/json',
+                dataType: 'json'
+            }).done((data) => {
+                console.log(data);
+                moveLock = false;
+            }).fail((xhr) => {
+                console.log('Error move char ' + xhr.responseText);
+                moveLock = false;
+            });
+        }
+
     }
 };
 
@@ -58,7 +82,7 @@ window.getGame = function (gameId) {
         }).fail((xhr,a,b) => {
             dispatch({
                 type: GET_GAME_ERROR,
-                payload: xhr.responseJSON['Message']
+                payload: xhr.responseJSON ? xhr.responseJSON['Message']: ''
             })
         });
     }

@@ -40,14 +40,16 @@ function viewState(state = initialState, action) {
             });
             return { ...state, game: { ...state.game, Field: newField}};
         case MOVE_SELECTED:
-            console.log(action)
+            return { ...state};
+        case MOVE_CHARACTER:
             var newField = state.game.Field.map((char) => {
-                if(char.selected) {
+                if(char.Row == action.payload.row && char.Col == action.payload.col) {
                     return { ...char, Row: action.payload.row, Col: action.payload.col }
                 }
                 return char
             });
             return { ...state, game: { ...state.game, Field: newField}};
+
         default:
             return state;
     }

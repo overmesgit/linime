@@ -19,7 +19,6 @@
 
 #game {
     position: relative;
-    cursor: pointer;
 }
 
 .btn {
@@ -58,6 +57,7 @@
     width: 100px;
     height: 100px;
     position: absolute;
+    cursor: pointer;
 }
 
 .char {
