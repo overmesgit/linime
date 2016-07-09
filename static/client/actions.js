@@ -5,6 +5,8 @@ window.GET_GAME_ERROR = 'GET_GAME_ERROR';
 window.CHAR_SELECTED = 'CHAR_SELECTED';
 window.MOVE_SELECTED = 'MOVE_SELECTED';
 window.MOVE_CHARACTER = 'MOVE_CHARACTER';
+window.REMOVE_CHARACTER = 'REMOVE_CHARACTER';
+window.FADE_CHARACTER = 'FADE_CHARACTER';
 
 window.moveCharacter = function (char, row, col) {
     return {
@@ -13,26 +15,45 @@ window.moveCharacter = function (char, row, col) {
     }
 };
 
-var moveCharacterPath = (dispatch, char) => {return (data) => {
-    var path = data.Path;
-    var callBack = () => {
-        var current = path.pop();
-        var row = current[0];
-        var col = current[1];
-        dispatch({
-            type: MOVE_CHARACTER,
-            payload: {char, row, col}
-        });
-        if (path.length > 0) {
-            char.Row = row;
-            char.Col = col;
-            setTimeout(callBack, 100);
-        } else {
-            moveLock = false;
-        }
-    };
-    callBack();
-}};
+var moveCharacterPath = (dispatch, char) => {
+    return (data) => {
+        var path = data.Path;
+        var completed = data.Completed;
+        var callBack = () => {
+            var current = path.pop();
+            var row = current[0];
+            var col = current[1];
+            dispatch({
+                type: MOVE_CHARACTER,
+                payload: {char, row, col}
+            });
+            if (path.length > 0) {
+                char.Row = row;
+                char.Col = col;
+                setTimeout(callBack, 100);
+            } else {
+                moveLock = false;
+                setTimeout(() => {
+                    for (var i = 0; i < completed.length; i++) {
+                        dispatch({
+                            type: FADE_CHARACTER,
+                            payload: {row: completed[i][0], col: completed[i][1]}
+                        });
+                    }
+                }, 50);
+                setTimeout(() => {
+                    for (var i = 0; i < completed.length; i++) {
+                        dispatch({
+                            type: REMOVE_CHARACTER,
+                            payload: {row: completed[i][0], col: completed[i][1]}
+                        });
+                    }
+                }, 600);
+            }
+        };
+        callBack();
+    }
+};
 
 var moveLock = false;
 window.moveSelected = function (gameId, char, Row, Col) {
@@ -74,6 +95,7 @@ window.createGame = function () {
             type: GET_GAME_REQUEST
         });
         $.post('/game', (data) => {
+            window.location.hash = '#game/' + data.Id;
             dispatch({
                 type: GET_GAME_SUCCESS,
                 payload: data
@@ -93,6 +115,7 @@ window.getGame = function (gameId) {
             type: GET_GAME_REQUEST
         });
         $.get('/game?gameId=' + gameId, (data) => {
+            window.location.hash = '#game/' + data.Id;
             dispatch({
                 type: GET_GAME_SUCCESS,
                 payload: data

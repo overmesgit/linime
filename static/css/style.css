@@ -5,7 +5,7 @@
     text-align: center;
     border: 5px solid #bababa;
     background-color: lightgray;
-    border-radius: 50px;
+    border-radius: 25px;
 }
 
 #newGame {
@@ -58,12 +58,11 @@
     height: 100px;
     position: absolute;
     cursor: pointer;
-    transition: top 1s, left 1s;
-    -webkit-transition: top 1s, left 1s;
+    transition: opacity 500ms ease-in;
 }
 
 .char {
-    width: 55px;
+    max-width: 86px;
     height: 86px;
     margin: 7px auto auto;
     background-repeat: no-repeat;
@@ -73,6 +72,10 @@
 
 .char-cell.selected .char {
     box-shadow: 0 0 5pt 5pt red;
+}
+
+.example-leave {
+  opacity: 0;
 }
 
 

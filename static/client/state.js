@@ -50,7 +50,22 @@ function viewState(state = initialState, action) {
                 return char
             });
             return {...state, game: {...state.game, Field: newField}};
-
+        case FADE_CHARACTER:
+            var newField = state.game.Field.map((char) => {
+                if (char.Row == action.payload.row && char.Col == action.payload.col) {
+                    return {...char, toDelete: true}
+                }
+                return char
+            });
+            return {...state, game: {...state.game, Field: newField}};
+        case REMOVE_CHARACTER:
+            var newField = [];
+            state.game.Field.forEach((char) => {
+                if (char.Row != action.payload.row || char.Col != action.payload.col) {
+                    newField.push(char);
+                }
+            });
+            return {...state, game: {...state.game, Field: newField}};
         default:
             return state;
     }

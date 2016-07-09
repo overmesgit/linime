@@ -1,3 +1,5 @@
+window.ReactCSSTransitionGroup = React.ReactCSSTransitionGroup;
+
 class Character extends React.Component {
     constructor() {
         super();
@@ -10,12 +12,12 @@ class Character extends React.Component {
     }
 
     render() {
-        const {Img, Row, Col, prevRow, prevCol, selected} = this.props.char;
-        return <div className={"char-cell " + (selected ? "selected":"")}
-                    style={{ top: this.cellHeight*Row, left: this.cellWidth*Col}}
-                    onClick={this.selectChar.bind(this)}>
-            <div className="char" style={{ backgroundImage: 'url(' + Img + ')'}}></div>
-        </div>
+        const {Img, Row, Col, prevRow, prevCol, selected, toDelete} = this.props.char;
+        return <div className={"char-cell " + (selected ? "selected":"") + " " + (toDelete?"example-leave":"")}
+                 style={{ top: this.cellHeight*Row, left: this.cellWidth*Col}}
+                 onClick={this.selectChar.bind(this)}>
+                <img src={Img} className="char" />
+            </div>
     }
 }
 

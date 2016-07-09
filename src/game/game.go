@@ -26,6 +26,15 @@ type Game struct {
 	currentRandomPos int
 }
 
+func (g *Game) RemoveChar(toDelete GameCharPosition) {
+	for i := range g.Field {
+		if g.Field[i].Id == toDelete.Id {
+			g.Field = append(g.Field[:i], g.Field[i+1:]...)
+			break
+		}
+	}
+}
+
 func (g *Game) CheckCompleted() [][2]int {
 	fieldsMap := make(map[int]map[int]GameCharPosition, g.Height)
 	for i := 0; i < g.Height; i++ {
@@ -54,8 +63,10 @@ func (g *Game) CheckCompleted() [][2]int {
 
 	result := make([][2]int, 0)
 	for _, char := range completedChar {
+		g.RemoveChar(char)
 		result = append(result, [2]int{char.Row, char.Col})
 	}
+
 	return result
 }
 

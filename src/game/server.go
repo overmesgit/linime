@@ -78,6 +78,8 @@ func serveGame(w http.ResponseWriter, r *http.Request) {
 					//newChars := game.CreateNewChars()
 					//completedNew := game.CheckCompleted()
 					//w.Write(MoveResponse{path, completed, newChars, completedNew})
+
+					game.Update()
 					jsonResp, err := json.Marshal(MoveResponse{path, completed})
 					if err != nil {
 						panic(err)
