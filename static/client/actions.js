@@ -7,6 +7,7 @@ window.MOVE_SELECTED = 'MOVE_SELECTED';
 window.MOVE_CHARACTER = 'MOVE_CHARACTER';
 window.REMOVE_CHARACTER = 'REMOVE_CHARACTER';
 window.FADE_CHARACTER = 'FADE_CHARACTER';
+window.ADD_CHARACTER = 'ADD_CHARACTER';
 
 window.moveCharacter = function (char, row, col) {
     return {
@@ -19,6 +20,7 @@ var moveCharacterPath = (dispatch, char) => {
     return (data) => {
         var path = data.Path;
         var completed = data.Completed;
+        var newChars = data.NewChars;
         var callBack = () => {
             var current = path.pop();
             var row = current[0];
@@ -38,6 +40,12 @@ var moveCharacterPath = (dispatch, char) => {
                         dispatch({
                             type: FADE_CHARACTER,
                             payload: {row: completed[i][0], col: completed[i][1]}
+                        });
+                    }
+                    for (var j = 0; j < newChars.length; j++) {
+                        dispatch({
+                            type: ADD_CHARACTER,
+                            payload: newChars[j]
                         });
                     }
                 }, 50);

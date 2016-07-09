@@ -12,8 +12,10 @@ class Character extends React.Component {
     }
 
     render() {
-        const {Img, Row, Col, prevRow, prevCol, selected, toDelete} = this.props.char;
-        return <div className={"char-cell " + (selected ? "selected":"") + " " + (toDelete?"example-leave":"")}
+        const {Img, Row, Col, prevRow, prevCol, selected, toDelete, newChar} = this.props.char;
+        var classes = "char-cell " + (selected ? "selected":"") + " " + (toDelete?"cell-remove":"");
+        classes += " " + (newChar ? "new":"");
+        return <div className={classes}
                  style={{ top: this.cellHeight*Row, left: this.cellWidth*Col}}
                  onClick={this.selectChar.bind(this)}>
                 <img src={Img} className="char" />
@@ -64,7 +66,7 @@ class Game extends React.Component {
             }
         }
         var characters = game.Field.map((charData) => {
-            return <Character key={'' + charData.Col + charData.Row} char={charData}
+            return <Character key={charData.Img.slice(-8, -4) + charData.Col + charData.Row} char={charData}
                               selectChar={selectChar}/>
         });
 

@@ -70,11 +70,15 @@
     border-radius: 15px;
 }
 
+.char-cell.new .char {
+    box-shadow: 0 0 5pt 5pt cornflowerblue;
+}
+
 .char-cell.selected .char {
     box-shadow: 0 0 5pt 5pt red;
 }
 
-.example-leave {
+.cell-remove {
   opacity: 0;
 }
 

@@ -2,6 +2,7 @@ package game
 
 import (
 	"mal/parser"
+	"math"
 	"math/rand"
 	"sort"
 )
@@ -40,19 +41,21 @@ func (g *Game) ShuffleField() {
 
 func (g *Game) GetRandomPositions() (int, int) {
 	if g.positions == nil {
-		g.positions = GetAllPositions(g.Width, g.Height)
-		g.randomPos = rand.Perm(g.Width * g.Height)
+		g.positions = g.GetAllFreePositions()
+		g.randomPos = rand.Perm(len(g.positions))
 	}
 	res := g.positions[g.randomPos[g.currentRandomPos]]
 	g.currentRandomPos++
 	return res[0], res[1]
 }
 
-func GetAllPositions(row, col int) [][2]int {
-	result := make([][2]int, row*col)
-	for i := 0; i < row; i++ {
-		for j := 0; j < col; j++ {
-			result[i*col+j] = [2]int{i, j}
+func (g *Game) GetAllFreePositions() [][2]int {
+	result := make([][2]int, 0)
+	for i := 0; i < g.Height; i++ {
+		for j := 0; j < g.Width; j++ {
+			if g.isFieldFree(i, j) {
+				result = append(result, [2]int{i, j})
+			}
 		}
 	}
 	return result
@@ -92,8 +95,13 @@ func (a AnimeGroupMembersSlice) GetRandomByMembers() AnimeGroupMembers {
 func GetRandomCharactersByFavorites(c parser.CharacterSlice, n int) parser.CharacterSlice {
 	sort.Sort(sort.Reverse(c))
 	fullFavoritesSum := 0
-	for _, a := range c {
-		fullFavoritesSum += a.Favorites
+	for i := range c {
+		//WARNING: not line function
+		c[i].Favorites = int(math.Sqrt(float64(c[i].Favorites)))
+		if c[i].Favorites == 0 {
+			c[i].Favorites = 1
+		}
+		fullFavoritesSum += c[i].Favorites
 	}
 
 	resultIndexes := make(map[int]bool, 0)

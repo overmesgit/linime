@@ -37,7 +37,7 @@ type MoveMessage struct {
 type MoveResponse struct {
 	Path      [][2]int
 	Completed [][2]int
-	//NewItems     []GameCharPosition
+	NewChars  []GameCharPosition
 	//CompletedNew [][2]int
 	//GameScore    string
 }
@@ -75,12 +75,12 @@ func serveGame(w http.ResponseWriter, r *http.Request) {
 					w.Write(ErrorMessage{err.Error()}.AsJson())
 				} else {
 					completed := game.CheckCompleted()
-					//newChars := game.CreateNewChars()
+					newChars := game.AddNewChars()
 					//completedNew := game.CheckCompleted()
 					//w.Write(MoveResponse{path, completed, newChars, completedNew})
 
 					game.Update()
-					jsonResp, err := json.Marshal(MoveResponse{path, completed})
+					jsonResp, err := json.Marshal(MoveResponse{path, completed, newChars})
 					if err != nil {
 						panic(err)
 					}
