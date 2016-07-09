@@ -15,8 +15,7 @@ const initialState = {
     view: initialView,
     game: null,
     message: '',
-    fetchingGame: gameId,
-    selectedChar: null
+    fetchingGame: gameId
 };
 
 function viewState(state = initialState, action) {
@@ -30,7 +29,25 @@ function viewState(state = initialState, action) {
         case GET_GAME_ERROR:
             return { ...state, message: action.payload, view: ERROR_VIEW};
         case CHAR_SELECTED:
-            return { ...state, selectedChar: action.payload};
+            var newField = state.game.Field.map((char) => {
+                if(char.selected) {
+                    return { ...char, selected: false}
+                }
+                if(char.Row == action.payload.Row && char.Col == action.payload.Col) {
+                    return { ...char, selected: true}
+                }
+                return char
+            });
+            return { ...state, game: { ...state.game, Field: newField}};
+        case MOVE_SELECTED:
+            console.log(action)
+            var newField = state.game.Field.map((char) => {
+                if(char.selected) {
+                    return { ...char, Row: action.payload.row, Col: action.payload.col }
+                }
+                return char
+            });
+            return { ...state, game: { ...state.game, Field: newField}};
         default:
             return state;
     }

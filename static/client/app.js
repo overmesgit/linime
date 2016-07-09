@@ -11,16 +11,15 @@ class AppClass extends React.Component {
     }
 
     render() {
-        const { view, game, message, selectedChar } = this.props.app;
-        const { createGame, selectChar } = this.props.appActions;
-        console.log(selectChar)
+        const { view, game, message } = this.props.app;
+        const { createGame, selectChar, moveSelected } = this.props.appActions;
         switch (view) {
             case MAIN_VIEW:
                 return <Home createGame={createGame} />
             case LOADING_VIEW:
                 return <div>Loading</div>
             case GAME_VIEW:
-                return <Game game={game} selectedChar={selectedChar} selectChar={selectChar} />
+                return <Game game={game} selectChar={selectChar} moveSelected={moveSelected} />
             case ERROR_VIEW:
                 return <div>Error {message}
                     <button onClick={this.setMainView.bind(this)}>Main view</button>
@@ -37,8 +36,7 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    appActions: Redux.bindActionCreators({setView: setView, createGame: createGame,
-        getGame: getGame, selectChar: selectChar}, dispatch)
+    appActions: Redux.bindActionCreators({setView, createGame, getGame, selectChar, moveSelected}, dispatch)
   }
 }
 

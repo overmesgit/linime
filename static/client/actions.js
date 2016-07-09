@@ -3,6 +3,14 @@ window.GET_GAME_REQUEST = 'GET_GAME_REQUEST';
 window.GET_GAME_SUCCESS = 'GET_GAME_SUCCESS';
 window.GET_GAME_ERROR = 'GET_GAME_ERROR';
 window.CHAR_SELECTED = 'CHAR_SELECTED';
+window.MOVE_SELECTED = 'MOVE_SELECTED';
+
+window.moveSelected = function (row, col) {
+    return {
+        type: MOVE_SELECTED,
+        payload: {row: row, col: col}
+    }
+};
 
 window.selectChar = function (char) {
     return {

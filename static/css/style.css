@@ -19,6 +19,7 @@
 
 #game {
     position: relative;
+    cursor: pointer;
 }
 
 .btn {
@@ -60,16 +61,16 @@
 }
 
 .char {
-    width: 58px;
-    height: 90px;
-    margin: 5px auto auto;
+    width: 55px;
+    height: 86px;
+    margin: 7px auto auto;
     background-repeat: no-repeat;
     background-size: contain;
     border-radius: 15px;
 }
 
 .char-cell.selected .char {
-    box-shadow: 0 0 3pt 2pt red;
+    box-shadow: 0 0 5pt 5pt red;
 }
 
 
