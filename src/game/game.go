@@ -2,7 +2,6 @@ package game
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"gopkg.in/mgo.v2/bson"
 	"mal/parser"
@@ -56,7 +55,6 @@ func (g *Game) getExistedChar(required bool) GameCharPosition {
 		for _, char := range titleMap[selectedTitleId] {
 			existedCharacters = append(existedCharacters, char.Id)
 		}
-		fmt.Println("existed", existedCharacters)
 		char := mongoDB.C("char")
 		anime := mongoDB.C("anime")
 		notEmpty := bson.M{"$not": bson.M{"$size": 0}}
@@ -75,9 +73,7 @@ func (g *Game) getExistedChar(required bool) GameCharPosition {
 			panic(err)
 		}
 		if len(characters) > 0 {
-			fmt.Println("title char without existed", characters)
 			randomCharacters := GetRandomCharactersByFavorites(characters, 1)
-			fmt.Println("random char", randomCharacters)
 			return g.AddCharacterToRandomPos(randomCharacters[0], selectedTitleId)
 		}
 	}
@@ -106,7 +102,6 @@ func (g *Game) getNewGroupChar() GameCharPosition {
 
 	uniquerGroups := GetUniqueValues(newGroups)
 	targetGroup := uniquerGroups[rand.Intn(len(uniquerGroups))]
-	fmt.Println("random new group", targetGroup)
 	return g.AddRandomCharacterByGroup(targetGroup, 1)[0]
 }
 
@@ -123,7 +118,6 @@ func (g *Game) AddNewChars() []GameCharPosition {
 		case funcRandom < 100:
 			newChar = g.getNewGroupChar()
 		}
-		fmt.Println(newChar)
 		result = append(result, newChar)
 	}
 	return result

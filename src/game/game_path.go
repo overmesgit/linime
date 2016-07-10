@@ -6,37 +6,48 @@ type PathField struct {
 	open    bool
 }
 
-func (g *Game) isFieldFree(row, col int) bool {
-	for i := range g.Field {
-		if g.Field[i].Row == row && g.Field[i].Col == col {
-			return false
-		}
-	}
-	return true
+type fieldParam func(row, col int) bool
 
+func (g *Game) getFieldFreeFactory() fieldParam {
+	fieldsMap := make(map[int]map[int]bool, 0)
+	for row := 0; row < g.Height; row++ {
+		fieldsMap[row] = make(map[int]bool, 0)
+	}
+	for i := range g.Field {
+		fieldsMap[g.Field[i].Row][g.Field[i].Col] = true
+	}
+	return func(row, col int) bool {
+		if colMap, ok := fieldsMap[row]; ok {
+			if _, ok := colMap[col]; ok {
+				return false
+			}
+		}
+		return true
+	}
 }
 
 func (g *Game) makeMove(fields [][]PathField, nextOpenedFields [][2]int) [][2]int {
 	result := make([][2]int, 0)
+	isFieldFree := g.getFieldFreeFactory()
 	for _, next := range nextOpenedFields {
 		nextRow, nextCol := next[0], next[1]
 		//left
-		if nextCol > 0 && !fields[nextRow][nextCol-1].open && g.isFieldFree(nextRow, nextCol-1) {
+		if nextCol > 0 && !fields[nextRow][nextCol-1].open && isFieldFree(nextRow, nextCol-1) {
 			result = append(result, [2]int{nextRow, nextCol - 1})
 			fields[nextRow][nextCol-1] = PathField{nextRow, nextCol, true}
 		}
 		//right
-		if nextCol < g.Width-1 && !fields[nextRow][nextCol+1].open && g.isFieldFree(nextRow, nextCol+1) {
+		if nextCol < g.Width-1 && !fields[nextRow][nextCol+1].open && isFieldFree(nextRow, nextCol+1) {
 			result = append(result, [2]int{nextRow, nextCol + 1})
 			fields[nextRow][nextCol+1] = PathField{nextRow, nextCol, true}
 		}
 		//top
-		if nextRow > 0 && !fields[nextRow-1][nextCol].open && g.isFieldFree(nextRow-1, nextCol) {
+		if nextRow > 0 && !fields[nextRow-1][nextCol].open && isFieldFree(nextRow-1, nextCol) {
 			result = append(result, [2]int{nextRow - 1, nextCol})
 			fields[nextRow-1][nextCol] = PathField{nextRow, nextCol, true}
 		}
 		//bottom
-		if nextRow < g.Height-1 && !fields[nextRow+1][nextCol].open && g.isFieldFree(nextRow+1, nextCol) {
+		if nextRow < g.Height-1 && !fields[nextRow+1][nextCol].open && isFieldFree(nextRow+1, nextCol) {
 			result = append(result, [2]int{nextRow + 1, nextCol})
 			fields[nextRow+1][nextCol] = PathField{nextRow, nextCol, true}
 		}

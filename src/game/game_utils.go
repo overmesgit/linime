@@ -51,9 +51,10 @@ func (g *Game) GetRandomPositions() (int, int) {
 
 func (g *Game) GetAllFreePositions() [][2]int {
 	result := make([][2]int, 0)
+	isFieldFree := g.getFieldFreeFactory()
 	for i := 0; i < g.Height; i++ {
 		for j := 0; j < g.Width; j++ {
-			if g.isFieldFree(i, j) {
+			if isFieldFree(i, j) {
 				result = append(result, [2]int{i, j})
 			}
 		}
