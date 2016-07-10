@@ -72,6 +72,9 @@ function viewState(state = initialState, action) {
             return {...state, game: {...state.game}};
         case CHANGE_GAME_TURN:
             return {...state, game: {...state.game, Turn: action.payload}};
+        case UPDATE_GAME_SCORE:
+            action.payload.push.apply(state.game.Score.CompletedTitles, action.payload);
+            return {...state, game: {...state.game}};
         default:
             return state;
     }

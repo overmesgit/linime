@@ -9,6 +9,7 @@ window.REMOVE_CHARACTER = 'REMOVE_CHARACTER';
 window.FADE_CHARACTER = 'FADE_CHARACTER';
 window.ADD_CHARACTER = 'ADD_CHARACTER';
 window.CHANGE_GAME_TURN = 'CHANGE_GAME_TURN';
+window.UPDATE_GAME_SCORE = 'UPDATE_GAME_SCORE';
 
 window.moveCharacter = function (char, row, col) {
     return {
@@ -26,43 +27,46 @@ var groupDispatchChar = (dispatch, array, type) => {
     }
 };
 
-var removeAndAddNewChars = (dispatch, completed, newChars, completedNew, nextTurn) => {
+var removeAndAddNewChars = (dispatch, data) => {
+    const { Completed, NewChars, CompletedNew, NextTurn, GameScore } = data;
     moveLock = false;
     var timeOutAdd = 0;
-    if (completed.length > 0) {
+    if (Completed.length > 0) {
         timeOutAdd = 300;
     }
     //hot browser cache
-    for (var j = 0; j < newChars.length; j++) {
+    for (var j = 0; j < NewChars.length; j++) {
         var newImg = new Image();
-        newImg.src = newChars[j].Img;
+        newImg.src = NewChars[j].Img;
     }
     setTimeout(() => {
-        groupDispatchChar(dispatch, completed, FADE_CHARACTER);
+        groupDispatchChar(dispatch, Completed, FADE_CHARACTER);
     }, 50);
     setTimeout(() => {
-        groupDispatchChar(dispatch, completed, REMOVE_CHARACTER);
-        for (var j = 0; j < newChars.length; j++) {
+        groupDispatchChar(dispatch, Completed, REMOVE_CHARACTER);
+        for (var j = 0; j < NewChars.length; j++) {
             dispatch({
                 type: ADD_CHARACTER,
-                payload: newChars[j]
+                payload: NewChars[j]
             });
         }
         //start new character animation
         setTimeout(() => {
             dispatch({
                 type: CHANGE_GAME_TURN,
-                payload: nextTurn
+                payload: NextTurn
             });
-        }, 300);
+            dispatch({
+                type: UPDATE_GAME_SCORE,
+                payload: GameScore
+            });
+        }, 50);
         setTimeout(() => {
-            setTimeout(() => {
-                groupDispatchChar(dispatch, completedNew, FADE_CHARACTER);
-            }, 300);
-            setTimeout(() => {
-                groupDispatchChar(dispatch, completedNew, REMOVE_CHARACTER);
-            }, 600);
-        }, timeOutAdd);
+            groupDispatchChar(dispatch, CompletedNew, FADE_CHARACTER);
+        }, 50);
+        setTimeout(() => {
+            groupDispatchChar(dispatch, CompletedNew, REMOVE_CHARACTER);
+        }, 300);
     }, timeOutAdd);
 
 };
@@ -83,7 +87,7 @@ var moveCallbackFactory = (dispatch, char) => {
                 char.Col = col;
                 setTimeout(callBack, 100);
             } else {
-                removeAndAddNewChars(dispatch, data.Completed, data.NewChars, data.CompletedNew, data.NextTurn)
+                removeAndAddNewChars(dispatch, data)
             }
         };
         callBack();
