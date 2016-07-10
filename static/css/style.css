@@ -30,27 +30,27 @@
 }
 
 .leftCol.fieldCell {
-    width: 95px;
-    border-left: 5px hidden #bababa;
+    width: 98px;
+    border-left: 2px hidden #bababa;
 }
 .rightCol.fieldCell {
-    width: 95px;
-    border-right: 5px hidden #bababa;
+    width: 98px;
+    border-right: 2px hidden #bababa;
 }
 .topRow.fieldCell {
-    height: 95px;
-    border-top: 5px hidden #bababa;
+    height: 98px;
+    border-top: 2px hidden #bababa;
 }
 .bottomRow.fieldCell {
-    height: 95px;
-    border-bottom: 5px hidden #bababa;
+    height: 98px;
+    border-bottom: 2px hidden #bababa;
 }
 
 .fieldCell {
-    width: 90px;
-    height: 90px;
+    width: 96px;
+    height: 96px;
     float: left;
-    border: 5px solid #bababa;
+    border: 2px solid #bababa;
 }
 
 .char-cell {
@@ -58,16 +58,27 @@
     height: 100px;
     position: absolute;
     cursor: pointer;
-    transition: opacity 500ms ease-in;
+    transition: opacity 300ms;
+    z-index: 100;
+}
+
+.char-cell:hover {
+    z-index: 1000;
 }
 
 .char {
-    max-width: 86px;
-    height: 86px;
-    margin: 7px auto auto;
-    background-repeat: no-repeat;
-    background-size: contain;
+    max-width: 92px;
+    max-height: 92px;
+    margin: 4px auto auto;
     border-radius: 15px;
+    z-index: 100;
+}
+
+.char-cell:hover .char {
+    margin: 0;
+    max-width: 150px;
+    max-height: 150px;
+
 }
 
 .char-cell.new .char {
@@ -80,6 +91,10 @@
 
 .cell-remove {
   opacity: 0;
+}
+
+.appear {
+    opacity: 0;
 }
 
 

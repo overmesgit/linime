@@ -22,9 +22,40 @@ type Game struct {
 	Height           int                `bson:"height"`
 	Width            int                `bson:"width"`
 	Line             int                `bson:"line"`
+	Turn             int                `bson:"turn"`
 	positions        [][2]int
 	randomPos        []int
 	currentRandomPos int
+}
+
+func NewGame() *Game {
+	return &Game{RandString(8), make([]GameCharPosition, 0), 9, 9, 3, 1, nil, nil, 0}
+}
+
+type MoveResponse struct {
+	Path         [][2]int
+	Completed    [][2]int
+	NewChars     []GameCharPosition
+	CompletedNew [][2]int
+	NextTurn     int
+
+	//GameScore    string
+}
+
+func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, error) {
+	var res MoveResponse
+	path, err := g.MoveCharacter(char, row, col)
+	if err != nil {
+		return res, err
+	} else {
+		completed := g.CheckCompleted()
+		newChars := g.AddNewChars()
+		completedNew := g.CheckCompleted()
+		g.Turn++
+
+		g.Update()
+		return MoveResponse{path, completed, newChars, completedNew, g.Turn}, nil
+	}
 }
 
 func (g *Game) getExistedChar(required bool) GameCharPosition {
@@ -224,10 +255,6 @@ func (g *Game) AsJson() []byte {
 		panic(err)
 	}
 	return data
-}
-
-func NewGame() *Game {
-	return &Game{RandString(8), make([]GameCharPosition, 0), 9, 9, 3, nil, nil, 0}
 }
 
 func GetGame(uuid string) (*Game, error) {

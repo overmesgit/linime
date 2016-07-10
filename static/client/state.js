@@ -67,15 +67,11 @@ function viewState(state = initialState, action) {
             });
             return {...state, game: {...state.game, Field: newField}};
         case ADD_CHARACTER:
-            var newField = state.game.Field.map((char) => {
-                if (char.newChar) {
-                    return {...char, newChar: false}
-                }
-                return char
-            });
-            action.payload.newChar = true;
-            newField.push(action.payload);
-            return {...state, game: {...state.game, Field: newField}};
+            action.payload.turn = state.game.Turn;
+            state.game.Field.push(action.payload);
+            return {...state, game: {...state.game}};
+        case CHANGE_GAME_TURN:
+            return {...state, game: {...state.game, Turn: action.payload}};
         default:
             return state;
     }

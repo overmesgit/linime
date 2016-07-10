@@ -8,6 +8,7 @@ window.MOVE_CHARACTER = 'MOVE_CHARACTER';
 window.REMOVE_CHARACTER = 'REMOVE_CHARACTER';
 window.FADE_CHARACTER = 'FADE_CHARACTER';
 window.ADD_CHARACTER = 'ADD_CHARACTER';
+window.CHANGE_GAME_TURN = 'CHANGE_GAME_TURN';
 
 window.moveCharacter = function (char, row, col) {
     return {
@@ -16,11 +17,55 @@ window.moveCharacter = function (char, row, col) {
     }
 };
 
-var moveCharacterPath = (dispatch, char) => {
+var groupDispatchChar = (dispatch, array, type) => {
+    for (var i = 0; i < array.length; i++) {
+        dispatch({
+            type: type,
+            payload: {row: array[i][0], col: array[i][1]}
+        });
+    }
+};
+
+var removeAndAddNewChars = (dispatch, completed, newChars, completedNew, nextTurn) => {
+    moveLock = false;
+    var timeOutAdd = 0;
+    if (completed.length > 0) {
+        timeOutAdd = 300;
+    }
+    //hot browser cache
+    for (var j = 0; j < newChars.length; j++) {
+            var newImg = new Image();
+            newImg.src = newChars[j].Img;
+        }
+    setTimeout(() => {
+        groupDispatchChar(dispatch, completed, FADE_CHARACTER);
+    }, 50);
+    setTimeout(() => {
+        groupDispatchChar(dispatch, completed, REMOVE_CHARACTER);
+        for (var j = 0; j < newChars.length; j++) {
+            dispatch({
+                type: ADD_CHARACTER,
+                payload: newChars[j]
+            });
+        }
+    }, timeOutAdd);
+    setTimeout(() => {
+        dispatch({
+            type: CHANGE_GAME_TURN,
+            payload: nextTurn
+        });
+        setTimeout(() => {
+            groupDispatchChar(dispatch, completedNew, FADE_CHARACTER);
+        }, 300);
+        setTimeout(() => {
+            groupDispatchChar(dispatch, completedNew, REMOVE_CHARACTER);
+        }, 600);
+    }, 300 + timeOutAdd)
+};
+
+var moveCallbackFactory = (dispatch, char) => {
     return (data) => {
         var path = data.Path;
-        var completed = data.Completed;
-        var newChars = data.NewChars;
         var callBack = () => {
             var current = path.pop();
             var row = current[0];
@@ -34,29 +79,7 @@ var moveCharacterPath = (dispatch, char) => {
                 char.Col = col;
                 setTimeout(callBack, 100);
             } else {
-                moveLock = false;
-                setTimeout(() => {
-                    for (var i = 0; i < completed.length; i++) {
-                        dispatch({
-                            type: FADE_CHARACTER,
-                            payload: {row: completed[i][0], col: completed[i][1]}
-                        });
-                    }
-                    for (var j = 0; j < newChars.length; j++) {
-                        dispatch({
-                            type: ADD_CHARACTER,
-                            payload: newChars[j]
-                        });
-                    }
-                }, 50);
-                setTimeout(() => {
-                    for (var i = 0; i < completed.length; i++) {
-                        dispatch({
-                            type: REMOVE_CHARACTER,
-                            payload: {row: completed[i][0], col: completed[i][1]}
-                        });
-                    }
-                }, 600);
+                removeAndAddNewChars(dispatch, data.Completed, data.NewChars, data.CompletedNew, data.NextTurn)
             }
         };
         callBack();
@@ -74,7 +97,7 @@ window.moveSelected = function (gameId, char, Row, Col) {
                 data: JSON.stringify({char, Row, Col}),
                 contentType: 'application/json',
                 dataType: 'json'
-            }).done(moveCharacterPath(dispatch, char)).fail((xhr) => {
+            }).done(moveCallbackFactory(dispatch, char)).fail((xhr) => {
                 console.log('Error move char ' + xhr.responseText);
                 moveLock = false;
             });

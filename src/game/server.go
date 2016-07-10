@@ -34,14 +34,6 @@ type MoveMessage struct {
 	Col  int
 }
 
-type MoveResponse struct {
-	Path      [][2]int
-	Completed [][2]int
-	NewChars  []GameCharPosition
-	//CompletedNew [][2]int
-	//GameScore    string
-}
-
 func serveGame(w http.ResponseWriter, r *http.Request) {
 	getParams := r.URL.Query()
 	gameUUID := getParams.Get("gameId")
@@ -69,18 +61,12 @@ func serveGame(w http.ResponseWriter, r *http.Request) {
 				if err != nil {
 					panic(err)
 				}
-				path, err := game.MoveCharacter(message.Char, message.Row, message.Col)
+				resp, err := game.MakeTurn(message.Char, message.Row, message.Col)
 				if err != nil {
 					w.WriteHeader(http.StatusNotFound)
 					w.Write(ErrorMessage{err.Error()}.AsJson())
 				} else {
-					completed := game.CheckCompleted()
-					newChars := game.AddNewChars()
-					//completedNew := game.CheckCompleted()
-					//w.Write(MoveResponse{path, completed, newChars, completedNew})
-
-					game.Update()
-					jsonResp, err := json.Marshal(MoveResponse{path, completed, newChars})
+					jsonResp, err := json.Marshal(resp)
 					if err != nil {
 						panic(err)
 					}
