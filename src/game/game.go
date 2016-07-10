@@ -23,13 +23,15 @@ type Game struct {
 	Width            int                `bson:"width"`
 	Line             int                `bson:"line"`
 	Turn             int                `bson:"turn"`
+	Score            GameScore
 	positions        [][2]int
 	randomPos        []int
 	currentRandomPos int
 }
 
 func NewGame() *Game {
-	return &Game{RandString(8), make([]GameCharPosition, 0), 9, 9, 3, 1, nil, nil, 0}
+	gameScore := GameScore{make([]CompleteTitle, 0), make([]int, 0)}
+	return &Game{RandString(8), make([]GameCharPosition, 0), 9, 9, 3, 1, gameScore, nil, nil, 0}
 }
 
 type MoveResponse struct {
@@ -38,7 +40,7 @@ type MoveResponse struct {
 	NewChars     []GameCharPosition
 	CompletedNew [][2]int
 	NextTurn     int
-	//GameScore    string
+	GameScore    []CompleteTitle
 }
 
 func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, error) {
@@ -52,7 +54,7 @@ func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, erro
 		newChars := g.AddNewChars()
 		completedNew, notInLineNew := g.CheckCompleted()
 
-		g.UpdateGameScore(append(completed, completedNew...), append(notInLine, notInLineNew...))
+		titleScoreUpdate := g.UpdateGameScore(append(completed, completedNew...), append(notInLine, notInLineNew...))
 		g.Turn++
 		g.Update()
 
@@ -64,7 +66,7 @@ func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, erro
 		for _, char := range append(completedNew, notInLineNew...) {
 			completedIndexesNew = append(completedIndexesNew, [2]int{char.Row, char.Col})
 		}
-		return MoveResponse{path, completedIndexes, newChars, completedIndexesNew, g.Turn}, nil
+		return MoveResponse{path, completedIndexes, newChars, completedIndexesNew, g.Turn, titleScoreUpdate}, nil
 	}
 }
 
@@ -117,11 +119,14 @@ func (g *Game) CheckCompleted() ([]GameCharPosition, []GameCharPosition) {
 		}
 	}
 	for i := range g.Field {
-		prev := make([]GameCharPosition, 0)
-		prev = append(prev, g.Field[i])
+		prev := make([]GameCharPosition, 1)
+		prev[0] = g.Field[i]
 		checkCompleted(checkLeft(fieldsMap, g.Field[i], prev))
+		prev = prev[0:1]
 		checkCompleted(checkLeftTop(fieldsMap, g.Field[i], prev))
+		prev = prev[0:1]
 		checkCompleted(checkTop(fieldsMap, g.Field[i], prev))
+		prev = prev[0:1]
 		checkCompleted(checkTopRight(fieldsMap, g.Field[i], prev))
 	}
 
@@ -218,6 +223,8 @@ func GetRandomImage(char parser.Character) string {
 type AnimeGroupMembers struct {
 	Id         bson.M `bson:"_id"`
 	Members    int    `bson:"members"`
+	Title      string `bson:"title"`
+	English    string `bson:"english"`
 	Characters []int  `bson:"characters"`
 }
 
