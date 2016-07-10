@@ -38,7 +38,6 @@ type MoveResponse struct {
 	NewChars     []GameCharPosition
 	CompletedNew [][2]int
 	NextTurn     int
-
 	//GameScore    string
 }
 
@@ -48,92 +47,25 @@ func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, erro
 	if err != nil {
 		return res, err
 	} else {
-		completed := g.CheckCompleted()
+		completed, notInLine := g.CheckCompleted()
+
 		newChars := g.AddNewChars()
-		completedNew := g.CheckCompleted()
+		completedNew, notInLineNew := g.CheckCompleted()
+
+		g.UpdateGameScore(append(completed, completedNew...), append(notInLine, notInLineNew...))
 		g.Turn++
-
 		g.Update()
-		return MoveResponse{path, completed, newChars, completedNew, g.Turn}, nil
-	}
-}
 
-func (g *Game) getExistedChar(required bool) GameCharPosition {
-	titleMap := make(map[int][]GameCharPosition, 0)
-	for _, v := range g.Field {
-		if _, ok := titleMap[v.TitleId]; !ok {
-			titleMap[v.TitleId] = make([]GameCharPosition, 0)
+		completedIndexes := make([][2]int, 0)
+		for _, char := range append(completed, notInLine...) {
+			completedIndexes = append(completedIndexes, [2]int{char.Row, char.Col})
 		}
-		titleMap[v.TitleId] = append(titleMap[v.TitleId], v)
-	}
-
-	targetTitles := make([]int, 0)
-	for key, titles := range titleMap {
-		if required {
-			if len(titles) < g.Line {
-				targetTitles = append(targetTitles, key)
-			}
-		} else {
-			if len(titles) >= g.Line {
-				targetTitles = append(targetTitles, key)
-			}
+		completedIndexesNew := make([][2]int, 0)
+		for _, char := range append(completedNew, notInLineNew...) {
+			completedIndexesNew = append(completedIndexesNew, [2]int{char.Row, char.Col})
 		}
+		return MoveResponse{path, completedIndexes, newChars, completedIndexesNew, g.Turn}, nil
 	}
-
-	if len(targetTitles) > 0 {
-		selectedTitleId := targetTitles[rand.Intn(len(targetTitles))]
-		existedCharacters := make([]int, 0)
-		for _, char := range titleMap[selectedTitleId] {
-			existedCharacters = append(existedCharacters, char.Id)
-		}
-		char := mongoDB.C("char")
-		anime := mongoDB.C("anime")
-		notEmpty := bson.M{"$not": bson.M{"$size": 0}}
-
-		var titleCharacters []int
-		err := anime.Find(bson.M{"characters": notEmpty, "_id.i": selectedTitleId}).Distinct("characters", &titleCharacters)
-		if err != nil {
-			panic(err)
-		}
-		var characters parser.CharacterSlice
-		err = char.Find(bson.M{"$and": []interface{}{
-			bson.M{"_id": bson.M{"$in": titleCharacters}},
-			bson.M{"_id": bson.M{"$nin": existedCharacters}},
-		}}).All(&characters)
-		if err != nil {
-			panic(err)
-		}
-		if len(characters) > 0 {
-			randomCharacters := GetRandomCharactersByFavorites(characters, 1)
-			return g.AddCharacterToRandomPos(randomCharacters[0], selectedTitleId)
-		}
-	}
-	return g.getNewGroupChar()
-}
-
-func (g *Game) getNewGroupChar() GameCharPosition {
-	currentTitles := make([]int, 0)
-	for _, v := range g.Field {
-		currentTitles = append(currentTitles, v.TitleId)
-	}
-
-	anime := mongoDB.C("anime")
-	notEmpty := bson.M{"$not": bson.M{"$size": 0}}
-	var currentGroups []int
-	err := anime.Find(bson.M{"characters": notEmpty, "_id.i": bson.M{"$in": currentTitles}}).Distinct("group", &currentGroups)
-	if err != nil {
-		panic(err)
-	}
-
-	var newGroups []int
-	err = anime.Find(bson.M{"characters": notEmpty, "_id.i": bson.M{"$nin": currentGroups}}).Distinct("group", &newGroups)
-	if err != nil {
-		panic(err)
-	}
-
-	uniquerGroups := GetUniqueValues(newGroups)
-	targetGroup := uniquerGroups[rand.Intn(len(uniquerGroups))]
-	return g.AddRandomCharacterByGroup(targetGroup, 1)[0]
 }
 
 func (g *Game) AddNewChars() []GameCharPosition {
@@ -142,9 +74,11 @@ func (g *Game) AddNewChars() []GameCharPosition {
 		funcRandom := rand.Intn(100)
 		var newChar GameCharPosition
 		switch {
-		case funcRandom < 40:
+		case len(g.Field)+1 >= g.Width*g.Height:
+			break
+		case funcRandom < 50:
 			newChar = g.getExistedChar(true)
-		case funcRandom < 70:
+		case funcRandom < 80:
 			newChar = g.getExistedChar(false)
 		case funcRandom < 100:
 			newChar = g.getNewGroupChar()
@@ -163,7 +97,7 @@ func (g *Game) RemoveChar(toDelete GameCharPosition) {
 	}
 }
 
-func (g *Game) CheckCompleted() [][2]int {
+func (g *Game) CheckCompleted() ([]GameCharPosition, []GameCharPosition) {
 	fieldsMap := make(map[int]map[int]GameCharPosition, g.Height)
 	for i := 0; i < g.Height; i++ {
 		fieldsMap[i] = make(map[int]GameCharPosition, 0)
@@ -173,10 +107,12 @@ func (g *Game) CheckCompleted() [][2]int {
 	}
 
 	completedChar := make(map[int]GameCharPosition, 0)
+	completedTitles := make(map[int]bool, 0)
 	checkCompleted := func(completed []GameCharPosition) {
 		if len(completed) >= g.Line {
 			for c := range completed {
 				completedChar[completed[c].Id] = completed[c]
+				completedTitles[completed[c].TitleId] = true
 			}
 		}
 	}
@@ -189,13 +125,22 @@ func (g *Game) CheckCompleted() [][2]int {
 		checkCompleted(checkTopRight(fieldsMap, g.Field[i], prev))
 	}
 
-	result := make([][2]int, 0)
+	completedSlice := make([]GameCharPosition, 0)
 	for _, char := range completedChar {
+		completedSlice = append(completedSlice, char)
 		g.RemoveChar(char)
-		result = append(result, [2]int{char.Row, char.Col})
 	}
 
-	return result
+	notLineSlice := make([]GameCharPosition, 0)
+	for _, v := range g.Field {
+		if _, ok := completedTitles[v.TitleId]; ok {
+			if _, ok := completedChar[v.Id]; !ok {
+				notLineSlice = append(notLineSlice, v)
+				g.RemoveChar(v)
+			}
+		}
+	}
+	return completedSlice, notLineSlice
 }
 
 func (g *Game) MoveCharacter(char GameCharPosition, row, col int) ([][2]int, error) {
@@ -315,7 +260,7 @@ func GetUniqueValues(values []int) []int {
 }
 
 func CreateNewGame() *Game {
-	titlesCount, charCount := 5, 3
+	titlesCount, charCount := 4, 3
 	game := NewGame()
 
 	var groupResult []int

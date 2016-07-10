@@ -58,7 +58,7 @@
     height: 100px;
     position: absolute;
     cursor: pointer;
-    transition: opacity 300ms;
+    transition: opacity 300ms, top 100ms, left 100ms;
     z-index: 100;
 }
 

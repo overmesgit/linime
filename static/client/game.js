@@ -1,12 +1,6 @@
 window.ReactCSSTransitionGroup = React.ReactCSSTransitionGroup;
 
 class Character extends React.Component {
-    constructor() {
-        super();
-        this.cellWidth = 100;
-        this.cellHeight = 100;
-    }
-
     selectChar() {
         this.props.selectChar(this.props.char);
     }
@@ -14,10 +8,10 @@ class Character extends React.Component {
     render() {
         const {gameTurn} = this.props;
         const {Img, Row, Col, prevRow, prevCol, selected, toDelete, turn} = this.props.char;
-        var classes = "char-cell " + (selected ? "selected":"") + " " + (toDelete?"cell-remove":"");
-        classes += " " + (turn == gameTurn - 1 ? "new":"") + " " + (turn == gameTurn ? "appear":"");
-        return <div className={classes}
-                 style={{ top: this.cellHeight*Row, left: this.cellWidth*Col}}
+        var classes = ["char-cell", "row"+Row, "col"+Col,
+            (selected ? "selected":""), (toDelete?"cell-remove":""),
+            (turn == gameTurn - 1 ? "new":""), (turn == gameTurn ? "appear":"")];
+        return <div className={classes.join(" ")}
                  onClick={this.selectChar.bind(this)}>
                 <img src={Img} className="char" />
             </div>

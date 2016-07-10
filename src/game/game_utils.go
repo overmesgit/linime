@@ -1,11 +1,90 @@
 package game
 
 import (
+	"gopkg.in/mgo.v2/bson"
 	"mal/parser"
 	"math"
 	"math/rand"
 	"sort"
 )
+
+func (g *Game) getExistedChar(required bool) GameCharPosition {
+	titleMap := make(map[int][]GameCharPosition, 0)
+	for _, v := range g.Field {
+		if _, ok := titleMap[v.TitleId]; !ok {
+			titleMap[v.TitleId] = make([]GameCharPosition, 0)
+		}
+		titleMap[v.TitleId] = append(titleMap[v.TitleId], v)
+	}
+
+	targetTitles := make([]int, 0)
+	for key, titles := range titleMap {
+		if required {
+			if len(titles) < g.Line {
+				targetTitles = append(targetTitles, key)
+			}
+		} else {
+			if len(titles) >= g.Line {
+				targetTitles = append(targetTitles, key)
+			}
+		}
+	}
+
+	if len(targetTitles) > 0 {
+		selectedTitleId := targetTitles[rand.Intn(len(targetTitles))]
+		existedCharacters := make([]int, 0)
+		for _, char := range titleMap[selectedTitleId] {
+			existedCharacters = append(existedCharacters, char.Id)
+		}
+		char := mongoDB.C("char")
+		anime := mongoDB.C("anime")
+		notEmpty := bson.M{"$not": bson.M{"$size": 0}}
+
+		var titleCharacters []int
+		err := anime.Find(bson.M{"characters": notEmpty, "_id.i": selectedTitleId}).Distinct("characters", &titleCharacters)
+		if err != nil {
+			panic(err)
+		}
+		var characters parser.CharacterSlice
+		err = char.Find(bson.M{"$and": []interface{}{
+			bson.M{"_id": bson.M{"$in": titleCharacters}},
+			bson.M{"_id": bson.M{"$nin": existedCharacters}},
+		}}).All(&characters)
+		if err != nil {
+			panic(err)
+		}
+		if len(characters) > 0 {
+			randomCharacters := GetRandomCharactersByFavorites(characters, 1)
+			return g.AddCharacterToRandomPos(randomCharacters[0], selectedTitleId)
+		}
+	}
+	return g.getNewGroupChar()
+}
+
+func (g *Game) getNewGroupChar() GameCharPosition {
+	currentTitles := make([]int, 0)
+	for _, v := range g.Field {
+		currentTitles = append(currentTitles, v.TitleId)
+	}
+
+	anime := mongoDB.C("anime")
+	notEmpty := bson.M{"$not": bson.M{"$size": 0}}
+	var currentGroups []int
+	err := anime.Find(bson.M{"characters": notEmpty, "_id.i": bson.M{"$in": currentTitles}}).Distinct("group", &currentGroups)
+	if err != nil {
+		panic(err)
+	}
+
+	var newGroups []int
+	err = anime.Find(bson.M{"characters": notEmpty, "_id.i": bson.M{"$nin": currentGroups}}).Distinct("group", &newGroups)
+	if err != nil {
+		panic(err)
+	}
+
+	uniquerGroups := GetUniqueValues(newGroups)
+	targetGroup := uniquerGroups[rand.Intn(len(uniquerGroups))]
+	return g.AddRandomCharacterByGroup(targetGroup, 1)[0]
+}
 
 func checkLeft(pos map[int]map[int]GameCharPosition, char GameCharPosition, prevResult []GameCharPosition) []GameCharPosition {
 	if leftChar, ok := pos[char.Row][char.Col-1]; ok && leftChar.TitleId == char.TitleId {
