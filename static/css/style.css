@@ -104,8 +104,6 @@
     width: 300px;
     max-height: 900px;
     text-align: left;
-    overflow-y: auto;
-    overflow-x: hidden;
 }
 
 #game-scores > p {
@@ -151,6 +149,17 @@
     margin-left: 5px;
     vertical-align: top;
     display: inline-block;
+}
+
+#game-scores .ps-scrollbar-x-rail {
+    margin-left: 10px;
+    margin-right: 10px;
+    display: none;
+}
+
+#game-scores .ps-scrollbar-y-rail {
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 

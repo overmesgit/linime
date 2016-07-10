@@ -72,6 +72,10 @@ class CompleteTitle extends React.Component {
 }
 
 class GameScore extends React.Component {
+    componentDidMount() {
+        $('#game-scores').perfectScrollbar();
+    }
+
     getTotalScore() {
         const {completedTitles} = this.props;
         var totalScore = 0;
