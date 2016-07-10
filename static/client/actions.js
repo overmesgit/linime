@@ -34,9 +34,9 @@ var removeAndAddNewChars = (dispatch, completed, newChars, completedNew, nextTur
     }
     //hot browser cache
     for (var j = 0; j < newChars.length; j++) {
-            var newImg = new Image();
-            newImg.src = newChars[j].Img;
-        }
+        var newImg = new Image();
+        newImg.src = newChars[j].Img;
+    }
     setTimeout(() => {
         groupDispatchChar(dispatch, completed, FADE_CHARACTER);
     }, 50);
@@ -48,19 +48,23 @@ var removeAndAddNewChars = (dispatch, completed, newChars, completedNew, nextTur
                 payload: newChars[j]
             });
         }
-    }, timeOutAdd);
-    setTimeout(() => {
-        dispatch({
-            type: CHANGE_GAME_TURN,
-            payload: nextTurn
-        });
+        //start new character animation
         setTimeout(() => {
-            groupDispatchChar(dispatch, completedNew, FADE_CHARACTER);
+            dispatch({
+                type: CHANGE_GAME_TURN,
+                payload: nextTurn
+            });
         }, 300);
         setTimeout(() => {
-            groupDispatchChar(dispatch, completedNew, REMOVE_CHARACTER);
-        }, 600);
-    }, 300 + timeOutAdd)
+            setTimeout(() => {
+                groupDispatchChar(dispatch, completedNew, FADE_CHARACTER);
+            }, 300);
+            setTimeout(() => {
+                groupDispatchChar(dispatch, completedNew, REMOVE_CHARACTER);
+            }, 600);
+        }, timeOutAdd);
+    }, timeOutAdd);
+
 };
 
 var moveCallbackFactory = (dispatch, char) => {
