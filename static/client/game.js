@@ -49,6 +49,52 @@ class FieldCell extends React.Component {
     }
 }
 
+class CompleteTitle extends React.Component {
+    render() {
+        const {title} = this.props;
+        var charsNodes = title.Characters.map((charStat) => {
+            return <p key={charStat.Id} className="stat-char">
+                <span className="stat-char-score">{(charStat.Score > 0 ? "+":"")}{charStat.Score}</span>
+                <img src={charStat.Img} className="stat-char-img" />
+                <a target="_blank" className="stat-char-name" href={"http://myanimelist.net/character/" + charStat.Id}>{charStat.Name}</a>
+            </p>
+        });
+
+        return <div id="title-scores">
+            <p className="score-title-turn">turn: {title.Turn}</p>
+            <a target="_blank" className="score-title-name" href={"http://myanimelist.net/anime/" + title.Id}>{title.Title} ({title.English})</a>
+            {charsNodes}
+        </div>
+    }
+}
+
+class GameScore extends React.Component {
+    getTotalScore() {
+        const {completedTitles} = this.props;
+        var totalScore = 0;
+        completedTitles.forEach((title) => {
+            title.Characters.forEach((char) => {
+                totalScore += char.Score;
+            })
+        });
+        return totalScore;
+    }
+    render() {
+        const {completedTitles, currentTurn} = this.props;
+
+        var titlesNodes = completedTitles.map((title) => {
+            return <CompleteTitle key={title.Id} title={title} />
+        });
+        //last titles in the end of the list
+        titlesNodes.reverse();
+        return <div id="game-scores">
+            <p>Turn: {currentTurn}</p>
+            <p>Total score: {this.getTotalScore()}</p>
+            {titlesNodes}
+        </div>
+    }
+}
+
 class Game extends React.Component {
     render() {
         const {game, selectChar, moveSelected} = this.props;
@@ -66,9 +112,10 @@ class Game extends React.Component {
         });
 
         return <div id="game" className="content">
-            {fieldCell}
-            {characters}
-        </div>
+                {fieldCell}
+                {characters}
+                <GameScore completedTitles={game.Score.CompletedTitles} currentTurn={game.Turn} />
+            </div>
     }
 }
 

@@ -90,6 +90,6 @@ func (g *Game) UpdateGameScore(completedChars []GameCharPosition, notInLine []Ga
 	g.Score.CompletedGroups = append(g.Score.CompletedGroups, g.GetCompletedGroups(completedChars)...)
 
 	titles := g.GetCompletedTitles(completedChars, notInLine)
-	g.Score.CompletedTitles = append(titles)
+	g.Score.CompletedTitles = append(g.Score.CompletedTitles, titles...)
 	return titles
 }

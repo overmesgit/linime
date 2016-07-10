@@ -97,5 +97,57 @@
     opacity: 0;
 }
 
+#game-scores {
+    padding-left: 8px;
+    border: 5px solid #bababa;
+    background-color: lightgray;
+    border-radius: 25px;
+    position: absolute;
+    left: 920px;
+    width: 300px;
+    max-height: 900px;
+    text-align: left;
+    overflow-y: auto;
+}
+
+#game-scores > p {
+    margin-top: 0;
+    margin-bottom: 0;
+    font-size: 30px;
+}
+
+.score-title-turn {
+    margin: 5px 0 0 0;
+    font-size: 20px;
+}
+
+.score-title-name {
+    margin: 5px 0 0 0;
+}
+
+.stat-char {
+    margin: 2px 0 0 5px;
+}
+
+.stat-char-score {
+    font-size: 43px;
+    width: 50px;
+    vertical-align: top;
+    text-align: center;
+    display: inline-block;
+}
+
+.stat-char-img {
+    max-width: 50px;
+    max-height: 50px;
+}
+
+.stat-char-name {
+    margin-top: 15px;
+    margin-left: 5px;
+    vertical-align: top;
+    display: inline-block;
+}
+
 
 
