@@ -1,6 +1,6 @@
 .content {
     margin: auto;
-    width: 900px;
+    width: 810px;
     height: 900px;
     text-align: center;
     border: 5px solid #bababa;
@@ -30,11 +30,11 @@
 }
 
 .leftCol.fieldCell {
-    width: 98px;
+    width: 88px;
     border-left: 2px hidden #bababa;
 }
 .rightCol.fieldCell {
-    width: 98px;
+    width: 88px;
     border-right: 2px hidden #bababa;
 }
 .topRow.fieldCell {
@@ -47,14 +47,14 @@
 }
 
 .fieldCell {
-    width: 96px;
+    width: 86px;
     height: 96px;
     float: left;
     border: 2px solid #bababa;
 }
 
 .char-cell {
-    width: 100px;
+    width: 90px;
     height: 100px;
     position: absolute;
     cursor: pointer;
@@ -67,7 +67,7 @@
 }
 
 .char {
-    max-width: 92px;
+    max-width: 90px;
     max-height: 92px;
     margin: 4px auto auto;
     border-radius: 15px;
@@ -99,7 +99,7 @@
     background-color: lightgray;
     border-radius: 25px;
     position: absolute;
-    left: 920px;
+    left: 820px;
     width: 300px;
     max-height: 900px;
     text-align: left;
