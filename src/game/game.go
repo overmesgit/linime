@@ -76,7 +76,7 @@ func (g *Game) AddNewChars() []GameCharPosition {
 		funcRandom := rand.Intn(100)
 		var newChar GameCharPosition
 		switch {
-		case len(g.Field)+1 >= g.Width*g.Height:
+		case len(g.Field) >= g.Width*g.Height:
 			break
 		case funcRandom < 50:
 			newChar = g.getExistedChar(true)
