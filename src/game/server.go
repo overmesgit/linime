@@ -23,7 +23,11 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", 405)
 		return
 	}
-	homeTempl := template.Must(template.ParseFiles("templates/home.html"))
+	templateName := "home.html"
+	//if strings.Contains(r.URL.Path, "/test") {
+	//	templateName = "test.html"
+	//}
+	homeTempl := template.Must(template.ParseFiles("templates/" + templateName))
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	homeTempl.Execute(w, r.Host)
 }

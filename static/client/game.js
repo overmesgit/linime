@@ -5,6 +5,16 @@ class Character extends React.Component {
         this.props.selectChar(this.props.char);
     }
 
+    shouldComponentUpdate(nextProps, nextState) {
+        var checkList = ['Img', 'Row', 'Col', 'prevRow', 'prevCol', 'selected', 'toDelete', 'turn'];
+        for(var i = 0; i < checkList.length; i++){
+            if (this.props.char[checkList[i]] != nextProps.char[checkList[i]]) {
+                return true;
+            }
+        }
+        return this.props.gameTurn != nextProps.gameTurn;
+    }
+
     render() {
         const {gameTurn} = this.props;
         const {Img, Row, Col, prevRow, prevCol, selected, toDelete, turn} = this.props.char;
@@ -19,6 +29,9 @@ class Character extends React.Component {
 }
 
 class FieldCell extends React.Component {
+    shouldComponentUpdate(nextProps, nextState) {
+        return false;
+    }
     moveSelected() {
         var char = this.props.game.Field.find((char) => {
             if (char.selected) {
@@ -50,6 +63,9 @@ class FieldCell extends React.Component {
 }
 
 class CompleteTitle extends React.Component {
+    shouldComponentUpdate(nextProps, nextState) {
+        return false;
+    }
     render() {
         const {title} = this.props;
         var charsNodes = title.Characters.map((charStat, i) => {
@@ -88,7 +104,6 @@ class GameScore extends React.Component {
     }
     render() {
         const {completedTitles, currentTurn} = this.props;
-
         var titlesNodes = completedTitles.map((title, i) => {
             return <CompleteTitle key={'' + title.Id + i} title={title} />
         });
