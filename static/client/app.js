@@ -1,30 +1,19 @@
 class AppClass extends React.Component {
-    setMainView(e) {
-        this.props.appActions.setView(MAIN_VIEW);
-    }
-
     componentWillMount() {
-        if(this.props.app.fetchingGame != '') {
+        if (this.props.app.fetchingGame != '') {
             this.props.appActions.getGame(this.props.app.fetchingGame);
             this.props.app.fetchingGame = '';
         }
     }
 
     render() {
-        const { view, game, message } = this.props.app;
-        const { createGame, selectChar, moveSelected } = this.props.appActions;
-        switch (view) {
-            case MAIN_VIEW:
-                return <Home createGame={createGame} />
-            case LOADING_VIEW:
-                return <div>Loading</div>
-            case GAME_VIEW:
-                return <Game game={game} selectChar={selectChar} moveSelected={moveSelected} />
-            case ERROR_VIEW:
-                return <div>Error {message}
-                    <button onClick={this.setMainView.bind(this)}>Main view</button>
-                </div>
-        }
+        const {game, messages, myGames} = this.props.app;
+        const {createGame, completeGame, selectChar, moveSelected, getGame} = this.props.appActions;
+        return <div className="content">
+            <Menu createGame={createGame} completeGame={completeGame} getGame={getGame} game={game} myGames={myGames} />
+            <Game game={game} selectChar={selectChar} moveSelected={moveSelected} />
+            <GameScore completedTitles={game.Score.CompletedTitles} currentTurn={game.Turn} />
+        </div>
     }
 }
 
@@ -35,9 +24,9 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-  return {
-    appActions: Redux.bindActionCreators({setView, createGame, getGame, selectChar, moveSelected}, dispatch)
-  }
+    return {
+        appActions: Redux.bindActionCreators({createGame, completeGame, getGame, selectChar, moveSelected}, dispatch)
+    }
 }
 
 var App = ReactRedux.connect(mapStateToProps, mapDispatchToProps)(AppClass);

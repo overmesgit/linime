@@ -76,7 +76,7 @@ func (g *Game) getNewGroupChar() GameCharPosition {
 	}
 
 	var newGroups []int
-	err = anime.Find(bson.M{"characters": notEmpty, "_id.i": bson.M{"$nin": currentGroups}}).Distinct("group", &newGroups)
+	err = anime.Find(bson.M{"characters": notEmpty, "group": bson.M{"$nin": currentGroups}}).Distinct("group", &newGroups)
 	if err != nil {
 		panic(err)
 	}

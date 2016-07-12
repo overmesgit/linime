@@ -23,6 +23,7 @@ type CompleteTitle struct {
 type GameScore struct {
 	CompletedTitles []CompleteTitle
 	CompletedGroups []int
+	TotalScore      int
 }
 
 func (g *Game) GetCompletedGroups(completedChars []GameCharPosition) []int {
@@ -91,5 +92,20 @@ func (g *Game) UpdateGameScore(completedChars []GameCharPosition, notInLine []Ga
 
 	titles := g.GetCompletedTitles(completedChars, notInLine)
 	g.Score.CompletedTitles = append(g.Score.CompletedTitles, titles...)
+
+	g.Turn++
+	if len(g.Field) >= g.Width*g.Height {
+		g.CompleteCountTotalScore()
+	}
 	return titles
+}
+
+func (g *Game) CompleteCountTotalScore() {
+	totalScore := 0
+	for _, title := range g.Score.CompletedTitles {
+		for _, char := range title.Characters {
+			totalScore += char.Score
+		}
+	}
+	g.Score.TotalScore = totalScore
 }

@@ -6,6 +6,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"mal/parser"
 	"math/rand"
+	"time"
 )
 
 type GameCharPosition struct {
@@ -27,11 +28,12 @@ type Game struct {
 	positions        [][2]int
 	randomPos        []int
 	currentRandomPos int
+	Date             time.Time `bson:"date"`
 }
 
 func NewGame() *Game {
-	gameScore := GameScore{make([]CompleteTitle, 0), make([]int, 0)}
-	return &Game{RandString(8), make([]GameCharPosition, 0), 9, 9, 3, 1, gameScore, nil, nil, 0}
+	gameScore := GameScore{make([]CompleteTitle, 0), make([]int, 0), -1}
+	return &Game{RandString(8), make([]GameCharPosition, 0), 9, 9, 3, 1, gameScore, nil, nil, 0, time.Now()}
 }
 
 type MoveResponse struct {
@@ -45,6 +47,9 @@ type MoveResponse struct {
 
 func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, error) {
 	var res MoveResponse
+	if g.Score.TotalScore >= 0 {
+		return res, errors.New("Game completed")
+	}
 	path, err := g.MoveCharacter(char, row, col)
 	if err != nil {
 		return res, err
@@ -55,7 +60,6 @@ func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, erro
 		completedNew, notInLineNew := g.CheckCompleted()
 
 		titleScoreUpdate := g.UpdateGameScore(append(completed, completedNew...), append(notInLine, notInLineNew...))
-		g.Turn++
 		g.Update()
 
 		completedIndexes := make([][2]int, 0)
@@ -129,11 +133,9 @@ func (g *Game) CheckCompleted() ([]GameCharPosition, []GameCharPosition) {
 		prev = prev[0:1]
 		checkCompleted(checkTopRight(fieldsMap, g.Field[i], prev))
 	}
-
 	completedSlice := make([]GameCharPosition, 0)
 	for _, char := range completedChar {
 		completedSlice = append(completedSlice, char)
-		g.RemoveChar(char)
 	}
 
 	notLineSlice := make([]GameCharPosition, 0)
@@ -141,9 +143,11 @@ func (g *Game) CheckCompleted() ([]GameCharPosition, []GameCharPosition) {
 		if _, ok := completedTitles[v.TitleId]; ok {
 			if _, ok := completedChar[v.Id]; !ok {
 				notLineSlice = append(notLineSlice, v)
-				g.RemoveChar(v)
 			}
 		}
+	}
+	for _, char := range append(completedSlice, notLineSlice...) {
+		g.RemoveChar(char)
 	}
 	return completedSlice, notLineSlice
 }

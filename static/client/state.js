@@ -5,29 +5,37 @@ window.ERROR_VIEW = 'ERROR_VIEW';
 
 var urlHash = window.location.hash.substr(1);
 var gameId = '';
-var initialView = MAIN_VIEW;
 if (urlHash.search('game') > -1) {
     gameId = urlHash.split('/')[1];
-    initialView = LOADING_VIEW;
+}
+
+var myGames = [];
+if(supports_html5_storage()) {
+    if(localStorage.games) {
+        myGames = localStorage.games.split(',').reverse()
+    }
 }
 
 const initialState = {
-    view: initialView,
-    game: null,
-    message: '',
-    fetchingGame: gameId
+    game: {Field: [], Score: {CompletedTitles: [], TotalScore: 0}, Turn: 0},
+    messages: [],
+    fetchingGame: gameId,
+    myGames: myGames
 };
 
 function viewState(state = initialState, action) {
     switch (action.type) {
-        case SET_VIEW_ACTION:
-            return {...state, view: action.payload};
+        case COMPLETE_GAME:
+            return {...state, game: { ...state.game, Score: {...state.game.Score, TotalScore: 0}}};
         case GET_GAME_REQUEST:
-            return {...state, view: LOADING_VIEW};
+            return {...state};
+        case ADD_MY_GAME:
+            state.myGames.unshift(action.payload);
+            return {...state};
         case GET_GAME_SUCCESS:
-            return {...state, game: action.payload, view: GAME_VIEW};
+            return {...state, game: action.payload};
         case GET_GAME_ERROR:
-            return {...state, message: action.payload, view: ERROR_VIEW};
+            return {...state, message: action.payload};
         case CHAR_SELECTED:
             var newField = state.game.Field.map((char) => {
                 if (char.selected) {

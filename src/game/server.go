@@ -9,11 +9,11 @@ import (
 	"net/http"
 )
 
-type ErrorMessage struct {
+type Message struct {
 	Message string
 }
 
-func (e ErrorMessage) AsJson() []byte {
+func (e Message) AsJson() []byte {
 	data, _ := json.Marshal(e)
 	return data
 }
@@ -46,7 +46,8 @@ func serveGame(w http.ResponseWriter, r *http.Request) {
 		game, err := GetGame(gameUUID)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
-			w.Write(ErrorMessage{err.Error()}.AsJson())
+			w.Write(Message{err.Error()}.AsJson())
+			return
 		}
 		switch r.Method {
 		case "GET":
@@ -68,7 +69,7 @@ func serveGame(w http.ResponseWriter, r *http.Request) {
 				resp, err := game.MakeTurn(message.Char, message.Row, message.Col)
 				if err != nil {
 					w.WriteHeader(http.StatusNotFound)
-					w.Write(ErrorMessage{err.Error()}.AsJson())
+					w.Write(Message{err.Error()}.AsJson())
 				} else {
 					jsonResp, err := json.Marshal(resp)
 					if err != nil {
@@ -76,6 +77,10 @@ func serveGame(w http.ResponseWriter, r *http.Request) {
 					}
 					w.Write(jsonResp)
 				}
+			case "complete":
+				game.CompleteCountTotalScore()
+				game.Update()
+				w.Write(Message{"ok"}.AsJson())
 			}
 		}
 	} else {

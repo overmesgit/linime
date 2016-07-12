@@ -1,4 +1,3 @@
-window.SET_VIEW_ACTION = 'SET_VIEW';
 window.GET_GAME_REQUEST = 'GET_GAME_REQUEST';
 window.GET_GAME_SUCCESS = 'GET_GAME_SUCCESS';
 window.GET_GAME_ERROR = 'GET_GAME_ERROR';
@@ -10,6 +9,25 @@ window.FADE_CHARACTER = 'FADE_CHARACTER';
 window.ADD_CHARACTER = 'ADD_CHARACTER';
 window.CHANGE_GAME_TURN = 'CHANGE_GAME_TURN';
 window.UPDATE_GAME_SCORE = 'UPDATE_GAME_SCORE';
+window.COMPLETE_GAME = 'COMPLETE_GAME';
+window.ADD_MY_GAME = 'ADD_MY_GAME';
+
+window.completeGame = function (gameId) {
+    return (dispatch) => {
+        $.ajax({
+            method: "PUT",
+            url: '/game?gameId=' + gameId + '&action=complete',
+            contentType: 'application/json'
+        }).done((data) => {
+            console.log('Game completed');
+            dispatch({
+                type: COMPLETE_GAME
+            });
+        }).fail((xhr) => {
+            console.log('Error move char ' + xhr.responseText);
+        });
+    }
+};
 
 window.moveCharacter = function (char, row, col) {
     return {
@@ -121,13 +139,6 @@ window.selectChar = function (char) {
     }
 };
 
-window.setView = function (view) {
-    return {
-        type: SET_VIEW_ACTION,
-        payload: view
-    }
-};
-
 window.createGame = function () {
     return (dispatch) => {
         dispatch({
@@ -135,6 +146,17 @@ window.createGame = function () {
         });
         $.post('/game', (data) => {
             window.location.hash = '#game/' + data.Id;
+            if(supports_html5_storage()) {
+                if(!localStorage.games) {
+                    localStorage.games = data.Id;
+                } else {
+                    localStorage.games = localStorage.games + ',' + data.Id;
+                }
+            }
+            dispatch({
+                type: ADD_MY_GAME,
+                payload: data.Id
+            });
             dispatch({
                 type: GET_GAME_SUCCESS,
                 payload: data

@@ -1,27 +1,67 @@
 .content {
     margin: auto;
-    width: 810px;
-    height: 900px;
-    text-align: center;
+    width: 1470px;
+}
+
+.window {
     border: 5px solid #bababa;
     background-color: lightgray;
     border-radius: 25px;
+    float: left;
+    margin: 5px;
 }
 
-#newGame {
-    margin: auto;
-    width: 700px;
-    height: 50px;
-    border-radius: 20px;
-    line-height: 50px;
+#menu {
+    width: 300px;
+}
+
+.menu-content {
+    margin: 10px;
+}
+
+.menu-content > h1, .menu-content > p,  .menu-content > h3, .my-games-list > h3 {
+    margin: 3px;
+}
+
+.my-games-list {
+    margin-top: 50px;
+}
+
+.my-games-list > p {
+    margin: 5px;
+}
+
+.menu-content-button {
     cursor: pointer;
+    border-radius: 10px;
+    line-height: 40px;
+    height: 40px;
+    text-align: center;
+    margin: 5px;
+}
+
+.my-game {
+    text-align: center;
+    border-radius: 5px;
 }
 
 #game {
     position: relative;
+    width: 810px;
+    height: 900px;
+    text-align: center;
+}
+
+#score {
+    width: 300px;
+    max-height: 900px;
+    text-align: left;
+    overflow: hidden;
+    position: relative;
 }
 
 .btn {
+    cursor: pointer;
     background-color: #7aa6cf;
 }
 
@@ -94,18 +134,7 @@
     opacity: 0;
 }
 
-#game-scores {
-    border: 5px solid #bababa;
-    background-color: lightgray;
-    border-radius: 25px;
-    position: absolute;
-    left: 820px;
-    width: 300px;
-    max-height: 900px;
-    text-align: left;
-}
-
-#game-scores > p {
+#score > p {
     padding-left: 8px;
     margin-top: 0;
     margin-bottom: 0;
@@ -159,13 +188,11 @@
     display: inline-block;
 }
 
-#game-scores .ps-scrollbar-x-rail {
-    margin-left: 10px;
-    margin-right: 10px;
+#score .ps-scrollbar-x-rail {
     display: none;
 }
 
-#game-scores .ps-scrollbar-y-rail {
+#score .ps-scrollbar-y-rail {
     margin-top: 10px;
     margin-bottom: 10px;
 }
