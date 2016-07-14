@@ -17,14 +17,17 @@ if(supports_html5_storage()) {
 }
 
 const initialState = {
-    game: {Field: [], Score: {CompletedTitles: [], TotalScore: 0}, Turn: 0},
+    game: {Field: [], Score: {CompletedTitles: [], TotalScore: 0}, Turn: 0, AnimeDifficulty: 0, CharDifficulty: 0, MalUser: ''},
     messages: [],
     fetchingGame: gameId,
-    myGames: myGames
+    myGames: myGames,
+    createGameStatus: {hidden: true, AnimeDifficulty: 0, CharDifficulty: 0, MalUser: ''}
 };
 
 function viewState(state = initialState, action) {
     switch (action.type) {
+        case TOGGLE_CREATE_GAME_MENU:
+            return {...state, createGameStatus: {...state.createGame, hidden: !state.createGameStatus.hidden}};
         case COMPLETE_GAME:
             return {...state, game: { ...state.game, Score: {...state.game.Score, TotalScore: 0}}};
         case GET_GAME_REQUEST:

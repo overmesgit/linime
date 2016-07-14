@@ -7,10 +7,11 @@ class AppClass extends React.Component {
     }
 
     render() {
-        const {game, messages, myGames} = this.props.app;
-        const {createGame, completeGame, selectChar, moveSelected, getGame} = this.props.appActions;
+        const {game, messages, myGames, createGameStatus} = this.props.app;
+        const {createGame, completeGame, selectChar, moveSelected, getGame, toggleCreateGame} = this.props.appActions;
         return <div className="content">
-            <Menu createGame={createGame} completeGame={completeGame} getGame={getGame} game={game} myGames={myGames} />
+            <Menu createGame={createGame} completeGame={completeGame} getGame={getGame} game={game} myGames={myGames}
+            toggleCreateGame={toggleCreateGame} createGameStatus={createGameStatus} />
             <Game game={game} selectChar={selectChar} moveSelected={moveSelected} />
             <GameScore completedTitles={game.Score.CompletedTitles} currentTurn={game.Turn} />
         </div>
@@ -25,7 +26,8 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return {
-        appActions: Redux.bindActionCreators({createGame, completeGame, getGame, selectChar, moveSelected}, dispatch)
+        appActions: Redux.bindActionCreators({createGame, completeGame, getGame, selectChar,
+            moveSelected, toggleCreateGame}, dispatch)
     }
 }
 

@@ -11,6 +11,13 @@ window.CHANGE_GAME_TURN = 'CHANGE_GAME_TURN';
 window.UPDATE_GAME_SCORE = 'UPDATE_GAME_SCORE';
 window.COMPLETE_GAME = 'COMPLETE_GAME';
 window.ADD_MY_GAME = 'ADD_MY_GAME';
+window.TOGGLE_CREATE_GAME_MENU = 'TOGGLE_CREATE_GAME_MENU';
+
+window.toggleCreateGame = function () {
+    return {
+        type: TOGGLE_CREATE_GAME_MENU
+    }
+};
 
 window.completeGame = function (gameId) {
     return (dispatch) => {
