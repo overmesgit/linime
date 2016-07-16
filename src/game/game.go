@@ -5,6 +5,7 @@ import (
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"gopkg.in/mgo.v2/bson"
 	"mal/parser"
+	"malpar"
 	"math/rand"
 	"time"
 )
@@ -32,11 +33,12 @@ type Game struct {
 	CharDiff         int
 	AnimeDiff        int
 	UserName         string
+	UserItems        []int
 }
 
 func NewGame() *Game {
 	gameScore := GameScore{make([]CompleteTitle, 0), make([]int, 0), -1}
-	return &Game{RandString(8), make([]GameCharPosition, 0), 9, 9, 3, 1, gameScore, nil, nil, 0, time.Now(), 0, 0, ""}
+	return &Game{RandString(8), make([]GameCharPosition, 0), 9, 9, 3, 1, gameScore, nil, nil, 0, time.Now(), 0, 0, "", make([]int, 0)}
 }
 
 func NewGameWithParam(param CreateGameParam) *Game {
@@ -71,6 +73,9 @@ func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, erro
 		completedNew, notInLineNew := g.CheckCompleted()
 
 		titleScoreUpdate := g.UpdateGameScore(append(completed, completedNew...), append(notInLine, notInLineNew...))
+		if g.Score.TotalScore >= 0 {
+			g.UserItems = make([]int, 0)
+		}
 		g.Update()
 
 		completedIndexes := make([][2]int, 0)
@@ -283,6 +288,19 @@ func GetUniqueValues(values []int) []int {
 
 func CreateNewGame(gameParam CreateGameParam) *Game {
 	game := NewGameWithParam(gameParam)
+	if gameParam.UserName != "" {
+		userList, err := malpar.GetUserScoresByName(game.UserName, 2)
+		if err != nil {
+			panic(err)
+		}
+		for _, item := range userList.AnimeList {
+			// 1 watching, 2 completed, 3 on hold, 4 drop
+			if item.Status > 0 && item.Status <= 3 {
+				game.UserItems = append(game.UserItems, int(item.Id))
+			}
+		}
+
+	}
 
 	for i := 0; i < 3; i++ {
 		game.AddNewChars()
