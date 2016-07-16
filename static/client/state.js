@@ -21,7 +21,7 @@ const initialState = {
     messages: [],
     fetchingGame: gameId,
     myGames: myGames,
-    createGameStatus: {hidden: true, AnimeDifficulty: 0, CharDifficulty: 0, MalUser: ''}
+    createGameStatus: {hidden: true}
 };
 
 function viewState(state = initialState, action) {

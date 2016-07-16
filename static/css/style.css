@@ -1,5 +1,5 @@
 p {
-    margin: 5px;
+    margin: 3px;
 }
 
 .content {
@@ -45,7 +45,7 @@ p {
     line-height: 40px;
     height: 40px;
     text-align: center;
-    margin: 5px;
+    margin: 5px 5px 0 5px;
 }
 
 .my-game {
@@ -207,32 +207,40 @@ p {
 
 .difficulty {
     background-color: #94bde2;
-    margin: -5px 25px 0 25px;
+    margin: 0 25px 0 25px;
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
-    padding: 2px 10px 5px 10px;
+    padding: 0 10px 0 10px;
     overflow: hidden;
     transition: height 0.5s;
-    height: 155px;
+    height: 190px;
 }
 
 .difficulty-hidden {
     height: 0;
 }
 
+.mal-username {
+    width: 200px;
+    padding: 3px;
+    border-radius: 5px;
+    border: 0;
+    margin: 3px;
+}
+
 .create-game {
     line-height: 30px;
     text-align: center;
     border-radius: 10px;
-    margin-top: 10px;
+    margin-top: 5px;
 }
 
 .select-style {
     border: 1px solid #ccc;
-    width: 200px;
+    width: 205px;
     border-radius: 3px;
     overflow: hidden;
-    margin: 5px;
+    margin: 3px;
 }
 
 .select-style select {

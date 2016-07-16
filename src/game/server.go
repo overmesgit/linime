@@ -38,6 +38,12 @@ type MoveMessage struct {
 	Col  int
 }
 
+type CreateGameParam struct {
+	CharDiff  int
+	AnimeDiff int
+	UserName  string
+}
+
 func serveGame(w http.ResponseWriter, r *http.Request) {
 	getParams := r.URL.Query()
 	gameUUID := getParams.Get("gameId")
@@ -84,8 +90,13 @@ func serveGame(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	} else {
+		var gameParam CreateGameParam
+		err := json.NewDecoder(r.Body).Decode(&gameParam)
+		if err != nil {
+			panic(err)
+		}
 		if r.Method == "POST" {
-			game := CreateNewGame()
+			game := CreateNewGame(gameParam)
 			game.Save()
 			w.Write(game.AsJson())
 		}

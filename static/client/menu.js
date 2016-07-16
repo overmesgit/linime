@@ -1,18 +1,10 @@
 class Menu extends React.Component {
     createGame(e) {
-        this.props.createGame();
+        this.props.createGame(+this.refs.charDiff.value, +this.refs.animeDiff.value, this.refs.userName.value);
     }
 
     completeGame(e) {
         this.props.completeGame(this.props.game.Id);
-    }
-
-    changeCharDifficulty(e) {
-        console.log(e, e.target.value)
-    }
-
-    changeAnimeDifficulty(e) {
-        console.log(e, e.target.value)
     }
 
     render() {
@@ -35,17 +27,19 @@ class Menu extends React.Component {
                     <h2 className="menu-content-button btn" onClick={toggleCreateGame}>New game</h2>
                     <div className={"difficulty" + (createGameStatus.hidden ? " difficulty-hidden": "")}>
                         <p>Character Popularity:</p>
-                        <select className="select-style" onChange={this.changeCharDifficulty} value={createGameStatus.CharDifficulty}>
+                        <select className="select-style" ref="charDiff" >
                             <option value="0">Easy</option>
                             <option value="1">Normal</option>
                             <option value="2">Hard</option>
                         </select>
-                        <p>Anime popularity:</p>
-                        <select className="select-style" onChange={this.changeAnimeDifficulty} value={createGameStatus.AnimeDifficulty}>
+                        <p>Anime Popularity:</p>
+                        <select className="select-style" ref="animeDiff" >
                             <option value="0">Easy</option>
                             <option value="1">Normal</option>
                             <option value="2">Hard</option>
                         </select>
+                        <p>Use MyAnimeList:</p>
+                        <input className="mal-username" ref="userName"  placeholder="MyAnimeList username"/>
                         <div className="btn create-game" onClick={this.createGame.bind(this)}>Create Game</div>
                     </div>
                     {completeNode}

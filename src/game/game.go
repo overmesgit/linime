@@ -29,11 +29,22 @@ type Game struct {
 	randomPos        []int
 	currentRandomPos int
 	Date             time.Time `bson:"date"`
+	CharDiff         int
+	AnimeDiff        int
+	UserName         string
 }
 
 func NewGame() *Game {
 	gameScore := GameScore{make([]CompleteTitle, 0), make([]int, 0), -1}
-	return &Game{RandString(8), make([]GameCharPosition, 0), 9, 9, 3, 1, gameScore, nil, nil, 0, time.Now()}
+	return &Game{RandString(8), make([]GameCharPosition, 0), 9, 9, 3, 1, gameScore, nil, nil, 0, time.Now(), 0, 0, ""}
+}
+
+func NewGameWithParam(param CreateGameParam) *Game {
+	game := NewGame()
+	game.CharDiff = param.CharDiff
+	game.AnimeDiff = param.AnimeDiff
+	game.UserName = param.UserName
+	return game
 }
 
 type MoveResponse struct {
@@ -252,7 +263,7 @@ func (g *Game) AddRandomCharacterByGroup(GroupId, CharCount int) []GameCharPosit
 	if err != nil {
 		panic(err)
 	}
-	randomCharacters := GetRandomCharactersByFavorites(characters, CharCount)
+	randomCharacters := GetRandomCharactersByFavorites(characters, CharCount, g.CharDiff)
 	return g.AddCharactersToRandomPos(randomCharacters, titleId)
 
 }
@@ -270,23 +281,11 @@ func GetUniqueValues(values []int) []int {
 
 }
 
-func CreateNewGame() *Game {
-	titlesCount, charCount := 4, 3
-	game := NewGame()
+func CreateNewGame(gameParam CreateGameParam) *Game {
+	game := NewGameWithParam(gameParam)
 
-	var groupResult []int
-	anime := mongoDB.C("anime")
-	notEmpty := bson.M{"$not": bson.M{"$size": 0}}
-	err := anime.Find(bson.M{"characters": notEmpty}).Distinct("group", &groupResult)
-	if err != nil {
-		panic(err)
-	}
-
-	uniqueGroups := GetUniqueValues(groupResult)
-	randomIndexes := rand.Perm(len(uniqueGroups))
-	for i := 0; i < titlesCount; i++ {
-		groupId := uniqueGroups[randomIndexes[i]]
-		game.AddRandomCharacterByGroup(groupId, charCount)
+	for i := 0; i < 3; i++ {
+		game.AddNewChars()
 	}
 
 	return game

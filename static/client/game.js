@@ -68,13 +68,13 @@ class Game extends React.Component {
         var fieldCell = [];
         for (var row = 0; row < game.Width; row++) {
             for (var col = 0; col < game.Height; col++) {
-                fieldCell.push(<FieldCell key={'' + row + col} row={row} col={col}
+                fieldCell.push(<FieldCell key={'fields' + row + col} row={row} col={col}
                                           game={game} moveSelected={moveSelected}>
                 </FieldCell>)
             }
         }
-        var characters = game.Field.map((charData) => {
-            return <Character key={charData.Img.slice(-8, -4) + charData.Col + charData.Row} char={charData}
+        var characters = game.Field.map((charData, i) => {
+            return <Character key={'char' + i} char={charData}
                               selectChar={selectChar} gameTurn={game.Turn} />
         });
 

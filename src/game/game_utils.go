@@ -54,7 +54,7 @@ func (g *Game) getExistedChar(required bool) GameCharPosition {
 			panic(err)
 		}
 		if len(characters) > 0 {
-			randomCharacters := GetRandomCharactersByFavorites(characters, 1)
+			randomCharacters := GetRandomCharactersByFavorites(characters, 1, g.CharDiff)
 			return g.AddCharacterToRandomPos(randomCharacters[0], selectedTitleId)
 		}
 	}
@@ -70,7 +70,8 @@ func (g *Game) getNewGroupChar() GameCharPosition {
 	anime := mongoDB.C("anime")
 	notEmpty := bson.M{"$not": bson.M{"$size": 0}}
 	var currentGroups []int
-	err := anime.Find(bson.M{"characters": notEmpty, "_id.i": bson.M{"$in": currentTitles}}).Distinct("group", &currentGroups)
+	animeLimit := 500 + 500*g.AnimeDiff*g.AnimeDiff
+	err := anime.Find(bson.M{"characters": notEmpty, "_id.i": bson.M{"$in": currentTitles}}).Sort("-members").Limit(animeLimit).Distinct("group", &currentGroups)
 	if err != nil {
 		panic(err)
 	}
@@ -172,21 +173,33 @@ func (a AnimeGroupMembersSlice) GetRandomByMembers() AnimeGroupMembers {
 	return a[len(a)-1]
 }
 
-func GetRandomCharactersByFavorites(c parser.CharacterSlice, n int) parser.CharacterSlice {
+func GetRandomCharactersByFavorites(c parser.CharacterSlice, n int, charDiff int) parser.CharacterSlice {
 	sort.Sort(sort.Reverse(c))
 	fullFavoritesSum := 0
 	for i := range c {
-		//WARNING: not line function
-		c[i].Favorites = int(math.Sqrt(float64(c[i].Favorites)))
-		if c[i].Favorites == 0 {
-			c[i].Favorites = 1
+		switch charDiff {
+		case 0:
+		case 1:
+			c[i].Favorites = int(math.Sqrt(float64(c[i].Favorites)))
+			if c[i].Favorites == 0 {
+				c[i].Favorites = 1
+			}
+		case 2:
+			c[i].Favorites = int(math.Sqrt(float64(c[i].Favorites)))
+			if c[i].Favorites == 0 {
+				c[i].Favorites = 3
+			}
 		}
 		fullFavoritesSum += c[i].Favorites
 	}
 
 	resultIndexes := make(map[int]bool, 0)
 	for i := 0; i < n; i++ {
-		randomInt := rand.Intn(fullFavoritesSum)
+		randomInt := 0
+		if fullFavoritesSum > 0 {
+			randomInt = rand.Intn(fullFavoritesSum)
+		}
+
 		currentSum := 0
 		for charIndex, char := range c {
 			currentSum += char.Favorites

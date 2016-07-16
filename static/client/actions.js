@@ -12,6 +12,8 @@ window.UPDATE_GAME_SCORE = 'UPDATE_GAME_SCORE';
 window.COMPLETE_GAME = 'COMPLETE_GAME';
 window.ADD_MY_GAME = 'ADD_MY_GAME';
 window.TOGGLE_CREATE_GAME_MENU = 'TOGGLE_CREATE_GAME_MENU';
+window.CHANGE_ANIME_DIFFICULTY = 'CHANGE_ANIME_DIFFICULTY';
+window.CHANGE_CHAR_DIFFICULTY = 'CHANGE_CHAR_DIFFICULTY';
 
 window.toggleCreateGame = function () {
     return {
@@ -53,7 +55,7 @@ var groupDispatchChar = (dispatch, array, type) => {
 };
 
 var removeAndAddNewChars = (dispatch, data) => {
-    const { Completed, NewChars, CompletedNew, NextTurn, GameScore } = data;
+    const {Completed, NewChars, CompletedNew, NextTurn, GameScore} = data;
     moveLock = false;
     var timeOutAdd = 0;
     if (Completed.length > 0) {
@@ -146,34 +148,40 @@ window.selectChar = function (char) {
     }
 };
 
-window.createGame = function () {
+window.createGame = function (charDiff, animeDiff, userName) {
     return (dispatch) => {
         dispatch({
             type: GET_GAME_REQUEST
         });
-        $.post('/game', (data) => {
-            window.location.hash = '#game/' + data.Id;
-            if(supports_html5_storage()) {
-                if(!localStorage.games) {
-                    localStorage.games = data.Id;
-                } else {
-                    localStorage.games = localStorage.games + ',' + data.Id;
+        $.post({
+            'url': '/game',
+            'data': JSON.stringify({CharDiff: charDiff, AnimeDiff: animeDiff, UserName: userName}),
+            contentType: 'application/json'
+        })
+            .done((data) => {
+                window.location.hash = '#game/' + data.Id;
+                if (supports_html5_storage()) {
+                    if (!localStorage.games) {
+                        localStorage.games = data.Id;
+                    } else {
+                        localStorage.games = localStorage.games + ',' + data.Id;
+                    }
                 }
-            }
-            dispatch({
-                type: ADD_MY_GAME,
-                payload: data.Id
+                dispatch({
+                    type: ADD_MY_GAME,
+                    payload: data.Id
+                });
+                dispatch({
+                    type: GET_GAME_SUCCESS,
+                    payload: data
+                })
+            })
+            .fail((xhr) => {
+                dispatch({
+                    type: GET_GAME_ERROR,
+                    payload: 'Error create new game ' + xhr.responseText
+                })
             });
-            dispatch({
-                type: GET_GAME_SUCCESS,
-                payload: data
-            })
-        }).fail((xhr) => {
-            dispatch({
-                type: GET_GAME_ERROR,
-                payload: 'Error create new game ' + xhr.responseText
-            })
-        });
     }
 };
 
