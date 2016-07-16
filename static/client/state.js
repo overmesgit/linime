@@ -36,7 +36,7 @@ function viewState(state = initialState, action) {
             state.myGames.unshift(action.payload);
             return {...state};
         case GET_GAME_SUCCESS:
-            return {...state, game: action.payload};
+            return {...state, game: action.payload, createGameStatus: {...state.createGame, hidden: true}};
         case GET_GAME_ERROR:
             return {...state, message: action.payload};
         case CHAR_SELECTED:

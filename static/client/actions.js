@@ -77,7 +77,7 @@ var removeAndAddNewChars = (dispatch, data) => {
                 payload: NewChars[j]
             });
         }
-        //start new character animation
+        // start new character animation
         setTimeout(() => {
             dispatch({
                 type: CHANGE_GAME_TURN,
