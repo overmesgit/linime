@@ -22,7 +22,7 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", 405)
 		return
 	}
-	templateName := "home.html"
+	templateName := "prod.html"
 	//if strings.Contains(r.URL.Path, "/test") {
 	//	templateName = "test.html"
 	//}
