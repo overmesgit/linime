@@ -22,7 +22,7 @@ class AppClass extends React.Component {
             <Menu createGame={createGame} completeGame={completeGame} getGame={getGame} game={game} myGames={myGames}
             toggleCreateGame={toggleCreateGame} createGameStatus={createGameStatus} />
             <Game game={game} selectChar={selectChar} moveSelected={moveSelected} />
-            <GameScore completedTitles={game.Score.CompletedTitles} currentTurn={game.Turn} />
+            <GameScore completedTitles={game.Score.CompletedTitles} currentTurn={game.Turn} game={game} />
             {error != "" ? <Error error={error} />: ""}
         </div>
     }

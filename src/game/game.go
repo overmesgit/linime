@@ -30,6 +30,7 @@ type Game struct {
 	randomPos        []int
 	currentRandomPos int
 	Date             time.Time `bson:"date"`
+	EndDate          time.Time `bson:"enddate"`
 	CharDiff         int
 	AnimeDiff        int
 	UserName         string
@@ -38,7 +39,7 @@ type Game struct {
 
 func NewGame() *Game {
 	gameScore := GameScore{make([]CompleteTitle, 0), make([]int, 0), -1}
-	return &Game{RandString(8), make([]GameCharPosition, 0), 9, 9, 3, 1, gameScore, nil, nil, 0, time.Now(), 0, 0, "", make([]int, 0)}
+	return &Game{RandString(8), make([]GameCharPosition, 0), 9, 9, 3, 1, gameScore, nil, nil, 0, time.Now(), time.Now(), 0, 0, "", make([]int, 0)}
 }
 
 func NewGameWithParam(param CreateGameParam) *Game {

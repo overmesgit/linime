@@ -39,16 +39,31 @@ class GameScore extends React.Component {
         return totalScore;
     }
     render() {
-        const {completedTitles, currentTurn} = this.props;
+        const {completedTitles, currentTurn, game} = this.props;
         var titlesNodes = completedTitles.map((title, i) => {
             return <CompleteTitle key={'' + title.Id + i} title={title} />
         });
         //last titles in the end of the list
         titlesNodes.reverse();
+        var startDate = null;
+        if (game.Date) {
+            startDate = new Date(game.Date).toLocaleString()
+        }
+        var gameTime = null;
+        if (game.Score.TotalScore >= 0 && game.Date != game.EndDate) {
+            gameTime = Math.round((new Date(game.EndDate) - new Date(game.Date))/1000/60)
+        }
         return <div id="score" className="window">
             <p>Turn: {currentTurn}</p>
             <p>Total score: {this.getTotalScore()}</p>
+            <div className="difficulty-stat">
+                <p>Start date: {startDate}</p>
+                {gameTime ? <p>Game time: {gameTime} min</p>:""}
+                {game.UserName != "" ? <p>MAL User: {game.UserName}</p>: ""}
+                <p>Difficulty: {game.CharDiff+1}C {game.AnimeDiff+1}A</p>
+            </div>
             {titlesNodes}
+
         </div>
     }
 }

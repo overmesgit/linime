@@ -1,4 +1,8 @@
 class Menu extends React.Component {
+    componentDidMount() {
+        $('.my-games-list').perfectScrollbar();
+    }
+
     createGame(e) {
         this.props.createGame(+this.refs.charDiff.value, +this.refs.animeDiff.value, this.refs.userName.value);
     }

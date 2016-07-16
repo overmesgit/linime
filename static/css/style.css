@@ -29,11 +29,13 @@ p {
 
 .my-games-list {
     margin-top: 50px;
-    max-width: 300px;
+    max-height: 200px;
+    overflow: hidden;
+    position: relative;
 }
 
 .my-games-list > p {
-    margin: 5px;
+    margin: 5px 10px 5px 5px;
 }
 
 .game-control {
@@ -203,6 +205,11 @@ p {
 #score .ps-scrollbar-y-rail {
     margin-top: 10px;
     margin-bottom: 10px;
+}
+
+.difficulty-stat {
+    padding-left: 8px;
+    font-size: 18px;
 }
 
 .difficulty {

@@ -3,6 +3,7 @@ package game
 import (
 	"gopkg.in/mgo.v2/bson"
 	"mal/parser"
+	"time"
 )
 
 type CompletedChar struct {
@@ -113,4 +114,5 @@ func (g *Game) CompleteCountTotalScore() {
 		}
 	}
 	g.Score.TotalScore = totalScore
+	g.EndDate = time.Now()
 }

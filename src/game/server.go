@@ -90,7 +90,12 @@ func serveGame(w http.ResponseWriter, r *http.Request) {
 				w.Write(jsonResp)
 			case "complete":
 				game.CompleteCountTotalScore()
-				game.Update()
+				err = game.Update()
+				if err != nil {
+					w.WriteHeader(http.StatusInternalServerError)
+					w.Write(Message{err.Error()}.AsJson())
+					return
+				}
 				w.Write(Message{"ok"}.AsJson())
 			}
 		}
@@ -108,7 +113,12 @@ func serveGame(w http.ResponseWriter, r *http.Request) {
 				w.Write(Message{err.Error()}.AsJson())
 				return
 			}
-			game.Save()
+			err = game.Save()
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write(Message{err.Error()}.AsJson())
+				return
+			}
 			body, err := game.AsJson()
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
