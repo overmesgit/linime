@@ -1,3 +1,12 @@
+class Error extends React.Component {
+    render() {
+        const {error} = this.props;
+        return <div className="error">
+            {error}
+        </div>
+    }
+}
+
 class AppClass extends React.Component {
     componentWillMount() {
         if (this.props.app.fetchingGame != '') {
@@ -7,13 +16,14 @@ class AppClass extends React.Component {
     }
 
     render() {
-        const {game, messages, myGames, createGameStatus} = this.props.app;
+        const {game, error, myGames, createGameStatus} = this.props.app;
         const {createGame, completeGame, selectChar, moveSelected, getGame, toggleCreateGame} = this.props.appActions;
         return <div className="content">
             <Menu createGame={createGame} completeGame={completeGame} getGame={getGame} game={game} myGames={myGames}
             toggleCreateGame={toggleCreateGame} createGameStatus={createGameStatus} />
             <Game game={game} selectChar={selectChar} moveSelected={moveSelected} />
             <GameScore completedTitles={game.Score.CompletedTitles} currentTurn={game.Turn} />
+            {error != "" ? <Error error={error} />: ""}
         </div>
     }
 }

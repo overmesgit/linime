@@ -255,5 +255,17 @@ p {
     outline: none;
 }
 
+.error {
+    position: absolute;
+    right: 30px;
+    top: 13px;
+    width: 300px;
+    font-size: 24px;
+    padding: 10px;
+    background-color: #f77e7e;
+    border-radius: 15px;
+    border: solid 3px;
+}
+
 
 

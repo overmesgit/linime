@@ -8,7 +8,8 @@ import (
 	"sort"
 )
 
-func (g *Game) getExistedChar(required bool) GameCharPosition {
+func (g *Game) getExistedChar(required bool) (GameCharPosition, error) {
+	var res GameCharPosition
 	titleMap := make(map[int][]GameCharPosition, 0)
 	for _, v := range g.Field {
 		if _, ok := titleMap[v.TitleId]; !ok {
@@ -43,7 +44,7 @@ func (g *Game) getExistedChar(required bool) GameCharPosition {
 		var titleCharacters []int
 		err := anime.Find(bson.M{"characters": notEmpty, "_id.i": selectedTitleId}).Distinct("characters", &titleCharacters)
 		if err != nil {
-			panic(err)
+			return res, err
 		}
 		var characters parser.CharacterSlice
 		err = char.Find(bson.M{"$and": []interface{}{
@@ -51,17 +52,18 @@ func (g *Game) getExistedChar(required bool) GameCharPosition {
 			bson.M{"_id": bson.M{"$nin": existedCharacters}},
 		}}).All(&characters)
 		if err != nil {
-			panic(err)
+			return res, err
 		}
 		if len(characters) > 0 {
 			randomCharacters := GetRandomCharactersByFavorites(characters, 1, g.CharDiff)
-			return g.AddCharacterToRandomPos(randomCharacters[0], selectedTitleId)
+			return g.AddCharacterToRandomPos(randomCharacters[0], selectedTitleId), nil
 		}
 	}
 	return g.getNewGroupChar()
 }
 
-func (g *Game) getNewGroupChar() GameCharPosition {
+func (g *Game) getNewGroupChar() (GameCharPosition, error) {
+	var res GameCharPosition
 	currentTitles := make([]int, 0)
 	for _, v := range g.Field {
 		currentTitles = append(currentTitles, v.TitleId)
@@ -72,27 +74,31 @@ func (g *Game) getNewGroupChar() GameCharPosition {
 	var currentGroups []int
 	err := anime.Find(bson.M{"characters": notEmpty, "_id.i": bson.M{"$in": currentTitles}}).Distinct("group", &currentGroups)
 	if err != nil {
-		panic(err)
+		return res, err
 	}
 
 	var newGroups []int
 	if g.UserName != "" {
 		err = anime.Find(bson.M{"characters": notEmpty, "group": bson.M{"$nin": currentGroups}, "_id.i": bson.M{"$in": g.UserItems}}).Distinct("group", &newGroups)
 		if err != nil {
-			panic(err)
+			return res, err
 		}
 	}
 	if len(newGroups) == 0 {
 		animeLimit := 500 + 500*g.AnimeDiff*g.AnimeDiff
 		err = anime.Find(bson.M{"characters": notEmpty, "group": bson.M{"$nin": currentGroups}}).Sort("-members").Limit(animeLimit).Distinct("group", &newGroups)
 		if err != nil {
-			panic(err)
+			return res, err
 		}
 	}
 
 	uniquerGroups := GetUniqueValues(newGroups)
 	targetGroup := uniquerGroups[rand.Intn(len(uniquerGroups))]
-	return g.AddRandomCharacterByGroup(targetGroup, 1)[0]
+	val, err := g.AddRandomCharacterByGroup(targetGroup, 1)
+	if err != nil {
+		return res, err
+	}
+	return val[0], nil
 }
 
 func checkLeft(pos map[int]map[int]GameCharPosition, char GameCharPosition, prevResult []GameCharPosition) []GameCharPosition {

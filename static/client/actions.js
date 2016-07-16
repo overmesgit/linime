@@ -1,6 +1,6 @@
 window.GET_GAME_REQUEST = 'GET_GAME_REQUEST';
 window.GET_GAME_SUCCESS = 'GET_GAME_SUCCESS';
-window.GET_GAME_ERROR = 'GET_GAME_ERROR';
+window.ERROR = 'ERROR';
 window.CHAR_SELECTED = 'CHAR_SELECTED';
 window.MOVE_SELECTED = 'MOVE_SELECTED';
 window.MOVE_CHARACTER = 'MOVE_CHARACTER';
@@ -21,6 +21,15 @@ window.toggleCreateGame = function () {
     }
 };
 
+var removeErrorAfter = function(timeOut, dispatch) {
+    setTimeout(() => {
+        dispatch({
+                type: ERROR,
+                payload: ''
+            })
+    }, timeOut);
+};
+
 window.completeGame = function (gameId) {
     return (dispatch) => {
         $.ajax({
@@ -33,7 +42,11 @@ window.completeGame = function (gameId) {
                 type: COMPLETE_GAME
             });
         }).fail((xhr) => {
-            console.log('Error move char ' + xhr.responseText);
+            dispatch({
+                type: ERROR,
+                payload: 'Complete game error: ' + (xhr.responseJSON ? xhr.responseJSON['Message'] : '')
+            });
+            removeErrorAfter(5000, dispatch);
         });
     }
 };
@@ -133,7 +146,11 @@ window.moveSelected = function (gameId, char, Row, Col) {
                 contentType: 'application/json',
                 dataType: 'json'
             }).done(moveCallbackFactory(dispatch, char)).fail((xhr) => {
-                console.log('Error move char ' + xhr.responseText);
+                dispatch({
+                    type: ERROR,
+                    payload: 'Make turn error: ' + (xhr.responseJSON ? xhr.responseJSON['Message'] : '')
+                });
+                removeErrorAfter(5000, dispatch);
                 moveLock = false;
             });
         }
@@ -178,9 +195,10 @@ window.createGame = function (charDiff, animeDiff, userName) {
             })
             .fail((xhr) => {
                 dispatch({
-                    type: GET_GAME_ERROR,
-                    payload: 'Error create new game ' + xhr.responseText
-                })
+                    type: ERROR,
+                    payload: 'Create new game error: ' + (xhr.responseJSON ? xhr.responseJSON['Message'] : '')
+                });
+                removeErrorAfter(5000, dispatch);
             });
     }
 };
@@ -198,9 +216,10 @@ window.getGame = function (gameId) {
             })
         }).fail((xhr) => {
             dispatch({
-                type: GET_GAME_ERROR,
-                payload: xhr.responseJSON ? xhr.responseJSON['Message'] : ''
-            })
+                type: ERROR,
+                payload: 'Get game error: ' + (xhr.responseJSON ? xhr.responseJSON['Message'] : '')
+            });
+            removeErrorAfter(5000, dispatch);
         });
     }
 };

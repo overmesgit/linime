@@ -18,7 +18,7 @@ if(supports_html5_storage()) {
 
 const initialState = {
     game: {Field: [], Score: {CompletedTitles: [], TotalScore: 0}, Turn: 0, AnimeDifficulty: 0, CharDifficulty: 0, MalUser: ''},
-    messages: [],
+    error: "",
     fetchingGame: gameId,
     myGames: myGames,
     createGameStatus: {hidden: true}
@@ -37,8 +37,8 @@ function viewState(state = initialState, action) {
             return {...state};
         case GET_GAME_SUCCESS:
             return {...state, game: action.payload, createGameStatus: {...state.createGame, hidden: true}};
-        case GET_GAME_ERROR:
-            return {...state, message: action.payload};
+        case ERROR:
+            return {...state, error: action.payload};
         case CHAR_SELECTED:
             var newField = state.game.Field.map((char) => {
                 if (char.selected) {

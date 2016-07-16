@@ -69,10 +69,16 @@ func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, erro
 	} else {
 		completed, notInLine := g.CheckCompleted()
 
-		newChars := g.AddNewChars()
+		newChars, err := g.AddNewChars()
+		if err != nil {
+			return res, err
+		}
 		completedNew, notInLineNew := g.CheckCompleted()
 
-		titleScoreUpdate := g.UpdateGameScore(append(completed, completedNew...), append(notInLine, notInLineNew...))
+		titleScoreUpdate, err := g.UpdateGameScore(append(completed, completedNew...), append(notInLine, notInLineNew...))
+		if err != nil {
+			return res, err
+		}
 		if g.Score.TotalScore >= 0 {
 			g.UserItems = make([]int, 0)
 		}
@@ -90,24 +96,28 @@ func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, erro
 	}
 }
 
-func (g *Game) AddNewChars() []GameCharPosition {
+func (g *Game) AddNewChars() ([]GameCharPosition, error) {
 	result := make([]GameCharPosition, 0)
 	for i := 0; i < 3; i++ {
 		funcRandom := rand.Intn(100)
 		var newChar GameCharPosition
+		var err error
 		switch {
 		case len(g.Field) >= g.Width*g.Height:
 			break
 		case funcRandom < 50:
-			newChar = g.getExistedChar(true)
+			newChar, err = g.getExistedChar(true)
 		case funcRandom < 80:
-			newChar = g.getExistedChar(false)
+			newChar, err = g.getExistedChar(false)
 		case funcRandom < 100:
-			newChar = g.getNewGroupChar()
+			newChar, err = g.getNewGroupChar()
+		}
+		if err != nil {
+			return result, err
 		}
 		result = append(result, newChar)
 	}
-	return result
+	return result, nil
 }
 
 func (g *Game) RemoveChar(toDelete GameCharPosition) {
@@ -205,26 +215,16 @@ func (g *Game) AddCharactersToRandomPos(characters parser.CharacterSlice, titleI
 	return result
 }
 
-func (g *Game) Save() {
-	err := mongoDB.C("game").Insert(g)
-	if err != nil {
-		panic(err)
-	}
+func (g *Game) Save() error {
+	return mongoDB.C("game").Insert(g)
 }
 
-func (g *Game) Update() {
-	err := mongoDB.C("game").UpdateId(g.Id, g)
-	if err != nil {
-		panic(err)
-	}
+func (g *Game) Update() error {
+	return mongoDB.C("game").UpdateId(g.Id, g)
 }
 
-func (g *Game) AsJson() []byte {
-	data, err := json.Marshal(g)
-	if err != nil {
-		panic(err)
-	}
-	return data
+func (g *Game) AsJson() ([]byte, error) {
+	return json.Marshal(g)
 }
 
 func GetGame(uuid string) (*Game, error) {
@@ -248,7 +248,8 @@ type AnimeGroupMembers struct {
 	Characters []int  `bson:"characters"`
 }
 
-func (g *Game) AddRandomCharacterByGroup(GroupId, CharCount int) []GameCharPosition {
+func (g *Game) AddRandomCharacterByGroup(GroupId, CharCount int) ([]GameCharPosition, error) {
+	var res []GameCharPosition
 	anime := mongoDB.C("anime")
 	char := mongoDB.C("char")
 	notEmpty := bson.M{"$not": bson.M{"$size": 0}}
@@ -257,7 +258,7 @@ func (g *Game) AddRandomCharacterByGroup(GroupId, CharCount int) []GameCharPosit
 	var animeMembers AnimeGroupMembersSlice
 	err := anime.Find(bson.M{"characters": notEmpty, "group": GroupId}).All(&animeMembers)
 	if err != nil {
-		panic(err)
+		return res, err
 	}
 	randomTitle := animeMembers.GetRandomByMembers()
 	titleId := int(randomTitle.Id["i"].(float64))
@@ -266,10 +267,10 @@ func (g *Game) AddRandomCharacterByGroup(GroupId, CharCount int) []GameCharPosit
 	var characters parser.CharacterSlice
 	err = char.Find(bson.M{"_id": bson.M{"$in": randomTitle.Characters}}).All(&characters)
 	if err != nil {
-		panic(err)
+		return res, err
 	}
 	randomCharacters := GetRandomCharactersByFavorites(characters, CharCount, g.CharDiff)
-	return g.AddCharactersToRandomPos(randomCharacters, titleId)
+	return g.AddCharactersToRandomPos(randomCharacters, titleId), nil
 
 }
 
@@ -286,12 +287,12 @@ func GetUniqueValues(values []int) []int {
 
 }
 
-func CreateNewGame(gameParam CreateGameParam) *Game {
+func CreateNewGame(gameParam CreateGameParam) (*Game, error) {
 	game := NewGameWithParam(gameParam)
 	if gameParam.UserName != "" {
 		userList, err := malpar.GetUserScoresByName(game.UserName, 2)
 		if err != nil {
-			panic(err)
+			return game, err
 		}
 		for _, item := range userList.AnimeList {
 			// 1 watching, 2 completed, 3 on hold, 4 drop
@@ -306,5 +307,5 @@ func CreateNewGame(gameParam CreateGameParam) *Game {
 		game.AddNewChars()
 	}
 
-	return game
+	return game, nil
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"gopkg.in/mgo.v2"
 	"html/template"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -57,32 +56,38 @@ func serveGame(w http.ResponseWriter, r *http.Request) {
 		}
 		switch r.Method {
 		case "GET":
-			w.Write(game.AsJson())
-		case "PUT":
-			body, err := ioutil.ReadAll(r.Body)
+			body, err := game.AsJson()
 			if err != nil {
-				panic(err)
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write(Message{err.Error()}.AsJson())
+			} else {
+				w.Write(body)
 			}
-			defer r.Body.Close()
+		case "PUT":
 			action := getParams.Get("action")
 			switch action {
 			case "move":
 				var message MoveMessage
-				err := json.Unmarshal(body, &message)
+				err := json.NewDecoder(r.Body).Decode(&message)
+				defer r.Body.Close()
 				if err != nil {
-					panic(err)
+					w.WriteHeader(http.StatusInternalServerError)
+					w.Write(Message{err.Error()}.AsJson())
+					return
 				}
 				resp, err := game.MakeTurn(message.Char, message.Row, message.Col)
 				if err != nil {
-					w.WriteHeader(http.StatusNotFound)
+					w.WriteHeader(http.StatusInternalServerError)
 					w.Write(Message{err.Error()}.AsJson())
-				} else {
-					jsonResp, err := json.Marshal(resp)
-					if err != nil {
-						panic(err)
-					}
-					w.Write(jsonResp)
+					return
 				}
+				jsonResp, err := json.Marshal(resp)
+				if err != nil {
+					w.WriteHeader(http.StatusInternalServerError)
+					w.Write(Message{err.Error()}.AsJson())
+					return
+				}
+				w.Write(jsonResp)
 			case "complete":
 				game.CompleteCountTotalScore()
 				game.Update()
@@ -92,13 +97,25 @@ func serveGame(w http.ResponseWriter, r *http.Request) {
 	} else {
 		var gameParam CreateGameParam
 		err := json.NewDecoder(r.Body).Decode(&gameParam)
+		defer r.Body.Close()
 		if err != nil {
 			panic(err)
 		}
 		if r.Method == "POST" {
-			game := CreateNewGame(gameParam)
+			game, err := CreateNewGame(gameParam)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write(Message{err.Error()}.AsJson())
+				return
+			}
 			game.Save()
-			w.Write(game.AsJson())
+			body, err := game.AsJson()
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write(Message{err.Error()}.AsJson())
+				return
+			}
+			w.Write(body)
 		}
 	}
 }
