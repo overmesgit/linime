@@ -253,11 +253,11 @@ func (g *Game) AddRandomCharacterByGroup(GroupId, CharCount int) ([]GameCharPosi
 	var res []GameCharPosition
 	anime := mongoDB.C("anime")
 	char := mongoDB.C("char")
-	notEmpty := bson.M{"$not": bson.M{"$size": 0}}
+	exists := bson.M{"$exists": true}
 
 	//get random anime from group by members
 	var animeMembers AnimeGroupMembersSlice
-	err := anime.Find(bson.M{"characters": notEmpty, "group": GroupId}).All(&animeMembers)
+	err := anime.Find(bson.M{"characters.2": exists, "group": GroupId}).All(&animeMembers)
 	if err != nil {
 		return res, err
 	}
@@ -305,7 +305,10 @@ func CreateNewGame(gameParam CreateGameParam) (*Game, error) {
 	}
 
 	for i := 0; i < 3; i++ {
-		game.AddNewChars()
+		_, err := game.AddNewChars()
+		if err != nil {
+			return game, err
+		}
 	}
 
 	return game, nil

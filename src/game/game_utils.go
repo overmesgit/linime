@@ -70,23 +70,23 @@ func (g *Game) getNewGroupChar() (GameCharPosition, error) {
 	}
 
 	anime := mongoDB.C("anime")
-	notEmpty := bson.M{"$not": bson.M{"$size": 0}}
+	exists := bson.M{"$exists": true}
 	var currentGroups []int
-	err := anime.Find(bson.M{"characters": notEmpty, "_id.i": bson.M{"$in": currentTitles}}).Distinct("group", &currentGroups)
+	err := anime.Find(bson.M{"characters.2": exists, "_id.i": bson.M{"$in": currentTitles}}).Distinct("group", &currentGroups)
 	if err != nil {
 		return res, err
 	}
 
 	var newGroups []int
 	if g.UserName != "" {
-		err = anime.Find(bson.M{"characters": notEmpty, "group": bson.M{"$nin": currentGroups}, "_id.i": bson.M{"$in": g.UserItems}}).Distinct("group", &newGroups)
+		err = anime.Find(bson.M{"characters.2": exists, "group": bson.M{"$nin": currentGroups}, "_id.i": bson.M{"$in": g.UserItems}}).Distinct("group", &newGroups)
 		if err != nil {
 			return res, err
 		}
 	}
 	if len(newGroups) == 0 {
 		animeLimit := 500 + 500*g.AnimeDiff*g.AnimeDiff
-		err = anime.Find(bson.M{"characters": notEmpty, "group": bson.M{"$nin": currentGroups}}).Sort("-members").Limit(animeLimit).Distinct("group", &newGroups)
+		err = anime.Find(bson.M{"characters.2": exists, "group": bson.M{"$nin": currentGroups}}).Sort("-members").Limit(animeLimit).Distinct("group", &newGroups)
 		if err != nil {
 			return res, err
 		}
