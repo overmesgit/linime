@@ -17,7 +17,7 @@ if(supports_html5_storage()) {
 }
 
 const initialState = {
-    game: {Field: [], Score: {CompletedTitles: [], TotalScore: 0}, Turn: 0, AnimeDifficulty: 0, CharDifficulty: 0, MalUser: ''},
+    game: {Field: [], Score: {CompletedTitles: [], TotalScore: 0}, Turn: 0, AnimeDiff: 0, CharDiff: 0, UserName: ''},
     error: "",
     fetchingGame: gameId,
     myGames: myGames,

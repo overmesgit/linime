@@ -262,7 +262,13 @@ func (g *Game) AddRandomCharacterByGroup(GroupId, CharCount int) ([]GameCharPosi
 		return res, err
 	}
 	randomTitle := animeMembers.GetRandomByMembers()
-	titleId := int(randomTitle.Id["i"].(float64))
+	titleId := 0
+	switch randomTitle.Id["i"].(type) {
+	case int:
+		titleId = randomTitle.Id["i"].(int)
+	case float64:
+		titleId = int(randomTitle.Id["i"].(float64))
+	}
 
 	//get random character by favorites
 	var characters parser.CharacterSlice

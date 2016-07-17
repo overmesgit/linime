@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"mal/parser"
 )
 
 func main() {
@@ -14,11 +15,15 @@ func main() {
 	defer mongoSession.Close()
 	mongoDB := mongoSession.DB("mal")
 	anime := mongoDB.C("anime")
-	notEmpty := bson.M{"$not": bson.M{"$size": 0}}
+	exists := bson.M{"$exists": true}
+	var titles []parser.Title
 	var currentGroups []int
-	err = anime.Find(bson.M{"characters": notEmpty, "_id.i": bson.M{"$in": []int{5300}}}).Distinct("group", &currentGroups)
+	animeLimit := 100
+	err = anime.Find(bson.M{"characters.2": exists, "group": bson.M{"$nin": currentGroups}}).Sort("-members").Limit(animeLimit).All(&titles)
+
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(currentGroups)
+	fmt.Println(titles)
+	fmt.Println(len(titles))
 }

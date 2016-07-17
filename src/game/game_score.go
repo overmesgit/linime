@@ -59,12 +59,12 @@ func (g *Game) GetCompletedTitles(completedChars []GameCharPosition, notInLine [
 	}
 
 	anime := mongoDB.C("anime")
-	notEmpty := bson.M{"$not": bson.M{"$size": 0}}
+	exists := bson.M{"$exists": true}
 	completedTitlesMap := make(map[int]*CompleteTitle, 0)
 	for _, char := range completedChars {
 		if _, ok := completedTitlesMap[char.TitleId]; !ok {
 			var titleData AnimeGroupMembers
-			err := anime.Find(bson.M{"characters": notEmpty, "_id.i": char.TitleId}).One(&titleData)
+			err := anime.Find(bson.M{"characters.0": exists, "_id.i": char.TitleId}).One(&titleData)
 			if err != nil {
 				return res, err
 			}

@@ -174,8 +174,8 @@ p {
 }
 
 .stat-char-score {
-    font-size: 43px;
-    width: 50px;
+    font-size: 40px;
+    width: 60px;
     vertical-align: top;
     text-align: center;
     display: inline-block;
@@ -220,7 +220,7 @@ p {
     padding: 0 10px 0 10px;
     overflow: hidden;
     transition: height 0.5s;
-    height: 190px;
+    height: 200px;
 }
 
 .difficulty-hidden {

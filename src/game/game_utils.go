@@ -77,7 +77,7 @@ func (g *Game) getNewGroupChar() (GameCharPosition, error) {
 		return res, err
 	}
 
-	var newGroups []int
+	newGroups := make([]int, 0)
 	if g.UserName != "" {
 		err = anime.Find(bson.M{"characters.2": exists, "group": bson.M{"$nin": currentGroups}, "_id.i": bson.M{"$in": g.UserItems}}).Distinct("group", &newGroups)
 		if err != nil {
@@ -86,9 +86,15 @@ func (g *Game) getNewGroupChar() (GameCharPosition, error) {
 	}
 	if len(newGroups) == 0 {
 		animeLimit := 500 + 500*g.AnimeDiff*g.AnimeDiff
-		err = anime.Find(bson.M{"characters.2": exists, "group": bson.M{"$nin": currentGroups}}).Sort("-members").Limit(animeLimit).Distinct("group", &newGroups)
+		scoreFilter := 8 - g.AnimeDiff
+		var titles []parser.Title
+		err = anime.Find(bson.M{"characters.2": exists, "group": bson.M{"$nin": currentGroups},
+			"members_score": bson.M{"$gte": scoreFilter}}).Sort("-members").Limit(animeLimit).All(&titles)
 		if err != nil {
 			return res, err
+		}
+		for _, title := range titles {
+			newGroups = append(newGroups, title.Group)
 		}
 	}
 
@@ -225,7 +231,7 @@ func GetRandomCharactersByFavorites(c parser.CharacterSlice, n int, charDiff int
 	}
 
 	result := make(parser.CharacterSlice, 0)
-	for index, _ := range resultIndexes {
+	for index := range resultIndexes {
 		result = append(result, c[index])
 	}
 	return result
