@@ -67,5 +67,3 @@ class GameScore extends React.Component {
         </div>
     }
 }
-
-window.GameScore = GameScore;

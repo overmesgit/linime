@@ -17,18 +17,15 @@ func (e Message) AsJson() []byte {
 	return data
 }
 
+var homeTemplate *template.Template
+
 func serveHome(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", 405)
 		return
 	}
-	templateName := "prod.html"
-	//if strings.Contains(r.URL.Path, "/test") {
-	//	templateName = "test.html"
-	//}
-	homeTempl := template.Must(template.ParseFiles("templates/" + templateName))
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	homeTempl.Execute(w, r.Host)
+	homeTemplate.Execute(w, r.Host)
 }
 
 type MoveMessage struct {
@@ -143,6 +140,8 @@ func StartServer() {
 	mongoDB = mongoSession.DB("mal")
 
 	fmt.Println("start")
+
+	homeTemplate = template.Must(template.ParseFiles("templates/prod.html"))
 
 	char_fs := http.FileServer(http.Dir("/home/overmes/PycharmProjects/maspy/char_images"))
 	http.Handle("/static/char/", http.StripPrefix("/static/char/", char_fs))

@@ -199,15 +199,15 @@ func GetRandomCharactersByFavorites(c parser.CharacterSlice, n int, charDiff int
 	for i := range c {
 		switch charDiff {
 		case 0:
-		case 1:
-			c[i].Favorites = int(math.Sqrt(float64(c[i].Favorites)))
-			if c[i].Favorites == 0 {
-				c[i].Favorites = 1
+			if c[i].Type == "Main" {
+				c[i].Favorites += 10000
 			}
+		case 1:
+
 		case 2:
 			c[i].Favorites = int(math.Sqrt(float64(c[i].Favorites)))
 			if c[i].Favorites == 0 {
-				c[i].Favorites = 3
+				c[i].Favorites = 1
 			}
 		}
 		fullFavoritesSum += c[i].Favorites

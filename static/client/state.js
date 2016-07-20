@@ -1,7 +1,7 @@
-window.MAIN_VIEW = 'MAIN_VIEW';
-window.GAME_VIEW = 'GAME_VIEW';
-window.LOADING_VIEW = 'LOADING_VIEW';
-window.ERROR_VIEW = 'ERROR_VIEW';
+MAIN_VIEW = 'MAIN_VIEW';
+GAME_VIEW = 'GAME_VIEW';
+LOADING_VIEW = 'LOADING_VIEW';
+ERROR_VIEW = 'ERROR_VIEW';
 
 var urlHash = window.location.hash.substr(1);
 var gameId = '';
@@ -98,5 +98,5 @@ function thunkMiddleware({dispatch, getState}) {
             next(action);
 }
 
-window.Store = Redux.createStore(viewState, initialState, Redux.applyMiddleware(thunkMiddleware));
-window.Provider = ReactRedux.Provider;
+Store = Redux.createStore(viewState, initialState, Redux.applyMiddleware(thunkMiddleware));
+Provider = ReactRedux.Provider;

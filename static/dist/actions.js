@@ -1,74 +1,74 @@
-GET_GAME_REQUEST = 'GET_GAME_REQUEST';
-GET_GAME_SUCCESS = 'GET_GAME_SUCCESS';
-ERROR = 'ERROR';
-CHAR_SELECTED = 'CHAR_SELECTED';
-MOVE_SELECTED = 'MOVE_SELECTED';
-MOVE_CHARACTER = 'MOVE_CHARACTER';
-REMOVE_CHARACTER = 'REMOVE_CHARACTER';
-FADE_CHARACTER = 'FADE_CHARACTER';
-ADD_CHARACTER = 'ADD_CHARACTER';
-CHANGE_GAME_TURN = 'CHANGE_GAME_TURN';
-UPDATE_GAME_SCORE = 'UPDATE_GAME_SCORE';
-COMPLETE_GAME = 'COMPLETE_GAME';
-ADD_MY_GAME = 'ADD_MY_GAME';
-TOGGLE_CREATE_GAME_MENU = 'TOGGLE_CREATE_GAME_MENU';
-CHANGE_ANIME_DIFFICULTY = 'CHANGE_ANIME_DIFFICULTY';
-CHANGE_CHAR_DIFFICULTY = 'CHANGE_CHAR_DIFFICULTY';
+window.GET_GAME_REQUEST = 'GET_GAME_REQUEST';
+window.GET_GAME_SUCCESS = 'GET_GAME_SUCCESS';
+window.ERROR = 'ERROR';
+window.CHAR_SELECTED = 'CHAR_SELECTED';
+window.MOVE_SELECTED = 'MOVE_SELECTED';
+window.MOVE_CHARACTER = 'MOVE_CHARACTER';
+window.REMOVE_CHARACTER = 'REMOVE_CHARACTER';
+window.FADE_CHARACTER = 'FADE_CHARACTER';
+window.ADD_CHARACTER = 'ADD_CHARACTER';
+window.CHANGE_GAME_TURN = 'CHANGE_GAME_TURN';
+window.UPDATE_GAME_SCORE = 'UPDATE_GAME_SCORE';
+window.COMPLETE_GAME = 'COMPLETE_GAME';
+window.ADD_MY_GAME = 'ADD_MY_GAME';
+window.TOGGLE_CREATE_GAME_MENU = 'TOGGLE_CREATE_GAME_MENU';
+window.CHANGE_ANIME_DIFFICULTY = 'CHANGE_ANIME_DIFFICULTY';
+window.CHANGE_CHAR_DIFFICULTY = 'CHANGE_CHAR_DIFFICULTY';
 
-toggleCreateGame = function () {
+window.toggleCreateGame = function () {
     return {
         type: TOGGLE_CREATE_GAME_MENU
-    }
+    };
 };
 
-var removeErrorAfter = function(timeOut, dispatch) {
+var removeErrorAfter = function (timeOut, dispatch) {
     setTimeout(() => {
         dispatch({
-                type: ERROR,
-                payload: ''
-            })
+            type: ERROR,
+            payload: ''
+        });
     }, timeOut);
 };
 
-completeGame = function (gameId) {
-    return (dispatch) => {
+window.completeGame = function (gameId) {
+    return dispatch => {
         $.ajax({
             method: "PUT",
             url: '/game?gameId=' + gameId + '&action=complete',
             contentType: 'application/json'
-        }).done((data) => {
+        }).done(data => {
             console.log('Game completed');
             dispatch({
                 type: COMPLETE_GAME
             });
-        }).fail((xhr) => {
+        }).fail(xhr => {
             dispatch({
                 type: ERROR,
                 payload: 'Complete game error: ' + (xhr.responseJSON ? xhr.responseJSON['Message'] : '')
             });
             removeErrorAfter(5000, dispatch);
         });
-    }
+    };
 };
 
-moveCharacter = function (char, row, col) {
+window.moveCharacter = function (char, row, col) {
     return {
         type: MOVE_CHARACTER,
-        payload: {char, row, col}
-    }
+        payload: { char, row, col }
+    };
 };
 
 var groupDispatchChar = (dispatch, array, type) => {
     for (var i = 0; i < array.length; i++) {
         dispatch({
             type: type,
-            payload: {row: array[i][0], col: array[i][1]}
+            payload: { row: array[i][0], col: array[i][1] }
         });
     }
 };
 
 var removeAndAddNewChars = (dispatch, data) => {
-    const {Completed, NewChars, CompletedNew, NextTurn, GameScore} = data;
+    const { Completed, NewChars, CompletedNew, NextTurn, GameScore } = data;
     moveLock = false;
     var timeOutAdd = 0;
     if (Completed.length > 0) {
@@ -108,11 +108,10 @@ var removeAndAddNewChars = (dispatch, data) => {
             groupDispatchChar(dispatch, CompletedNew, REMOVE_CHARACTER);
         }, 300);
     }, timeOutAdd);
-
 };
 
 var moveCallbackFactory = (dispatch, char) => {
-    return (data) => {
+    return data => {
         var path = data.Path;
         var callBack = () => {
             var current = path.pop();
@@ -120,32 +119,32 @@ var moveCallbackFactory = (dispatch, char) => {
             var col = current[1];
             dispatch({
                 type: MOVE_CHARACTER,
-                payload: {char, row, col}
+                payload: { char, row, col }
             });
             if (path.length > 0) {
                 char.Row = row;
                 char.Col = col;
                 setTimeout(callBack, 100);
             } else {
-                removeAndAddNewChars(dispatch, data)
+                removeAndAddNewChars(dispatch, data);
             }
         };
         callBack();
-    }
+    };
 };
 
 var moveLock = false;
-moveSelected = function (gameId, char, Row, Col) {
-    return (dispatch) => {
+window.moveSelected = function (gameId, char, Row, Col) {
+    return dispatch => {
         if (!moveLock) {
             moveLock = true;
             $.ajax({
                 method: "PUT",
                 url: '/game?gameId=' + gameId + '&action=move',
-                data: JSON.stringify({char, Row, Col}),
+                data: JSON.stringify({ char, Row, Col }),
                 contentType: 'application/json',
                 dataType: 'json'
-            }).done(moveCallbackFactory(dispatch, char)).fail((xhr) => {
+            }).done(moveCallbackFactory(dispatch, char)).fail(xhr => {
                 dispatch({
                     type: ERROR,
                     payload: 'Make turn error: ' + (xhr.responseJSON ? xhr.responseJSON['Message'] : '')
@@ -154,72 +153,69 @@ moveSelected = function (gameId, char, Row, Col) {
                 moveLock = false;
             });
         }
-
-    }
+    };
 };
 
-selectChar = function (char) {
+window.selectChar = function (char) {
     return {
         type: CHAR_SELECTED,
         payload: char
-    }
+    };
 };
 
-createGame = function (charDiff, animeDiff, userName) {
-    return (dispatch) => {
+window.createGame = function (charDiff, animeDiff, userName) {
+    return dispatch => {
         dispatch({
             type: GET_GAME_REQUEST
         });
         $.post({
             'url': '/game',
-            'data': JSON.stringify({CharDiff: charDiff, AnimeDiff: animeDiff, UserName: userName}),
+            'data': JSON.stringify({ CharDiff: charDiff, AnimeDiff: animeDiff, UserName: userName }),
             contentType: 'application/json'
-        })
-            .done((data) => {
-                window.location.hash = '#game/' + data.Id;
-                if (supports_html5_storage()) {
-                    if (!localStorage.games) {
-                        localStorage.games = data.Id;
-                    } else {
-                        localStorage.games = localStorage.games + ',' + data.Id;
-                    }
+        }).done(data => {
+            window.location.hash = '#game/' + data.Id;
+            if (supports_html5_storage()) {
+                if (!localStorage.games) {
+                    localStorage.games = data.Id;
+                } else {
+                    localStorage.games = localStorage.games + ',' + data.Id;
                 }
-                dispatch({
-                    type: ADD_MY_GAME,
-                    payload: data.Id
-                });
-                dispatch({
-                    type: GET_GAME_SUCCESS,
-                    payload: data
-                })
-            })
-            .fail((xhr) => {
-                dispatch({
-                    type: ERROR,
-                    payload: 'Create new game error: ' + (xhr.responseJSON ? xhr.responseJSON['Message'] : '')
-                });
-                removeErrorAfter(5000, dispatch);
+            }
+            dispatch({
+                type: ADD_MY_GAME,
+                payload: data.Id
             });
-    }
+            dispatch({
+                type: GET_GAME_SUCCESS,
+                payload: data
+            });
+        }).fail(xhr => {
+            dispatch({
+                type: ERROR,
+                payload: 'Create new game error: ' + (xhr.responseJSON ? xhr.responseJSON['Message'] : '')
+            });
+            removeErrorAfter(5000, dispatch);
+        });
+    };
 };
 
-getGame = function (gameId) {
-    return (dispatch) => {
+window.getGame = function (gameId) {
+    return dispatch => {
         dispatch({
             type: GET_GAME_REQUEST
         });
-        $.get('/game?gameId=' + gameId, (data) => {
+        $.get('/game?gameId=' + gameId, data => {
             window.location.hash = '#game/' + data.Id;
             dispatch({
                 type: GET_GAME_SUCCESS,
                 payload: data
-            })
-        }).fail((xhr) => {
+            });
+        }).fail(xhr => {
             dispatch({
                 type: ERROR,
                 payload: 'Get game error: ' + (xhr.responseJSON ? xhr.responseJSON['Message'] : '')
             });
             removeErrorAfter(5000, dispatch);
         });
-    }
+    };
 };
