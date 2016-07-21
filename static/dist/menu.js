@@ -134,5 +134,3 @@ class Menu extends React.Component {
         );
     }
 }
-
-window.Menu = Menu;

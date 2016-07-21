@@ -1,4 +1,4 @@
-window.ReactCSSTransitionGroup = React.ReactCSSTransitionGroup;
+ReactCSSTransitionGroup = React.ReactCSSTransitionGroup;
 
 class Character extends React.Component {
     selectChar() {
@@ -85,5 +85,3 @@ class Game extends React.Component {
         );
     }
 }
-
-window.Game = Game;

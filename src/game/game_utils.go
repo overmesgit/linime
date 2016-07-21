@@ -55,7 +55,7 @@ func (g *Game) getExistedChar(required bool) (GameCharPosition, error) {
 			return res, err
 		}
 		if len(characters) > 0 {
-			randomCharacters := GetRandomCharactersByFavorites(characters, 1, g.CharDiff)
+			randomCharacters := GetRandomCharactersByFavorites(selectedTitleId, characters, 1, g.CharDiff)
 			return g.AddCharacterToRandomPos(randomCharacters[0], selectedTitleId), nil
 		}
 	}
@@ -193,14 +193,16 @@ func (a AnimeGroupMembersSlice) GetRandomByMembers() AnimeGroupMembers {
 	return a[len(a)-1]
 }
 
-func GetRandomCharactersByFavorites(c parser.CharacterSlice, n int, charDiff int) parser.CharacterSlice {
+func GetRandomCharactersByFavorites(titleId int, c parser.CharacterSlice, n int, charDiff int) parser.CharacterSlice {
 	sort.Sort(sort.Reverse(c))
 	fullFavoritesSum := 0
 	for i := range c {
 		switch charDiff {
 		case 0:
-			if c[i].Type == "Main" {
-				c[i].Favorites += 10000
+			for _, mainTitleId := range c[i].Main {
+				if titleId == mainTitleId {
+					c[i].Favorites += 10000
+				}
 			}
 		case 1:
 

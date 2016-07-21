@@ -1,21 +1,21 @@
-window.GET_GAME_REQUEST = 'GET_GAME_REQUEST';
-window.GET_GAME_SUCCESS = 'GET_GAME_SUCCESS';
-window.ERROR = 'ERROR';
-window.CHAR_SELECTED = 'CHAR_SELECTED';
-window.MOVE_SELECTED = 'MOVE_SELECTED';
-window.MOVE_CHARACTER = 'MOVE_CHARACTER';
-window.REMOVE_CHARACTER = 'REMOVE_CHARACTER';
-window.FADE_CHARACTER = 'FADE_CHARACTER';
-window.ADD_CHARACTER = 'ADD_CHARACTER';
-window.CHANGE_GAME_TURN = 'CHANGE_GAME_TURN';
-window.UPDATE_GAME_SCORE = 'UPDATE_GAME_SCORE';
-window.COMPLETE_GAME = 'COMPLETE_GAME';
-window.ADD_MY_GAME = 'ADD_MY_GAME';
-window.TOGGLE_CREATE_GAME_MENU = 'TOGGLE_CREATE_GAME_MENU';
-window.CHANGE_ANIME_DIFFICULTY = 'CHANGE_ANIME_DIFFICULTY';
-window.CHANGE_CHAR_DIFFICULTY = 'CHANGE_CHAR_DIFFICULTY';
+GET_GAME_REQUEST = 'GET_GAME_REQUEST';
+GET_GAME_SUCCESS = 'GET_GAME_SUCCESS';
+ERROR = 'ERROR';
+CHAR_SELECTED = 'CHAR_SELECTED';
+MOVE_SELECTED = 'MOVE_SELECTED';
+MOVE_CHARACTER = 'MOVE_CHARACTER';
+REMOVE_CHARACTER = 'REMOVE_CHARACTER';
+FADE_CHARACTER = 'FADE_CHARACTER';
+ADD_CHARACTER = 'ADD_CHARACTER';
+CHANGE_GAME_TURN = 'CHANGE_GAME_TURN';
+UPDATE_GAME_SCORE = 'UPDATE_GAME_SCORE';
+COMPLETE_GAME = 'COMPLETE_GAME';
+ADD_MY_GAME = 'ADD_MY_GAME';
+TOGGLE_CREATE_GAME_MENU = 'TOGGLE_CREATE_GAME_MENU';
+CHANGE_ANIME_DIFFICULTY = 'CHANGE_ANIME_DIFFICULTY';
+CHANGE_CHAR_DIFFICULTY = 'CHANGE_CHAR_DIFFICULTY';
 
-window.toggleCreateGame = function () {
+toggleCreateGame = function () {
     return {
         type: TOGGLE_CREATE_GAME_MENU
     };
@@ -30,7 +30,7 @@ var removeErrorAfter = function (timeOut, dispatch) {
     }, timeOut);
 };
 
-window.completeGame = function (gameId) {
+completeGame = function (gameId) {
     return dispatch => {
         $.ajax({
             method: "PUT",
@@ -51,7 +51,7 @@ window.completeGame = function (gameId) {
     };
 };
 
-window.moveCharacter = function (char, row, col) {
+moveCharacter = function (char, row, col) {
     return {
         type: MOVE_CHARACTER,
         payload: { char, row, col }
@@ -134,7 +134,7 @@ var moveCallbackFactory = (dispatch, char) => {
 };
 
 var moveLock = false;
-window.moveSelected = function (gameId, char, Row, Col) {
+moveSelected = function (gameId, char, Row, Col) {
     return dispatch => {
         if (!moveLock) {
             moveLock = true;
@@ -156,14 +156,14 @@ window.moveSelected = function (gameId, char, Row, Col) {
     };
 };
 
-window.selectChar = function (char) {
+selectChar = function (char) {
     return {
         type: CHAR_SELECTED,
         payload: char
     };
 };
 
-window.createGame = function (charDiff, animeDiff, userName) {
+createGame = function (charDiff, animeDiff, userName) {
     return dispatch => {
         dispatch({
             type: GET_GAME_REQUEST
@@ -199,7 +199,7 @@ window.createGame = function (charDiff, animeDiff, userName) {
     };
 };
 
-window.getGame = function (gameId) {
+getGame = function (gameId) {
     return dispatch => {
         dispatch({
             type: GET_GAME_REQUEST

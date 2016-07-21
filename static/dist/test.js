@@ -55,8 +55,8 @@ var topReducer = (state = state, action) => {
     };
 };
 
-window.Store = Redux.createStore(topReducer, state);
-window.Provider = ReactRedux.Provider;
+Store = Redux.createStore(topReducer, state);
+Provider = ReactRedux.Provider;
 
 function mapStateToProps(state) {
     return {

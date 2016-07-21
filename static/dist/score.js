@@ -127,5 +127,3 @@ class GameScore extends React.Component {
         );
     }
 }
-
-window.GameScore = GameScore;

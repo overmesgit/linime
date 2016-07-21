@@ -276,7 +276,7 @@ func (g *Game) AddRandomCharacterByGroup(GroupId, CharCount int) ([]GameCharPosi
 	if err != nil {
 		return res, err
 	}
-	randomCharacters := GetRandomCharactersByFavorites(characters, CharCount, g.CharDiff)
+	randomCharacters := GetRandomCharactersByFavorites(titleId, characters, CharCount, g.CharDiff)
 	return g.AddCharactersToRandomPos(randomCharacters, titleId), nil
 
 }
