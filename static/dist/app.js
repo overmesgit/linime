@@ -19,12 +19,12 @@ class AppClass extends React.Component {
 
     render() {
         const { game, error, myGames, createGameStatus } = this.props.app;
-        const { createGame, completeGame, selectChar, moveSelected, getGame, toggleCreateGame } = this.props.appActions;
+        const { createGame, completeGame, selectChar, moveSelected, getGame, toggleCreateGame, changeImage } = this.props.appActions;
         return React.createElement(
             'div',
             { className: 'content' },
             React.createElement(Menu, { createGame: createGame, completeGame: completeGame, getGame: getGame, game: game, myGames: myGames,
-                toggleCreateGame: toggleCreateGame, createGameStatus: createGameStatus }),
+                toggleCreateGame: toggleCreateGame, createGameStatus: createGameStatus, changeImage: changeImage }),
             React.createElement(Game, { game: game, selectChar: selectChar, moveSelected: moveSelected }),
             React.createElement(GameScore, { completedTitles: game.Score.CompletedTitles, currentTurn: game.Turn, game: game }),
             error != "" ? React.createElement(Error, { error: error }) : ""
@@ -41,7 +41,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return {
         appActions: Redux.bindActionCreators({ createGame, completeGame, getGame, selectChar,
-            moveSelected, toggleCreateGame }, dispatch)
+            moveSelected, toggleCreateGame, changeImage }, dispatch)
     };
 }
 

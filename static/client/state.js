@@ -39,6 +39,14 @@ function viewState(state = initialState, action) {
             return {...state, game: action.payload, createGameStatus: {...state.createGame, hidden: true}};
         case ERROR:
             return {...state, error: action.payload};
+        case CHAR_IMAGE_CHANGED:
+            var newField = state.game.Field.map((char) => {
+                if (char.Row == action.payload.Row && char.Col == action.payload.Col) {
+                    return {...char, Img: action.payload.Img}
+                }
+                return char
+            });
+            return {...state, game: {...state.game, Field: newField}};
         case CHAR_SELECTED:
             var newField = state.game.Field.map((char) => {
                 if (char.selected) {

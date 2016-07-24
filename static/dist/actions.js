@@ -14,6 +14,8 @@ ADD_MY_GAME = 'ADD_MY_GAME';
 TOGGLE_CREATE_GAME_MENU = 'TOGGLE_CREATE_GAME_MENU';
 CHANGE_ANIME_DIFFICULTY = 'CHANGE_ANIME_DIFFICULTY';
 CHANGE_CHAR_DIFFICULTY = 'CHANGE_CHAR_DIFFICULTY';
+CHANGE_CHAR_IMAGE = 'CHANGE_CHAR_IMAGE';
+CHAR_IMAGE_CHANGED = 'CHAR_IMAGE_CHANGED';
 
 toggleCreateGame = function () {
     return {
@@ -153,6 +155,29 @@ moveSelected = function (gameId, char, Row, Col) {
                 moveLock = false;
             });
         }
+    };
+};
+
+changeImage = function (gameId, char) {
+    return dispatch => {
+        $.ajax({
+            method: "PUT",
+            url: '/game?gameId=' + gameId + '&action=changeImg',
+            data: JSON.stringify({ char }),
+            contentType: 'application/json',
+            dataType: 'json'
+        }).done(data => {
+            dispatch({
+                type: CHAR_IMAGE_CHANGED,
+                payload: data
+            });
+        }).fail(xhr => {
+            dispatch({
+                type: ERROR,
+                payload: 'Make turn error: ' + (xhr.responseJSON ? xhr.responseJSON['Message'] : '')
+            });
+            removeErrorAfter(5000, dispatch);
+        });
     };
 };
 

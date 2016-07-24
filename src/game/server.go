@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gopkg.in/mgo.v2"
 	"html/template"
+	"io"
 	"net/http"
 )
 
@@ -40,62 +41,74 @@ type CreateGameParam struct {
 	UserName  string
 }
 
+func serveTargetGame(gameUUID string, method string, action string, body io.ReadCloser) (int, []byte) {
+	game, err := GetGame(gameUUID)
+	if err != nil {
+		return http.StatusNotFound, Message{Message: err.Error()}.AsJson()
+	}
+	switch method {
+	case "GET":
+		body, err := game.AsJson()
+		if err != nil {
+			return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
+		} else {
+			return http.StatusOK, body
+		}
+	case "PUT":
+		switch action {
+		case "move":
+			var message MoveMessage
+			err := json.NewDecoder(body).Decode(&message)
+			defer body.Close()
+			if err != nil {
+				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
+			}
+			resp, err := game.MakeTurn(message.Char, message.Row, message.Col)
+			if err != nil {
+				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
+			}
+			jsonResp, err := json.Marshal(resp)
+			if err != nil {
+				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
+			}
+			return http.StatusOK, jsonResp
+		case "changeImg":
+			var message MoveMessage
+			err := json.NewDecoder(body).Decode(&message)
+			defer body.Close()
+			if err != nil {
+				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
+			}
+			err = game.ChangeImage(&message.Char)
+			if err != nil {
+				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
+			}
+			game.Update()
+			jsonResp, err := json.Marshal(message.Char)
+			if err != nil {
+				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
+			}
+			return http.StatusOK, jsonResp
+		case "complete":
+			game.CompleteCountTotalScore()
+			err = game.Update()
+			if err != nil {
+				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
+			}
+			return http.StatusOK, Message{Message: "ok"}.AsJson()
+		}
+	}
+	return http.StatusInternalServerError, Message{Message: "action not found"}.AsJson()
+}
+
 func serveGame(w http.ResponseWriter, r *http.Request) {
 	getParams := r.URL.Query()
 	gameUUID := getParams.Get("gameId")
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	if gameUUID != "" {
-		game, err := GetGame(gameUUID)
-		if err != nil {
-			w.WriteHeader(http.StatusNotFound)
-			w.Write(Message{err.Error()}.AsJson())
-			return
-		}
-		switch r.Method {
-		case "GET":
-			body, err := game.AsJson()
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write(Message{err.Error()}.AsJson())
-			} else {
-				w.Write(body)
-			}
-		case "PUT":
-			action := getParams.Get("action")
-			switch action {
-			case "move":
-				var message MoveMessage
-				err := json.NewDecoder(r.Body).Decode(&message)
-				defer r.Body.Close()
-				if err != nil {
-					w.WriteHeader(http.StatusInternalServerError)
-					w.Write(Message{err.Error()}.AsJson())
-					return
-				}
-				resp, err := game.MakeTurn(message.Char, message.Row, message.Col)
-				if err != nil {
-					w.WriteHeader(http.StatusInternalServerError)
-					w.Write(Message{err.Error()}.AsJson())
-					return
-				}
-				jsonResp, err := json.Marshal(resp)
-				if err != nil {
-					w.WriteHeader(http.StatusInternalServerError)
-					w.Write(Message{err.Error()}.AsJson())
-					return
-				}
-				w.Write(jsonResp)
-			case "complete":
-				game.CompleteCountTotalScore()
-				err = game.Update()
-				if err != nil {
-					w.WriteHeader(http.StatusInternalServerError)
-					w.Write(Message{err.Error()}.AsJson())
-					return
-				}
-				w.Write(Message{"ok"}.AsJson())
-			}
-		}
+		status, resp := serveTargetGame(gameUUID, r.Method, getParams.Get("action"), r.Body)
+		w.WriteHeader(status)
+		w.Write(resp)
 	} else {
 		var gameParam CreateGameParam
 		err := json.NewDecoder(r.Body).Decode(&gameParam)

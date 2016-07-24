@@ -1,6 +1,7 @@
 package game
 
 import (
+	"github.com/syndtr/goleveldb/leveldb/errors"
 	"gopkg.in/mgo.v2/bson"
 	"mal/parser"
 	"math"
@@ -103,6 +104,9 @@ func (g *Game) getNewGroupChar() (GameCharPosition, error) {
 	val, err := g.AddRandomCharacterByGroup(targetGroup, 1)
 	if err != nil {
 		return res, err
+	}
+	if len(val) == 0 {
+		return res, errors.New("Get character by group error")
 	}
 	return val[0], nil
 }

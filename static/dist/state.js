@@ -41,6 +41,14 @@ function viewState(state = initialState, action) {
             return _extends({}, state, { game: action.payload, createGameStatus: _extends({}, state.createGame, { hidden: true }) });
         case ERROR:
             return _extends({}, state, { error: action.payload });
+        case CHAR_IMAGE_CHANGED:
+            var newField = state.game.Field.map(char => {
+                if (char.Row == action.payload.Row && char.Col == action.payload.Col) {
+                    return _extends({}, char, { Img: action.payload.Img });
+                }
+                return char;
+            });
+            return _extends({}, state, { game: _extends({}, state.game, { Field: newField }) });
         case CHAR_SELECTED:
             var newField = state.game.Field.map(char => {
                 if (char.selected) {

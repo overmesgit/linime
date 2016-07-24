@@ -12,7 +12,7 @@ class Menu extends React.Component {
     }
 
     render() {
-        const { myGames, getGame, game, createGameStatus, toggleCreateGame } = this.props;
+        const { myGames, getGame, game, createGameStatus, toggleCreateGame, changeImage } = this.props;
 
         var gamesNodes = myGames.map((gameId, i) => {
             return React.createElement(
@@ -30,6 +30,8 @@ class Menu extends React.Component {
                 "Complete game"
             );
         }
+
+        var selectedChar = game.Field.filter(field => field.selected);
 
         return React.createElement(
             "div",
@@ -109,7 +111,7 @@ class Menu extends React.Component {
                         React.createElement(
                             "p",
                             null,
-                            "Use MyAnimeList:"
+                            "Use MyAnimeList (Optional):"
                         ),
                         React.createElement("input", { className: "mal-username", ref: "userName", placeholder: "MyAnimeList username" }),
                         React.createElement(
@@ -118,7 +120,12 @@ class Menu extends React.Component {
                             "Create Game"
                         )
                     ),
-                    completeNode
+                    completeNode,
+                    selectedChar == 0 || React.createElement(
+                        "h2",
+                        { className: "menu-content-button btn", onClick: changeImage.bind(this, game.Id, selectedChar[0]) },
+                        "Change image"
+                    )
                 ),
                 React.createElement(
                     "div",

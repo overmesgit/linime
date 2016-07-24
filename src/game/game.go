@@ -35,11 +35,12 @@ type Game struct {
 	AnimeDiff        int
 	UserName         string
 	UserItems        []int
+	ChangeImgs       []string `bson:"change_imgs"`
 }
 
 func NewGame() *Game {
 	gameScore := GameScore{make([]CompleteTitle, 0), make([]int, 0), -1}
-	return &Game{RandString(8), make([]GameCharPosition, 0), 9, 9, 3, 1, gameScore, nil, nil, 0, time.Now(), time.Now(), 0, 0, "", make([]int, 0)}
+	return &Game{RandString(8), make([]GameCharPosition, 0), 9, 9, 3, 1, gameScore, nil, nil, 0, time.Now(), time.Now(), 0, 0, "", make([]int, 0), make([]string, 0)}
 }
 
 func NewGameWithParam(param CreateGameParam) *Game {
@@ -57,6 +58,40 @@ type MoveResponse struct {
 	CompletedNew [][2]int
 	NextTurn     int
 	GameScore    []CompleteTitle
+}
+
+func (g *Game) ChangeImage(character *GameCharPosition) error {
+	gameChar, err := g.FindChar(character.Row, character.Col)
+	if err != nil {
+		return err
+	}
+	g.ChangeImgs = append(g.ChangeImgs, gameChar.Img)
+	var char parser.Character
+	charCol := mongoDB.C("char")
+	err = charCol.Find(bson.M{"_id": gameChar.Id}).One(&char)
+	if err != nil {
+		return err
+	}
+	for i, img := range char.Images {
+		if img == gameChar.Img {
+			nextImage := char.Images[(i+1)%len(char.Images)]
+			character.Img = nextImage
+			gameChar.Img = nextImage
+			return nil
+		}
+	}
+	return errors.New("No image for change")
+}
+
+func (g *Game) FindChar(row, col int) (*GameCharPosition, error) {
+	for i := range g.Field {
+		currentChar := &g.Field[i]
+		if currentChar.Row == row && currentChar.Col == col {
+			return currentChar, nil
+		}
+	}
+	var res *GameCharPosition
+	return res, errors.New("Char not found")
 }
 
 func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, error) {
@@ -269,7 +304,6 @@ func (g *Game) AddRandomCharacterByGroup(GroupId, CharCount int) ([]GameCharPosi
 	case float64:
 		titleId = int(randomTitle.Id["i"].(float64))
 	}
-
 	//get random character by favorites
 	var characters parser.CharacterSlice
 	err = char.Find(bson.M{"_id": bson.M{"$in": randomTitle.Characters}}).All(&characters)
