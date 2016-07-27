@@ -21,10 +21,16 @@ type CompleteTitle struct {
 	Characters []CompletedChar
 }
 
+type ChangedImage struct {
+	Img  string `bson:"img"`
+	Turn int    `bson:"turn"`
+}
+
 type GameScore struct {
 	CompletedTitles []CompleteTitle
 	CompletedGroups []int
 	TotalScore      int
+	ChangeImgs      []ChangedImage
 }
 
 func (g *Game) GetCompletedGroups(completedChars []GameCharPosition) []int {
@@ -114,5 +120,6 @@ func (g *Game) CompleteCountTotalScore() {
 		}
 	}
 	g.Score.TotalScore = totalScore
+	g.Score.TotalScore -= len(g.Score.ChangeImgs)
 	g.EndDate = time.Now()
 }

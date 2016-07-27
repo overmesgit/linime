@@ -24,6 +24,7 @@ type Game struct {
 	Height           int                `bson:"height"`
 	Width            int                `bson:"width"`
 	Line             int                `bson:"line"`
+	MaxTitleChar     int                `bson:"max_title_char"`
 	Turn             int                `bson:"turn"`
 	Score            GameScore
 	positions        [][2]int
@@ -35,12 +36,13 @@ type Game struct {
 	AnimeDiff        int
 	UserName         string
 	UserItems        []int
-	ChangeImgs       []string `bson:"change_imgs"`
 }
 
 func NewGame() *Game {
-	gameScore := GameScore{make([]CompleteTitle, 0), make([]int, 0), -1}
-	return &Game{RandString(8), make([]GameCharPosition, 0), 9, 9, 3, 1, gameScore, nil, nil, 0, time.Now(), time.Now(), 0, 0, "", make([]int, 0), make([]string, 0)}
+	gameScore := GameScore{CompletedTitles: make([]CompleteTitle, 0), CompletedGroups: make([]int, 0), TotalScore: -1, ChangeImgs: make([]ChangedImage, 0)}
+	return &Game{Id: RandString(8), Field: make([]GameCharPosition, 0), Height: 9, Width: 9, Line: 3, MaxTitleChar: 5, Turn: 1,
+		Score: gameScore, positions: nil, randomPos: nil, currentRandomPos: 0, Date: time.Now(), EndDate: time.Now(),
+		CharDiff: 0, AnimeDiff: 0, UserName: "", UserItems: make([]int, 0)}
 }
 
 func NewGameWithParam(param CreateGameParam) *Game {
@@ -65,12 +67,26 @@ func (g *Game) ChangeImage(character *GameCharPosition) error {
 	if err != nil {
 		return err
 	}
-	g.ChangeImgs = append(g.ChangeImgs, gameChar.Img)
+
+	sameChange := false
+	for _, change := range g.Score.ChangeImgs {
+		if change.Img == gameChar.Img {
+			sameChange = true
+			break
+		}
+	}
+	if !sameChange {
+		g.Score.ChangeImgs = append(g.Score.ChangeImgs, ChangedImage{Img: gameChar.Img, Turn: g.Turn})
+	}
+
 	var char parser.Character
 	charCol := mongoDB.C("char")
 	err = charCol.Find(bson.M{"_id": gameChar.Id}).One(&char)
 	if err != nil {
 		return err
+	}
+	if len(char.Images) == 1 {
+		return errors.New("Only one image")
 	}
 	for i, img := range char.Images {
 		if img == gameChar.Img {

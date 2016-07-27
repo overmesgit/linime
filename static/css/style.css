@@ -48,6 +48,11 @@ p {
     height: 30px;
     text-align: center;
     margin: 5px 5px 0 5px;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .my-game {
@@ -185,6 +190,10 @@ p {
     max-width: 50px;
     max-height: 50px;
     border-radius: 5px;
+}
+
+.stat-change-img {
+    margin: 0 5px 0 5px;
 }
 
 .stat-char-img:hover {

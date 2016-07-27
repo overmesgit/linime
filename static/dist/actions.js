@@ -174,7 +174,7 @@ changeImage = function (gameId, char) {
         }).fail(xhr => {
             dispatch({
                 type: ERROR,
-                payload: 'Make turn error: ' + (xhr.responseJSON ? xhr.responseJSON['Message'] : '')
+                payload: 'Change image error: ' + (xhr.responseJSON ? xhr.responseJSON['Message'] : '')
             });
             removeErrorAfter(5000, dispatch);
         });

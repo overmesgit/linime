@@ -20,13 +20,13 @@ func (g *Game) getExistedChar(required bool) (GameCharPosition, error) {
 	}
 
 	targetTitles := make([]int, 0)
-	for key, titles := range titleMap {
+	for key, titlesChars := range titleMap {
 		if required {
-			if len(titles) < g.Line {
+			if len(titlesChars) < g.Line {
 				targetTitles = append(targetTitles, key)
 			}
 		} else {
-			if len(titles) >= g.Line {
+			if len(titlesChars) >= g.Line && len(titlesChars) < 5 {
 				targetTitles = append(targetTitles, key)
 			}
 		}

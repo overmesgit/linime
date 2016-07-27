@@ -23,26 +23,66 @@ class CompleteTitle extends React.Component {
     }
 }
 
+class ChangeImage extends React.Component {
+    shouldComponentUpdate(nextProps, nextState) {
+        return this.props.changeGroup.length != nextProps.changeGroup.length
+    }
+    render() {
+        const {changeGroup} = this.props;
+        var changeImagesNodes = [];
+        for(var i = 0; i < changeGroup.length; i += 5) {
+            changeImagesNodes.push(<p key={'' + i} className="stat-char">
+                <span className="stat-char-score">-1</span>
+                <img src={changeGroup[i].Img} className="stat-char-img stat-change-img" />
+                {changeGroup[i+1]?<img src={changeGroup[i+1].Img} className="stat-char-img stat-change-img" />:""}
+                {changeGroup[i+2]?<img src={changeGroup[i+2].Img} className="stat-char-img stat-change-img" />:""}
+                {changeGroup[i+3]?<img src={changeGroup[i+3].Img} className="stat-char-img stat-change-img" />:""}
+                {changeGroup[i+4]?<img src={changeGroup[i+4].Img} className="stat-char-img stat-change-img" />:""}
+            </p>)
+        }
+        return <div className="title-scores">
+            <p className="score-title-turn">turn: {changeGroup[0].Turn}</p>
+            {changeImagesNodes}
+        </div>
+    }
+}
+
 class GameScore extends React.Component {
     componentDidMount() {
         $('#score').perfectScrollbar();
     }
 
     getTotalScore() {
-        const {completedTitles} = this.props;
+        const {completedTitles, game} = this.props;
         var totalScore = 0;
         completedTitles.forEach((title) => {
             title.Characters.forEach((char) => {
                 totalScore += char.Score;
             })
         });
+        totalScore -= game.Score.ChangeImgs.length;
         return totalScore;
     }
     render() {
         const {completedTitles, currentTurn, game} = this.props;
         var titlesNodes = completedTitles.map((title, i) => {
-            return <CompleteTitle key={'' + title.Id + i} title={title} />
+            return [title.Turn, <CompleteTitle key={'' + title.Id + i} title={title} />]
         });
+
+        var changedImagesGroups = {};
+        for(var change of game.Score.ChangeImgs) {
+            if (!(change.Turn in changedImagesGroups)) {
+                changedImagesGroups[change.Turn] = []
+            }
+            changedImagesGroups[change.Turn].push(change)
+        }
+
+        for(var group in changedImagesGroups) {
+            titlesNodes.push([group, <ChangeImage key={'changeImage' + group} changeGroup={changedImagesGroups[group]} />])
+        }
+
+        titlesNodes.sort((a,b) => a[0] >= b[0] ? 1: -1);
+
         //last titles in the end of the list
         titlesNodes.reverse();
         var startDate = null;
@@ -62,7 +102,7 @@ class GameScore extends React.Component {
                 {game.UserName != "" ? <p>MAL User: {game.UserName}</p>: ""}
                 <p>Difficulty: {game.CharDiff+1}C {game.AnimeDiff+1}A</p>
             </div>
-            {titlesNodes}
+            {titlesNodes.map(item => item[1])}
 
         </div>
     }

@@ -17,7 +17,7 @@ if(supports_html5_storage()) {
 }
 
 const initialState = {
-    game: {Field: [], Score: {CompletedTitles: [], TotalScore: 0}, Turn: 0, AnimeDiff: 0, CharDiff: 0, UserName: ''},
+    game: {Field: [], Score: {CompletedTitles: [], TotalScore: 0, ChangeImgs: []}, Turn: 0, AnimeDiff: 0, CharDiff: 0, UserName: ''},
     error: "",
     fetchingGame: gameId,
     myGames: myGames,
@@ -40,13 +40,19 @@ function viewState(state = initialState, action) {
         case ERROR:
             return {...state, error: action.payload};
         case CHAR_IMAGE_CHANGED:
+            var changedImages = [];
             var newField = state.game.Field.map((char) => {
                 if (char.Row == action.payload.Row && char.Col == action.payload.Col) {
+                    if (state.game.Score.ChangeImgs.filter(change => change.Img == char.Img).length == 0) {
+                        changedImages = [...state.game.Score.ChangeImgs, {Img: char.Img, Turn: state.game.Turn}];
+                    } else {
+                        changedImages = state.game.Score.ChangeImgs
+                    }
                     return {...char, Img: action.payload.Img}
                 }
                 return char
             });
-            return {...state, game: {...state.game, Field: newField}};
+            return {...state, game: {...state.game, Field: newField, Score: {...state.game.Score, ChangeImgs: changedImages}}};
         case CHAR_SELECTED:
             var newField = state.game.Field.map((char) => {
                 if (char.selected) {
