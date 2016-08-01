@@ -10,6 +10,10 @@ import (
 	"time"
 )
 
+const (
+	MAX_FROM_ONE_TITLE = 5
+)
+
 type GameCharPosition struct {
 	TitleId int    `bson:"titleid" json:"-"`
 	Id      int    `bson:"id" json:"-"`
@@ -151,18 +155,23 @@ func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, erro
 func (g *Game) AddNewChars() ([]GameCharPosition, error) {
 	result := make([]GameCharPosition, 0)
 	for i := 0; i < 3; i++ {
-		funcRandom := rand.Intn(100)
 		var newChar GameCharPosition
 		var err error
-		switch {
-		case len(g.Field) >= g.Width*g.Height:
-			break
-		case funcRandom < 50:
+		full, required := g.getFullAndRequiredCount()
+		if required >= full/2 {
 			newChar, err = g.getExistedChar(true)
-		case funcRandom < 80:
-			newChar, err = g.getExistedChar(false)
-		case funcRandom < 100:
-			newChar, err = g.getNewGroupChar()
+		} else {
+			funcRandom := rand.Intn(100)
+			switch {
+			case len(g.Field) >= g.Width*g.Height:
+				break
+			case funcRandom < 50:
+				newChar, err = g.getExistedChar(true)
+			case funcRandom < 80:
+				newChar, err = g.getExistedChar(false)
+			case funcRandom < 100:
+				newChar, err = g.getNewGroupChar()
+			}
 		}
 		if err != nil {
 			return result, err

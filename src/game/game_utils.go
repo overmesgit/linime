@@ -9,8 +9,20 @@ import (
 	"sort"
 )
 
-func (g *Game) getExistedChar(required bool) (GameCharPosition, error) {
-	var res GameCharPosition
+func (g *Game) getFullAndRequiredCount() (float64, float64) {
+	titleMap := g.getTitleMap()
+	full, required := 0.0, 0.0
+	for _, val := range titleMap {
+		if len(val) >= g.Line {
+			full++
+		} else {
+			required++
+		}
+	}
+	return full, required
+}
+
+func (g *Game) getTitleMap() map[int][]GameCharPosition {
 	titleMap := make(map[int][]GameCharPosition, 0)
 	for _, v := range g.Field {
 		if _, ok := titleMap[v.TitleId]; !ok {
@@ -18,15 +30,21 @@ func (g *Game) getExistedChar(required bool) (GameCharPosition, error) {
 		}
 		titleMap[v.TitleId] = append(titleMap[v.TitleId], v)
 	}
+	return titleMap
+}
+
+func (g *Game) getExistedChar(requiredForLine bool) (GameCharPosition, error) {
+	var res GameCharPosition
+	titleMap := g.getTitleMap()
 
 	targetTitles := make([]int, 0)
 	for key, titlesChars := range titleMap {
-		if required {
+		if requiredForLine {
 			if len(titlesChars) < g.Line {
 				targetTitles = append(targetTitles, key)
 			}
 		} else {
-			if len(titlesChars) >= g.Line && len(titlesChars) < 5 {
+			if len(titlesChars) >= g.Line && len(titlesChars) < MAX_FROM_ONE_TITLE {
 				targetTitles = append(targetTitles, key)
 			}
 		}
@@ -77,6 +95,8 @@ func (g *Game) getNewGroupChar() (GameCharPosition, error) {
 	if err != nil {
 		return res, err
 	}
+
+	currentGroups = append(currentGroups, g.Score.CompletedGroups...)
 
 	newGroups := make([]int, 0)
 	if g.UserName != "" {
