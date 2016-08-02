@@ -42,8 +42,18 @@ type Game struct {
 	UserItems        []int
 }
 
+type MoveResponse struct {
+	Path         [][2]int
+	Completed    [][2]int
+	NewChars     []GameCharPosition
+	CompletedNew [][2]int
+	NextTurn     int
+	GameScore    []CompleteTitle
+}
+
 func NewGame() *Game {
-	gameScore := GameScore{CompletedTitles: make([]CompleteTitle, 0), CompletedGroups: make([]int, 0), TotalScore: -1, ChangeImgs: make([]ChangedImage, 0)}
+	gameScore := GameScore{CompletedTitles: make([]CompleteTitle, 0), CompletedGroups: make([]int, 0), TotalScore: -1,
+		ChangeImgs: make([]ChangedImage, 0), Advices: make([]Advice, 0)}
 	return &Game{Id: RandString(8), Field: make([]GameCharPosition, 0), Height: 9, Width: 9, Line: 3, MaxTitleChar: 5, Turn: 1,
 		Score: gameScore, positions: nil, randomPos: nil, currentRandomPos: 0, Date: time.Now(), EndDate: time.Now(),
 		CharDiff: 0, AnimeDiff: 0, UserName: "", UserItems: make([]int, 0)}
@@ -57,13 +67,49 @@ func NewGameWithParam(param CreateGameParam) *Game {
 	return game
 }
 
-type MoveResponse struct {
-	Path         [][2]int
-	Completed    [][2]int
-	NewChars     []GameCharPosition
-	CompletedNew [][2]int
-	NextTurn     int
-	GameScore    []CompleteTitle
+func (g *Game) GetAdvice() (Advice, error) {
+	var res Advice
+	titlesMap := g.getTitleMap()
+	var adviceTitle int
+
+outer:
+	for titleId, positions := range titlesMap {
+		if len(positions) < 2 {
+			break
+		}
+		for _, advice := range g.Score.Advices {
+			if advice.Title == titleId {
+				continue outer
+			}
+		}
+		adviceTitle = titleId
+		break
+
+	}
+
+	if adviceTitle == 0 && len(g.Score.Advices) > 0 {
+		for i, advice := range g.Score.Advices {
+			if _, ok := titlesMap[advice.Title]; ok {
+				adviceTitle = g.Score.Advices[i].Title
+				g.Score.Advices = append(g.Score.Advices[:i], g.Score.Advices[i+1:]...)
+				break
+			}
+		}
+	}
+
+	if adviceTitle != 0 {
+		positions, _ := titlesMap[adviceTitle]
+		images := make([]string, 0)
+		for _, pos := range positions {
+			images = append(images, pos.Img)
+		}
+		res = Advice{Img: images, Title: adviceTitle, Turn: g.Turn}
+		g.Score.Advices = append(g.Score.Advices, res)
+	} else {
+		return res, errors.New("Can't find advice")
+	}
+
+	return res, nil
 }
 
 func (g *Game) ChangeImage(character *GameCharPosition) error {
@@ -337,19 +383,6 @@ func (g *Game) AddRandomCharacterByGroup(GroupId, CharCount int) ([]GameCharPosi
 	}
 	randomCharacters := GetRandomCharactersByFavorites(titleId, characters, CharCount, g.CharDiff)
 	return g.AddCharactersToRandomPos(randomCharacters, titleId), nil
-
-}
-
-func GetUniqueValues(values []int) []int {
-	uniqueMap := make(map[int]bool, 0)
-	unique := make([]int, 0)
-	for _, v := range values {
-		if _, ok := uniqueMap[v]; !ok {
-			unique = append(unique, v)
-		}
-		uniqueMap[v] = true
-	}
-	return unique
 
 }
 

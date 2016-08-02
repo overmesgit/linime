@@ -89,6 +89,18 @@ func serveTargetGame(gameUUID string, method string, action string, body io.Read
 				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
 			}
 			return http.StatusOK, jsonResp
+		case "advice":
+			advice, err := game.GetAdvice()
+			if err != nil {
+				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
+			}
+			game.Update()
+			jsonResp, err := json.Marshal(advice)
+			if err != nil {
+				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
+			}
+			return http.StatusOK, jsonResp
+
 		case "complete":
 			game.CompleteCountTotalScore()
 			err = game.Update()
@@ -150,6 +162,7 @@ func StartServer() {
 		panic(err)
 	}
 	defer mongoSession.Close()
+	//mongoSession.SetMode(mgo.Eventual, true)
 	mongoDB = mongoSession.DB("mal")
 
 	fmt.Println("start")

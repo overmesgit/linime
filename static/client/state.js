@@ -17,7 +17,8 @@ if(supports_html5_storage()) {
 }
 
 const initialState = {
-    game: {Field: [], Score: {CompletedTitles: [], TotalScore: 0, ChangeImgs: []}, Turn: 0, AnimeDiff: 0, CharDiff: 0, UserName: ''},
+    game: {Field: [], Turn: 0, AnimeDiff: 0, CharDiff: 0, UserName: '',
+        Score: {CompletedTitles: [], TotalScore: 0, ChangeImgs: [], Advices: []}},
     error: "",
     fetchingGame: gameId,
     myGames: myGames,
@@ -39,6 +40,19 @@ function viewState(state = initialState, action) {
             return {...state, game: action.payload, createGameStatus: {...state.createGame, hidden: true}};
         case ERROR:
             return {...state, error: action.payload};
+        case GET_ADVICE:
+            var images = {};
+            for (var img of action.payload.Img) {
+                images[img] = true;
+            }
+            var newField = state.game.Field.map((char) => {
+                if (char.Img in images) {
+                    return {...char, advice: true, selected: false}
+                } else {
+                    return {...char, advice: false, selected: false}
+                }
+            });
+            return {...state, game: {...state.game, Field: newField, Score: {...state.game.Score, Advices: [...state.game.Score.Advices, action.payload]}}};
         case CHAR_IMAGE_CHANGED:
             var changedImages = [];
             var newField = state.game.Field.map((char) => {

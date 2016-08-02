@@ -12,7 +12,7 @@ class Menu extends React.Component {
     }
 
     render() {
-        const { myGames, getGame, game, createGameStatus, toggleCreateGame, changeImage } = this.props;
+        const { myGames, getGame, game, createGameStatus, toggleCreateGame, changeImage, getAdvice } = this.props;
 
         var gamesNodes = myGames.map((gameId, i) => {
             return React.createElement(
@@ -26,7 +26,7 @@ class Menu extends React.Component {
         if (game.Score.TotalScore == -1) {
             completeNode = React.createElement(
                 "h2",
-                { className: "menu-content-button btn", onClick: this.completeGame.bind(this) },
+                { className: "menu-content-button btn complete-game", onClick: this.completeGame.bind(this) },
                 "Complete game"
             );
         }
@@ -125,7 +125,12 @@ class Menu extends React.Component {
                         "h2",
                         { className: "menu-content-button btn", onClick: changeImage.bind(this, game.Id, selectedChar[0]) },
                         "Change image"
-                    )
+                    ),
+                    game.Turn > 0 ? React.createElement(
+                        "h2",
+                        { className: "menu-content-button btn btn-green", onClick: getAdvice.bind(this, game.Id) },
+                        "Get advice"
+                    ) : ""
                 ),
                 React.createElement(
                     "div",

@@ -26,11 +26,18 @@ type ChangedImage struct {
 	Turn int    `bson:"turn"`
 }
 
+type Advice struct {
+	Img   []string
+	Title int
+	Turn  int
+}
+
 type GameScore struct {
 	CompletedTitles []CompleteTitle
 	CompletedGroups []int
 	TotalScore      int
 	ChangeImgs      []ChangedImage
+	Advices         []Advice
 }
 
 func (g *Game) GetCompletedGroups(completedChars []GameCharPosition) []int {

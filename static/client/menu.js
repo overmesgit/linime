@@ -12,7 +12,7 @@ class Menu extends React.Component {
     }
 
     render() {
-        const {myGames, getGame, game, createGameStatus, toggleCreateGame, changeImage} = this.props;
+        const {myGames, getGame, game, createGameStatus, toggleCreateGame, changeImage, getAdvice} = this.props;
 
         var gamesNodes = myGames.map((gameId, i) => {
             return <p key={i} className="my-game btn" onClick={getGame.bind(this, gameId)}>{gameId}</p>
@@ -20,7 +20,7 @@ class Menu extends React.Component {
 
         var completeNode = "";
         if(game.Score.TotalScore == -1) {
-            completeNode = <h2 className="menu-content-button btn" onClick={this.completeGame.bind(this)}>Complete game</h2>
+            completeNode = <h2 className="menu-content-button btn complete-game" onClick={this.completeGame.bind(this)}>Complete game</h2>
         }
 
         var selectedChar = game.Field.filter(field => field.selected);
@@ -51,6 +51,7 @@ class Menu extends React.Component {
                     {completeNode}
                     {selectedChar == 0 || <h2 className="menu-content-button btn" onClick={changeImage.bind(this, game.Id, selectedChar[0])}>
                         Change image</h2>}
+                    {game.Turn > 0 ? <h2 className="menu-content-button btn btn-green" onClick={getAdvice.bind(this, game.Id)}>Get advice</h2>: ""}
                 </div>
                 <div className="my-games-list">
                     <h3>My games:</h3>

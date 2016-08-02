@@ -16,8 +16,30 @@ CHANGE_ANIME_DIFFICULTY = 'CHANGE_ANIME_DIFFICULTY';
 CHANGE_CHAR_DIFFICULTY = 'CHANGE_CHAR_DIFFICULTY';
 CHANGE_CHAR_IMAGE = 'CHANGE_CHAR_IMAGE';
 CHAR_IMAGE_CHANGED = 'CHAR_IMAGE_CHANGED';
+GET_ADVICE = 'GET_ADVICE';
 
-toggleCreateGame = function () {
+var getAdvice = function (gameId) {
+    return (dispatch) => {
+        $.ajax({
+            method: "PUT",
+            url: '/game?gameId=' + gameId + '&action=advice',
+            contentType: 'application/json'
+        }).done((data) => {
+            dispatch({
+                type: GET_ADVICE,
+                payload: data
+            });
+        }).fail((xhr) => {
+            dispatch({
+                type: ERROR,
+                payload: 'Get advice error: ' + (xhr.responseJSON ? xhr.responseJSON['Message'] : '')
+            });
+            removeErrorAfter(5000, dispatch);
+        });
+    }
+};
+
+var toggleCreateGame = function () {
     return {
         type: TOGGLE_CREATE_GAME_MENU
     }
@@ -32,14 +54,13 @@ var removeErrorAfter = function(timeOut, dispatch) {
     }, timeOut);
 };
 
-completeGame = function (gameId) {
+var completeGame = function (gameId) {
     return (dispatch) => {
         $.ajax({
             method: "PUT",
             url: '/game?gameId=' + gameId + '&action=complete',
             contentType: 'application/json'
         }).done((data) => {
-            console.log('Game completed');
             dispatch({
                 type: COMPLETE_GAME
             });
@@ -53,7 +74,7 @@ completeGame = function (gameId) {
     }
 };
 
-moveCharacter = function (char, row, col) {
+var moveCharacter = function (char, row, col) {
     return {
         type: MOVE_CHARACTER,
         payload: {char, row, col}

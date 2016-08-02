@@ -9,6 +9,19 @@ import (
 	"sort"
 )
 
+func GetUniqueValues(values []int) []int {
+	uniqueMap := make(map[int]bool, 0)
+	unique := make([]int, 0)
+	for _, v := range values {
+		if _, ok := uniqueMap[v]; !ok {
+			unique = append(unique, v)
+		}
+		uniqueMap[v] = true
+	}
+	return unique
+
+}
+
 func (g *Game) getFullAndRequiredCount() (float64, float64) {
 	titleMap := g.getTitleMap()
 	full, required := 0.0, 0.0

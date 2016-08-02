@@ -84,6 +84,14 @@ p {
     background-color: #82b0d8;
 }
 
+.btn.btn-green {
+    background-color: #29ba29;
+}
+
+.btn.btn-green:hover {
+    background-color: #2dce2d;
+}
+
 .leftCol.fieldCell {
     width: 88px;
     border-left: 2px hidden #bababa;
@@ -134,11 +142,15 @@ p {
 }
 
 .char-cell.new .char {
-    box-shadow: 0 0 5pt 5pt cornflowerblue;
+    box-shadow: 0 0 5pt 6pt cornflowerblue;
+}
+
+.char-cell.advice .char{
+    box-shadow: 0 0 5pt 6pt #29ba29;
 }
 
 .char-cell.selected .char {
-    box-shadow: 0 0 5pt 5pt red;
+    box-shadow: 0 0 5pt 6pt red;
 }
 
 .cell-remove {
@@ -281,6 +293,11 @@ p {
     background-color: #f77e7e;
     border-radius: 15px;
     border: solid 3px;
+}
+
+.complete-game {
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 

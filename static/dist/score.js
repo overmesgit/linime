@@ -75,10 +75,46 @@ class ChangeImage extends React.Component {
             React.createElement(
                 "p",
                 { className: "score-title-turn" },
-                "turn: ",
+                "image: ",
                 changeGroup[0].Turn
             ),
             changeImagesNodes
+        );
+    }
+}
+
+class Advice extends React.Component {
+    shouldComponentUpdate(nextProps, nextState) {
+        return this.props.adviceGroup.length != nextProps.adviceGroup.length;
+    }
+    render() {
+        const { adviceGroup } = this.props;
+        var adviceNodes = [];
+        for (var advice of adviceGroup) {
+            for (var i = 0; i < advice.Img.length; i += 5) {
+                adviceNodes.push(React.createElement(
+                    "p",
+                    { key: '' + advice.Title + i, className: "stat-char" },
+                    React.createElement("span", { className: "stat-char-score" }),
+                    React.createElement("img", { src: advice.Img[i], className: "stat-char-img stat-change-img" }),
+                    advice.Img[i + 1] ? React.createElement("img", { src: advice.Img[i + 1], className: "stat-char-img stat-change-img" }) : "",
+                    advice.Img[i + 2] ? React.createElement("img", { src: advice.Img[i + 2], className: "stat-char-img stat-change-img" }) : "",
+                    advice.Img[i + 3] ? React.createElement("img", { src: advice.Img[i + 3], className: "stat-char-img stat-change-img" }) : "",
+                    advice.Img[i + 4] ? React.createElement("img", { src: advice.Img[i + 4], className: "stat-char-img stat-change-img" }) : ""
+                ));
+            }
+        }
+
+        return React.createElement(
+            "div",
+            { className: "title-scores" },
+            React.createElement(
+                "p",
+                { className: "score-title-turn" },
+                "advice: ",
+                adviceGroup[0].Turn
+            ),
+            adviceNodes
         );
     }
 }
@@ -99,22 +135,32 @@ class GameScore extends React.Component {
         totalScore -= game.Score.ChangeImgs.length;
         return totalScore;
     }
+
+    groupByTurn(values) {
+        var result = {};
+        for (var val of values) {
+            if (!(val.Turn in result)) {
+                result[val.Turn] = [];
+            }
+            result[val.Turn].push(val);
+        }
+        return result;
+    }
+
     render() {
         const { completedTitles, currentTurn, game } = this.props;
         var titlesNodes = completedTitles.map((title, i) => {
             return [title.Turn, React.createElement(CompleteTitle, { key: '' + title.Id + i, title: title })];
         });
 
-        var changedImagesGroups = {};
-        for (var change of game.Score.ChangeImgs) {
-            if (!(change.Turn in changedImagesGroups)) {
-                changedImagesGroups[change.Turn] = [];
-            }
-            changedImagesGroups[change.Turn].push(change);
+        var changedImagesGroups = this.groupByTurn(game.Score.ChangeImgs);
+        for (const turn in changedImagesGroups) {
+            titlesNodes.push([turn, React.createElement(ChangeImage, { key: 'changeImage' + turn, changeGroup: changedImagesGroups[turn] })]);
         }
 
-        for (var group in changedImagesGroups) {
-            titlesNodes.push([group, React.createElement(ChangeImage, { key: 'changeImage' + group, changeGroup: changedImagesGroups[group] })]);
+        var advicesGroups = this.groupByTurn(game.Score.Advices);
+        for (const turn in advicesGroups) {
+            titlesNodes.push([turn, React.createElement(Advice, { key: 'advice' + turn, adviceGroup: advicesGroups[turn] })]);
         }
 
         titlesNodes.sort((a, b) => a[0] >= b[0] ? 1 : -1);

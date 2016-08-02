@@ -6,7 +6,7 @@ class Character extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        var checkList = ['Img', 'Row', 'Col', 'prevRow', 'prevCol', 'selected', 'toDelete', 'turn'];
+        var checkList = ['Img', 'Row', 'Col', 'prevRow', 'prevCol', 'selected', 'toDelete', 'turn', 'advice'];
         for(var i = 0; i < checkList.length; i++){
             if (this.props.char[checkList[i]] != nextProps.char[checkList[i]]) {
                 return true;
@@ -17,8 +17,8 @@ class Character extends React.Component {
 
     render() {
         const {gameTurn} = this.props;
-        const {Img, Row, Col, prevRow, prevCol, selected, toDelete, turn} = this.props.char;
-        var classes = ["char-cell", "row"+Row, "col"+Col,
+        const {Img, Row, Col, prevRow, prevCol, selected, toDelete, turn, advice} = this.props.char;
+        var classes = ["char-cell", "row"+Row, "col"+Col, (advice ? "advice":""),
             (selected ? "selected":""), (toDelete?"cell-remove":""),
             (turn == gameTurn - 1 ? "new":""), (turn == gameTurn ? "appear":"")];
         return <div className={classes.join(" ")}
