@@ -57,6 +57,9 @@ func serveTargetGame(gameUUID string, method string, action string, body io.Read
 	case "PUT":
 		switch action {
 		case "move":
+			if game.Score.TotalScore >= 0 {
+				return http.StatusInternalServerError, Message{Message: "Game completed"}.AsJson()
+			}
 			var message MoveMessage
 			err := json.NewDecoder(body).Decode(&message)
 			defer body.Close()
@@ -100,8 +103,10 @@ func serveTargetGame(gameUUID string, method string, action string, body io.Read
 				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
 			}
 			return http.StatusOK, jsonResp
-
 		case "complete":
+			if game.Score.TotalScore >= 0 {
+				return http.StatusInternalServerError, Message{Message: "Game completed"}.AsJson()
+			}
 			game.CompleteCountTotalScore()
 			err = game.Update()
 			if err != nil {

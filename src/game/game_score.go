@@ -112,7 +112,6 @@ func (g *Game) UpdateGameScore(completedChars []GameCharPosition, notInLine []Ga
 	}
 	g.Score.CompletedTitles = append(g.Score.CompletedTitles, titles...)
 
-	g.Turn++
 	if len(g.Field) >= g.Width*g.Height {
 		g.CompleteCountTotalScore()
 	}
@@ -128,5 +127,6 @@ func (g *Game) CompleteCountTotalScore() {
 	}
 	g.Score.TotalScore = totalScore
 	g.Score.TotalScore -= len(g.Score.ChangeImgs)
+	g.Score.TotalScore -= 3 * len(g.Score.Advices)
 	g.EndDate = time.Now()
 }

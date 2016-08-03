@@ -162,14 +162,15 @@ func (g *Game) FindChar(row, col int) (*GameCharPosition, error) {
 
 func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, error) {
 	var res MoveResponse
-	if g.Score.TotalScore >= 0 {
-		return res, errors.New("Game completed")
-	}
 	path, err := g.MoveCharacter(char, row, col)
 	if err != nil {
 		return res, err
 	} else {
 		completed, notInLine := g.CheckCompleted()
+		titleScoreUpdate, err := g.UpdateGameScore(completed, notInLine)
+		if err != nil {
+			return res, err
+		}
 
 		newChars, err := g.AddNewChars()
 		if err != nil {
@@ -177,7 +178,8 @@ func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, erro
 		}
 		completedNew, notInLineNew := g.CheckCompleted()
 
-		titleScoreUpdate, err := g.UpdateGameScore(append(completed, completedNew...), append(notInLine, notInLineNew...))
+		titleScoreUpdateNew, err := g.UpdateGameScore(completedNew, notInLineNew)
+		g.Turn++
 		if err != nil {
 			return res, err
 		}
@@ -194,7 +196,8 @@ func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, erro
 		for _, char := range append(completedNew, notInLineNew...) {
 			completedIndexesNew = append(completedIndexesNew, [2]int{char.Row, char.Col})
 		}
-		return MoveResponse{path, completedIndexes, newChars, completedIndexesNew, g.Turn, titleScoreUpdate}, nil
+		return MoveResponse{path, completedIndexes, newChars, completedIndexesNew, g.Turn,
+			append(titleScoreUpdate, titleScoreUpdateNew...)}, nil
 	}
 }
 
@@ -211,9 +214,9 @@ func (g *Game) AddNewChars() ([]GameCharPosition, error) {
 			switch {
 			case len(g.Field) >= g.Width*g.Height:
 				break
-			case funcRandom < 50:
+			case funcRandom < 40:
 				newChar, err = g.getExistedChar(true)
-			case funcRandom < 80:
+			case funcRandom < 70:
 				newChar, err = g.getExistedChar(false)
 			case funcRandom < 100:
 				newChar, err = g.getNewGroupChar()

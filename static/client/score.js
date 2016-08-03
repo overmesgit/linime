@@ -23,26 +23,35 @@ class CompleteTitle extends React.Component {
     }
 }
 
+class StatsImagesGroup extends React.Component {
+    render() {
+        const {imagesArray, score} = this.props;
+        var imagesGroup = [];
+        for(var i = 0; i < imagesArray.length; i += 5) {
+            imagesGroup.push(<p key={'' + i} className="stat-char">
+                <span className="stat-char-score">{ score }</span>
+                <img src={imagesArray[i]} className="stat-char-img stat-change-img" />
+                {imagesArray[i+1]?<img src={imagesArray[i+1]} className="stat-char-img stat-change-img" />:""}
+                {imagesArray[i+2]?<img src={imagesArray[i+2]} className="stat-char-img stat-change-img" />:""}
+                {imagesArray[i+3]?<img src={imagesArray[i+3]} className="stat-char-img stat-change-img" />:""}
+                {imagesArray[i+4]?<img src={imagesArray[i+4]} className="stat-char-img stat-change-img" />:""}
+            </p>)
+        }
+        return <div>
+            {imagesGroup}
+        </div>
+    }
+}
+
 class ChangeImage extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
         return this.props.changeGroup.length != nextProps.changeGroup.length
     }
     render() {
         const {changeGroup} = this.props;
-        var changeImagesNodes = [];
-        for(var i = 0; i < changeGroup.length; i += 5) {
-            changeImagesNodes.push(<p key={'' + i} className="stat-char">
-                <span className="stat-char-score">-1</span>
-                <img src={changeGroup[i].Img} className="stat-char-img stat-change-img" />
-                {changeGroup[i+1]?<img src={changeGroup[i+1].Img} className="stat-char-img stat-change-img" />:""}
-                {changeGroup[i+2]?<img src={changeGroup[i+2].Img} className="stat-char-img stat-change-img" />:""}
-                {changeGroup[i+3]?<img src={changeGroup[i+3].Img} className="stat-char-img stat-change-img" />:""}
-                {changeGroup[i+4]?<img src={changeGroup[i+4].Img} className="stat-char-img stat-change-img" />:""}
-            </p>)
-        }
         return <div className="title-scores">
             <p className="score-title-turn">image: {changeGroup[0].Turn}</p>
-            {changeImagesNodes}
+            <StatsImagesGroup imagesArray={changeGroup.map(change => change.Img)} score={-1} />
         </div>
     }
 }
@@ -55,16 +64,7 @@ class Advice extends React.Component {
         const {adviceGroup} = this.props;
         var adviceNodes = [];
         for (var advice of adviceGroup) {
-            for(var i = 0; i < advice.Img.length; i += 5) {
-                adviceNodes.push(<p key={'' + advice.Title + i} className="stat-char">
-                    <span className="stat-char-score"></span>
-                    <img src={advice.Img[i]} className="stat-char-img stat-change-img" />
-                    {advice.Img[i+1]?<img src={advice.Img[i+1]} className="stat-char-img stat-change-img" />:""}
-                    {advice.Img[i+2]?<img src={advice.Img[i+2]} className="stat-char-img stat-change-img" />:""}
-                    {advice.Img[i+3]?<img src={advice.Img[i+3]} className="stat-char-img stat-change-img" />:""}
-                    {advice.Img[i+4]?<img src={advice.Img[i+4]} className="stat-char-img stat-change-img" />:""}
-                </p>)
-            }
+            adviceNodes.push(<StatsImagesGroup key={advice.Title} imagesArray={advice.Img} score={-3} />)
         }
 
         return <div className="title-scores">
@@ -80,6 +80,9 @@ class GameScore extends React.Component {
     }
 
     getTotalScore() {
+        if (this.props.game.Score.TotalScore >= 0) {
+            return this.props.game.Score.TotalScore;
+        }
         const {completedTitles, game} = this.props;
         var totalScore = 0;
         completedTitles.forEach((title) => {
@@ -88,6 +91,13 @@ class GameScore extends React.Component {
             })
         });
         totalScore -= game.Score.ChangeImgs.length;
+
+        var uniqueAdviceTitles = {};
+        game.Score.Advices.forEach(advice => {
+            uniqueAdviceTitles[advice.Title] = true;
+        });
+        totalScore -= 3*Object.keys(uniqueAdviceTitles).length;
+
         return totalScore;
     }
 
@@ -105,17 +115,17 @@ class GameScore extends React.Component {
     render() {
         const {completedTitles, currentTurn, game} = this.props;
         var titlesNodes = completedTitles.map((title, i) => {
-            return [title.Turn, <CompleteTitle key={'' + title.Id + i} title={title} />]
+            return [parseInt(title.Turn, 10), <CompleteTitle key={'complete' + title.Id + i} title={title} />]
         });
 
         var changedImagesGroups = this.groupByTurn(game.Score.ChangeImgs);
         for(const turn in changedImagesGroups) {
-            titlesNodes.push([turn, <ChangeImage key={'changeImage' + turn} changeGroup={changedImagesGroups[turn]} />])
+            titlesNodes.push([parseInt(turn, 10), <ChangeImage key={'changeImage' + turn} changeGroup={changedImagesGroups[turn]} />])
         }
 
         var advicesGroups = this.groupByTurn(game.Score.Advices);
         for(const turn in advicesGroups) {
-            titlesNodes.push([turn, <Advice key={'advice' + turn} adviceGroup={advicesGroups[turn]} />])
+            titlesNodes.push([parseInt(turn, 10), <Advice key={'advice' + turn} adviceGroup={advicesGroups[turn]} />])
         }
 
         titlesNodes.sort((a,b) => a[0] >= b[0] ? 1: -1);
