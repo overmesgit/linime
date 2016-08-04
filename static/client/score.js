@@ -29,7 +29,7 @@ class StatsImagesGroup extends React.Component {
         var imagesGroup = [];
         for(var i = 0; i < imagesArray.length; i += 5) {
             imagesGroup.push(<p key={'' + i} className="stat-char">
-                <span className="stat-char-score">{ score }</span>
+                <span className="stat-char-score">{ score*(imagesArray.slice(i,i+5).length) }</span>
                 <img src={imagesArray[i]} className="stat-char-img stat-change-img" />
                 {imagesArray[i+1]?<img src={imagesArray[i+1]} className="stat-char-img stat-change-img" />:""}
                 {imagesArray[i+2]?<img src={imagesArray[i+2]} className="stat-char-img stat-change-img" />:""}
@@ -51,7 +51,7 @@ class ChangeImage extends React.Component {
         const {changeGroup} = this.props;
         return <div className="title-scores">
             <p className="score-title-turn">image: {changeGroup[0].Turn}</p>
-            <StatsImagesGroup imagesArray={changeGroup.map(change => change.Img)} score={-1} />
+            <StatsImagesGroup imagesArray={changeGroup.map(change => change.OldImg)} score={changeGroup[0].Score} />
         </div>
     }
 }
@@ -64,7 +64,7 @@ class Advice extends React.Component {
         const {adviceGroup} = this.props;
         var adviceNodes = [];
         for (var advice of adviceGroup) {
-            adviceNodes.push(<StatsImagesGroup key={advice.Title} imagesArray={advice.Img} score={-3} />)
+            adviceNodes.push(<StatsImagesGroup key={advice.Title} imagesArray={advice.Img} score={advice.Score != 0?advice.Score:""} />)
         }
 
         return <div className="title-scores">

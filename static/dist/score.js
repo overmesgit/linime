@@ -96,7 +96,7 @@ var StatsImagesGroup = function (_React$Component2) {
                     React.createElement(
                         "span",
                         { className: "stat-char-score" },
-                        score
+                        score * imagesArray.slice(i, i + 5).length
                     ),
                     React.createElement("img", { src: imagesArray[i], className: "stat-char-img stat-change-img" }),
                     imagesArray[i + 1] ? React.createElement("img", { src: imagesArray[i + 1], className: "stat-char-img stat-change-img" }) : "",
@@ -145,8 +145,8 @@ var ChangeImage = function (_React$Component3) {
                     changeGroup[0].Turn
                 ),
                 React.createElement(StatsImagesGroup, { imagesArray: changeGroup.map(function (change) {
-                        return change.Img;
-                    }), score: -1 })
+                        return change.OldImg;
+                    }), score: changeGroup[0].Score })
             );
         }
     }]);
@@ -182,7 +182,7 @@ var Advice = function (_React$Component4) {
                 for (var _iterator = adviceGroup[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                     var advice = _step.value;
 
-                    adviceNodes.push(React.createElement(StatsImagesGroup, { key: advice.Title, imagesArray: advice.Img, score: -3 }));
+                    adviceNodes.push(React.createElement(StatsImagesGroup, { key: advice.Title, imagesArray: advice.Img, score: advice.Score != 0 ? advice.Score : "" }));
                 }
             } catch (err) {
                 _didIteratorError = true;

@@ -1,7 +1,7 @@
-MAIN_VIEW = 'MAIN_VIEW';
-GAME_VIEW = 'GAME_VIEW';
-LOADING_VIEW = 'LOADING_VIEW';
-ERROR_VIEW = 'ERROR_VIEW';
+var MAIN_VIEW = 'MAIN_VIEW';
+var GAME_VIEW = 'GAME_VIEW';
+var LOADING_VIEW = 'LOADING_VIEW';
+var ERROR_VIEW = 'ERROR_VIEW';
 
 var urlHash = window.location.hash.substr(1);
 var gameId = '';
@@ -56,13 +56,13 @@ function viewState(state = initialState, action) {
         case CHAR_IMAGE_CHANGED:
             var changedImages = [];
             var newField = state.game.Field.map((char) => {
-                if (char.Row == action.payload.Row && char.Col == action.payload.Col) {
-                    if (state.game.Score.ChangeImgs.filter(change => change.Img == char.Img).length == 0) {
-                        changedImages = [...state.game.Score.ChangeImgs, {Img: char.Img, Turn: state.game.Turn}];
+                if (char.Img == action.payload.OldImg) {
+                    if (state.game.Score.ChangeImgs.filter(change => change.OldImg == char.Img).length == 0) {
+                        changedImages = [...state.game.Score.ChangeImgs, action.payload];
                     } else {
                         changedImages = state.game.Score.ChangeImgs
                     }
-                    return {...char, Img: action.payload.Img}
+                    return {...char, Img: action.payload.NewImg}
                 }
                 return char
             });
@@ -126,5 +126,5 @@ function thunkMiddleware({dispatch, getState}) {
             next(action);
 }
 
-Store = Redux.createStore(viewState, initialState, Redux.applyMiddleware(thunkMiddleware));
-Provider = ReactRedux.Provider;
+var Store = Redux.createStore(viewState, initialState, Redux.applyMiddleware(thunkMiddleware));
+var Provider = ReactRedux.Provider;

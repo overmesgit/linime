@@ -87,11 +87,13 @@ outer:
 
 	}
 
+	viewedAdvice := false
 	if adviceTitle == 0 && len(g.Score.Advices) > 0 {
 		for i, advice := range g.Score.Advices {
 			if _, ok := titlesMap[advice.Title]; ok {
 				adviceTitle = g.Score.Advices[i].Title
 				g.Score.Advices = append(g.Score.Advices[:i], g.Score.Advices[i+1:]...)
+				viewedAdvice = true
 				break
 			}
 		}
@@ -103,7 +105,11 @@ outer:
 		for _, pos := range positions {
 			images = append(images, pos.Img)
 		}
-		res = Advice{Img: images, Title: adviceTitle, Turn: g.Turn}
+		score := -3
+		if g.isCompleted() || viewedAdvice {
+			score = 0
+		}
+		res = Advice{Img: images, Title: adviceTitle, Turn: g.Turn, Score: score}
 		g.Score.Advices = append(g.Score.Advices, res)
 	} else {
 		return res, errors.New("Can't find advice")
@@ -112,41 +118,44 @@ outer:
 	return res, nil
 }
 
-func (g *Game) ChangeImage(character *GameCharPosition) error {
+func (g *Game) ChangeImage(character GameCharPosition) (ChangedImage, error) {
+	var result ChangedImage
 	gameChar, err := g.FindChar(character.Row, character.Col)
 	if err != nil {
-		return err
+		return result, err
 	}
 
 	sameChange := false
 	for _, change := range g.Score.ChangeImgs {
-		if change.Img == gameChar.Img {
+		if change.OldImg == gameChar.Img {
 			sameChange = true
 			break
 		}
-	}
-	if !sameChange {
-		g.Score.ChangeImgs = append(g.Score.ChangeImgs, ChangedImage{Img: gameChar.Img, Turn: g.Turn})
 	}
 
 	var char parser.Character
 	charCol := mongoDB.C("char")
 	err = charCol.Find(bson.M{"_id": gameChar.Id}).One(&char)
 	if err != nil {
-		return err
+		return result, err
 	}
 	if len(char.Images) == 1 {
-		return errors.New("Only one image")
+		return result, errors.New("Only one image")
 	}
 	for i, img := range char.Images {
 		if img == gameChar.Img {
 			nextImage := char.Images[(i+1)%len(char.Images)]
-			character.Img = nextImage
 			gameChar.Img = nextImage
-			return nil
+
+			result = ChangedImage{OldImg: character.Img, NewImg: nextImage, Turn: g.Turn, Score: 0}
+			if !sameChange {
+				result.Score = -1
+				g.Score.ChangeImgs = append(g.Score.ChangeImgs, result)
+			}
+			return result, nil
 		}
 	}
-	return errors.New("No image for change")
+	return result, errors.New("No image for change")
 }
 
 func (g *Game) FindChar(row, col int) (*GameCharPosition, error) {

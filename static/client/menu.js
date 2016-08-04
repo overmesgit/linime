@@ -49,7 +49,7 @@ class Menu extends React.Component {
                         <div className="btn create-game" onClick={this.createGame.bind(this)}>Create Game</div>
                     </div>
                     {completeNode}
-                    {game.Turn > 0 ? <h2 className="menu-content-button btn btn-green" onClick={getAdvice.bind(this, game.Id)}>Get advice</h2>: ""}
+                    {game.Turn > 0 ? <h2 className="menu-content-button btn btn-green" onClick={getAdvice.bind(this, game.Id)}>Random advice</h2>: ""}
                     {selectedChar == 0 || <h2 className="menu-content-button btn" onClick={changeImage.bind(this, game.Id, selectedChar[0])}>
                         Change image</h2>}
                 </div>

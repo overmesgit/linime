@@ -82,12 +82,12 @@ func serveTargetGame(gameUUID string, method string, action string, body io.Read
 			if err != nil {
 				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
 			}
-			err = game.ChangeImage(&message.Char)
+			changeImage, err := game.ChangeImage(message.Char)
 			if err != nil {
 				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
 			}
 			game.Update()
-			jsonResp, err := json.Marshal(message.Char)
+			jsonResp, err := json.Marshal(changeImage)
 			if err != nil {
 				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
 			}

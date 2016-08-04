@@ -159,7 +159,7 @@ var Menu = function (_React$Component) {
                         game.Turn > 0 ? React.createElement(
                             "h2",
                             { className: "menu-content-button btn btn-green", onClick: getAdvice.bind(this, game.Id) },
-                            "Get advice"
+                            "Random advice"
                         ) : "",
                         selectedChar == 0 || React.createElement(
                             "h2",

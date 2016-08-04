@@ -22,14 +22,17 @@ type CompleteTitle struct {
 }
 
 type ChangedImage struct {
-	Img  string `bson:"img"`
-	Turn int    `bson:"turn"`
+	NewImg string
+	OldImg string
+	Turn   int
+	Score  int
 }
 
 type Advice struct {
 	Img   []string
 	Title int
 	Turn  int
+	Score int
 }
 
 type GameScore struct {
@@ -51,6 +54,10 @@ func (g *Game) GetCompletedGroups(completedChars []GameCharPosition) []int {
 	var completedGroups []int
 	anime.Find(bson.M{"characters": notEmpty, "_id.i": bson.M{"$in": completedTitles}}).Distinct("group", &completedGroups)
 	return GetUniqueValues(completedGroups)
+}
+
+func (g *Game) isCompleted() bool {
+	return g.Score.TotalScore >= 0
 }
 
 func (g *Game) GetCompletedTitles(completedChars []GameCharPosition, notInLine []GameCharPosition) ([]CompleteTitle, error) {
