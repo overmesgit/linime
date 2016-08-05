@@ -132,7 +132,7 @@ var Menu = function (_React$Component) {
                             React.createElement(
                                 "p",
                                 null,
-                                "Use MyAnimeList (Optional):"
+                                "MyAnimeList (Optional):"
                             ),
                             React.createElement("input", { className: "mal-username", ref: "userName", placeholder: "MyAnimeList username" }),
                             React.createElement(

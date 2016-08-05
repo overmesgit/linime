@@ -5,6 +5,7 @@ p {
 .content {
     margin: auto;
     width: 1470px;
+    display: inherit !important;
 }
 
 .window {

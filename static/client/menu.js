@@ -40,7 +40,7 @@ class Menu extends React.Component {
                             <option value="3">Hard</option>
                             <option value="4">Flappy bird</option>
                         </select>
-                        <p>Use MyAnimeList (Optional):</p>
+                        <p>MyAnimeList (Optional):</p>
                         <input className="mal-username" ref="userName"  placeholder="MyAnimeList username"/>
                         <div className="btn create-game" onClick={this.createGame.bind(this)}>Create Game</div>
                     </div>

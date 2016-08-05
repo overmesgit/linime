@@ -25,7 +25,7 @@ class AppClass extends React.Component {
     render() {
         const {game, error, myGames, createGameStatus} = this.props.app;
         const {createGame, completeGame, selectChar, moveSelected, getGame, toggleCreateGame, changeImage, getAdvice} = this.props.appActions;
-        return <div className="content">
+        return <div className="content fa">
             <Menu createGame={createGame} completeGame={completeGame} getGame={getGame} game={game} myGames={myGames}
             toggleCreateGame={toggleCreateGame} createGameStatus={createGameStatus} changeImage={changeImage} getAdvice={getAdvice}/>
             <Game game={game} selectChar={selectChar} moveSelected={moveSelected} />

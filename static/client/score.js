@@ -29,7 +29,7 @@ class StatsImagesGroup extends React.Component {
         var imagesGroup = [];
         for(var i = 0; i < imagesArray.length; i += 5) {
             imagesGroup.push(<p key={'' + i} className="stat-char">
-                <span className="stat-char-score">{ score*(imagesArray.slice(i,i+5).length) }</span>
+                <span className="stat-char-score">{ score ? score*(imagesArray.slice(i,i+5).length): "" }</span>
                 <img src={imagesArray[i]} className="stat-char-img stat-change-img" />
                 {imagesArray[i+1]?<img src={imagesArray[i+1]} className="stat-char-img stat-change-img" />:""}
                 {imagesArray[i+2]?<img src={imagesArray[i+2]} className="stat-char-img stat-change-img" />:""}

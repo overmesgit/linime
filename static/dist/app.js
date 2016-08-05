@@ -76,7 +76,7 @@ var AppClass = function (_React$Component2) {
 
             return React.createElement(
                 "div",
-                { className: "content" },
+                { className: "content fa" },
                 React.createElement(Menu, { createGame: createGame, completeGame: completeGame, getGame: getGame, game: game, myGames: myGames,
                     toggleCreateGame: toggleCreateGame, createGameStatus: createGameStatus, changeImage: changeImage, getAdvice: getAdvice }),
                 React.createElement(Game, { game: game, selectChar: selectChar, moveSelected: moveSelected }),

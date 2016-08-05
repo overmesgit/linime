@@ -96,7 +96,7 @@ var StatsImagesGroup = function (_React$Component2) {
                     React.createElement(
                         "span",
                         { className: "stat-char-score" },
-                        score * imagesArray.slice(i, i + 5).length
+                        score ? score * imagesArray.slice(i, i + 5).length : ""
                     ),
                     React.createElement("img", { src: imagesArray[i], className: "stat-char-img stat-change-img" }),
                     imagesArray[i + 1] ? React.createElement("img", { src: imagesArray[i + 1], className: "stat-char-img stat-change-img" }) : "",
