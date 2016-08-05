@@ -360,7 +360,7 @@ var GameScore = function (_React$Component5) {
 
             //last titles in the end of the list
             titlesNodes.reverse();
-            var startDate = null;
+            var startDate = new Date().toLocaleString();
             if (game.Date) {
                 startDate = new Date(game.Date).toLocaleString();
             }
