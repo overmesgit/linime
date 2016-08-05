@@ -23,7 +23,7 @@ if (supports_html5_storage()) {
 }
 
 var initialState = {
-    game: { Field: [], Turn: 0, AnimeDiff: 0, CharDiff: 0, UserName: '',
+    game: { Field: [], Turn: 0, Difficulty: 0, UserName: '',
         Score: { CompletedTitles: [], TotalScore: 0, ChangeImgs: [], Advices: [] } },
     error: "",
     fetchingGame: gameId,
