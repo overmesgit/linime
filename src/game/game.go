@@ -43,12 +43,11 @@ type Game struct {
 }
 
 type MoveResponse struct {
-	Path         [][2]int
-	Completed    [][2]int
-	NewChars     []GameCharPosition
-	CompletedNew [][2]int
-	NextTurn     int
-	GameScore    []CompleteTitle
+	Path      [][2]int
+	Completed [][2]int
+	NewChars  []GameCharPosition
+	NextTurn  int
+	GameScore []CompleteTitle
 }
 
 func NewGame() *Game {
@@ -180,15 +179,7 @@ func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, erro
 		if err != nil {
 			return res, err
 		}
-
 		newChars, err := g.AddNewChars()
-		if err != nil {
-			return res, err
-		}
-		completedNew, notInLineNew := g.CheckCompleted()
-
-		titleScoreUpdateNew, err := g.UpdateGameScore(completedNew, notInLineNew)
-		g.Turn++
 		if err != nil {
 			return res, err
 		}
@@ -201,12 +192,7 @@ func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, erro
 		for _, char := range append(completed, notInLine...) {
 			completedIndexes = append(completedIndexes, [2]int{char.Row, char.Col})
 		}
-		completedIndexesNew := make([][2]int, 0)
-		for _, char := range append(completedNew, notInLineNew...) {
-			completedIndexesNew = append(completedIndexesNew, [2]int{char.Row, char.Col})
-		}
-		return MoveResponse{path, completedIndexes, newChars, completedIndexesNew, g.Turn,
-			append(titleScoreUpdate, titleScoreUpdateNew...)}, nil
+		return MoveResponse{path, completedIndexes, newChars, g.Turn, titleScoreUpdate}, nil
 	}
 }
 

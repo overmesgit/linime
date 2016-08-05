@@ -1,35 +1,37 @@
-GET_GAME_REQUEST = 'GET_GAME_REQUEST';
-GET_GAME_SUCCESS = 'GET_GAME_SUCCESS';
-ERROR = 'ERROR';
-CHAR_SELECTED = 'CHAR_SELECTED';
-MOVE_SELECTED = 'MOVE_SELECTED';
-MOVE_CHARACTER = 'MOVE_CHARACTER';
-REMOVE_CHARACTER = 'REMOVE_CHARACTER';
-FADE_CHARACTER = 'FADE_CHARACTER';
-ADD_CHARACTER = 'ADD_CHARACTER';
-CHANGE_GAME_TURN = 'CHANGE_GAME_TURN';
-UPDATE_GAME_SCORE = 'UPDATE_GAME_SCORE';
-COMPLETE_GAME = 'COMPLETE_GAME';
-ADD_MY_GAME = 'ADD_MY_GAME';
-TOGGLE_CREATE_GAME_MENU = 'TOGGLE_CREATE_GAME_MENU';
-CHANGE_ANIME_DIFFICULTY = 'CHANGE_ANIME_DIFFICULTY';
-CHANGE_CHAR_DIFFICULTY = 'CHANGE_CHAR_DIFFICULTY';
-CHANGE_CHAR_IMAGE = 'CHANGE_CHAR_IMAGE';
-CHAR_IMAGE_CHANGED = 'CHAR_IMAGE_CHANGED';
-GET_ADVICE = 'GET_ADVICE';
+'use strict';
 
-var getAdvice = function (gameId) {
-    return dispatch => {
+var GET_GAME_REQUEST = 'GET_GAME_REQUEST';
+var GET_GAME_SUCCESS = 'GET_GAME_SUCCESS';
+var ERROR = 'ERROR';
+var CHAR_SELECTED = 'CHAR_SELECTED';
+var MOVE_SELECTED = 'MOVE_SELECTED';
+var MOVE_CHARACTER = 'MOVE_CHARACTER';
+var REMOVE_CHARACTER = 'REMOVE_CHARACTER';
+var FADE_CHARACTER = 'FADE_CHARACTER';
+var ADD_CHARACTER = 'ADD_CHARACTER';
+var CHANGE_GAME_TURN = 'CHANGE_GAME_TURN';
+var UPDATE_GAME_SCORE = 'UPDATE_GAME_SCORE';
+var COMPLETE_GAME = 'COMPLETE_GAME';
+var ADD_MY_GAME = 'ADD_MY_GAME';
+var TOGGLE_CREATE_GAME_MENU = 'TOGGLE_CREATE_GAME_MENU';
+var CHANGE_ANIME_DIFFICULTY = 'CHANGE_ANIME_DIFFICULTY';
+var CHANGE_CHAR_DIFFICULTY = 'CHANGE_CHAR_DIFFICULTY';
+var CHANGE_CHAR_IMAGE = 'CHANGE_CHAR_IMAGE';
+var CHAR_IMAGE_CHANGED = 'CHAR_IMAGE_CHANGED';
+var GET_ADVICE = 'GET_ADVICE';
+
+var getAdvice = function getAdvice(gameId) {
+    return function (dispatch) {
         $.ajax({
             method: "PUT",
             url: '/game?gameId=' + gameId + '&action=advice',
             contentType: 'application/json'
-        }).done(data => {
+        }).done(function (data) {
             dispatch({
                 type: GET_ADVICE,
                 payload: data
             });
-        }).fail(xhr => {
+        }).fail(function (xhr) {
             dispatch({
                 type: ERROR,
                 payload: 'Get advice error: ' + (xhr.responseJSON ? xhr.responseJSON['Message'] : '')
@@ -39,14 +41,14 @@ var getAdvice = function (gameId) {
     };
 };
 
-var toggleCreateGame = function () {
+var toggleCreateGame = function toggleCreateGame() {
     return {
         type: TOGGLE_CREATE_GAME_MENU
     };
 };
 
-var removeErrorAfter = function (timeOut, dispatch) {
-    setTimeout(() => {
+var removeErrorAfter = function removeErrorAfter(timeOut, dispatch) {
+    setTimeout(function () {
         dispatch({
             type: ERROR,
             payload: ''
@@ -54,17 +56,17 @@ var removeErrorAfter = function (timeOut, dispatch) {
     }, timeOut);
 };
 
-var completeGame = function (gameId) {
-    return dispatch => {
+var completeGame = function completeGame(gameId) {
+    return function (dispatch) {
         $.ajax({
             method: "PUT",
             url: '/game?gameId=' + gameId + '&action=complete',
             contentType: 'application/json'
-        }).done(data => {
+        }).done(function (data) {
             dispatch({
                 type: COMPLETE_GAME
             });
-        }).fail(xhr => {
+        }).fail(function (xhr) {
             dispatch({
                 type: ERROR,
                 payload: 'Complete game error: ' + (xhr.responseJSON ? xhr.responseJSON['Message'] : '')
@@ -74,14 +76,14 @@ var completeGame = function (gameId) {
     };
 };
 
-var moveCharacter = function (char, row, col) {
+var moveCharacter = function moveCharacter(char, row, col) {
     return {
         type: MOVE_CHARACTER,
-        payload: { char, row, col }
+        payload: { char: char, row: row, col: col }
     };
 };
 
-var groupDispatchChar = (dispatch, array, type) => {
+var groupDispatchChar = function groupDispatchChar(dispatch, array, type) {
     for (var i = 0; i < array.length; i++) {
         dispatch({
             type: type,
@@ -90,8 +92,12 @@ var groupDispatchChar = (dispatch, array, type) => {
     }
 };
 
-var removeAndAddNewChars = (dispatch, data) => {
-    const { Completed, NewChars, CompletedNew, NextTurn, GameScore } = data;
+var removeAndAddNewChars = function removeAndAddNewChars(dispatch, data) {
+    var Completed = data.Completed;
+    var NewChars = data.NewChars;
+    var NextTurn = data.NextTurn;
+    var GameScore = data.GameScore;
+
     moveLock = false;
     var timeOutAdd = 0;
     if (Completed.length > 0) {
@@ -102,10 +108,10 @@ var removeAndAddNewChars = (dispatch, data) => {
         var newImg = new Image();
         newImg.src = NewChars[j].Img;
     }
-    setTimeout(() => {
+    setTimeout(function () {
         groupDispatchChar(dispatch, Completed, FADE_CHARACTER);
     }, 50);
-    setTimeout(() => {
+    setTimeout(function () {
         groupDispatchChar(dispatch, Completed, REMOVE_CHARACTER);
         for (var j = 0; j < NewChars.length; j++) {
             dispatch({
@@ -114,7 +120,7 @@ var removeAndAddNewChars = (dispatch, data) => {
             });
         }
         // start new character animation
-        setTimeout(() => {
+        setTimeout(function () {
             dispatch({
                 type: CHANGE_GAME_TURN,
                 payload: NextTurn
@@ -124,25 +130,19 @@ var removeAndAddNewChars = (dispatch, data) => {
                 payload: GameScore
             });
         }, 50);
-        setTimeout(() => {
-            groupDispatchChar(dispatch, CompletedNew, FADE_CHARACTER);
-        }, 50);
-        setTimeout(() => {
-            groupDispatchChar(dispatch, CompletedNew, REMOVE_CHARACTER);
-        }, 300);
     }, timeOutAdd);
 };
 
-var moveCallbackFactory = (dispatch, char) => {
-    return data => {
+var moveCallbackFactory = function moveCallbackFactory(dispatch, char) {
+    return function (data) {
         var path = data.Path;
-        var callBack = () => {
+        var callBack = function callBack() {
             var current = path.pop();
             var row = current[0];
             var col = current[1];
             dispatch({
                 type: MOVE_CHARACTER,
-                payload: { char, row, col }
+                payload: { char: char, row: row, col: col }
             });
             if (path.length > 0) {
                 char.Row = row;
@@ -157,17 +157,17 @@ var moveCallbackFactory = (dispatch, char) => {
 };
 
 var moveLock = false;
-moveSelected = function (gameId, char, Row, Col) {
-    return dispatch => {
+var moveSelected = function moveSelected(gameId, char, Row, Col) {
+    return function (dispatch) {
         if (!moveLock) {
             moveLock = true;
             $.ajax({
                 method: "PUT",
                 url: '/game?gameId=' + gameId + '&action=move',
-                data: JSON.stringify({ char, Row, Col }),
+                data: JSON.stringify({ char: char, Row: Row, Col: Col }),
                 contentType: 'application/json',
                 dataType: 'json'
-            }).done(moveCallbackFactory(dispatch, char)).fail(xhr => {
+            }).done(moveCallbackFactory(dispatch, char)).fail(function (xhr) {
                 dispatch({
                     type: ERROR,
                     payload: 'Make turn error: ' + (xhr.responseJSON ? xhr.responseJSON['Message'] : '')
@@ -179,20 +179,20 @@ moveSelected = function (gameId, char, Row, Col) {
     };
 };
 
-changeImage = function (gameId, char) {
-    return dispatch => {
+var changeImage = function changeImage(gameId, char) {
+    return function (dispatch) {
         $.ajax({
             method: "PUT",
             url: '/game?gameId=' + gameId + '&action=changeImg',
-            data: JSON.stringify({ char }),
+            data: JSON.stringify({ char: char }),
             contentType: 'application/json',
             dataType: 'json'
-        }).done(data => {
+        }).done(function (data) {
             dispatch({
                 type: CHAR_IMAGE_CHANGED,
                 payload: data
             });
-        }).fail(xhr => {
+        }).fail(function (xhr) {
             dispatch({
                 type: ERROR,
                 payload: 'Change image error: ' + (xhr.responseJSON ? xhr.responseJSON['Message'] : '')
@@ -202,15 +202,15 @@ changeImage = function (gameId, char) {
     };
 };
 
-selectChar = function (char) {
+var selectChar = function selectChar(char) {
     return {
         type: CHAR_SELECTED,
         payload: char
     };
 };
 
-createGame = function (charDiff, animeDiff, userName) {
-    return dispatch => {
+var createGame = function createGame(charDiff, animeDiff, userName) {
+    return function (dispatch) {
         dispatch({
             type: GET_GAME_REQUEST
         });
@@ -218,7 +218,7 @@ createGame = function (charDiff, animeDiff, userName) {
             'url': '/game',
             'data': JSON.stringify({ CharDiff: charDiff, AnimeDiff: animeDiff, UserName: userName }),
             contentType: 'application/json'
-        }).done(data => {
+        }).done(function (data) {
             window.location.hash = '#game/' + data.Id;
             if (supports_html5_storage()) {
                 if (!localStorage.games) {
@@ -235,7 +235,7 @@ createGame = function (charDiff, animeDiff, userName) {
                 type: GET_GAME_SUCCESS,
                 payload: data
             });
-        }).fail(xhr => {
+        }).fail(function (xhr) {
             dispatch({
                 type: ERROR,
                 payload: 'Create new game error: ' + (xhr.responseJSON ? xhr.responseJSON['Message'] : '')
@@ -245,18 +245,18 @@ createGame = function (charDiff, animeDiff, userName) {
     };
 };
 
-getGame = function (gameId) {
-    return dispatch => {
+var getGame = function getGame(gameId) {
+    return function (dispatch) {
         dispatch({
             type: GET_GAME_REQUEST
         });
-        $.get('/game?gameId=' + gameId, data => {
+        $.get('/game?gameId=' + gameId, function (data) {
             window.location.hash = '#game/' + data.Id;
             dispatch({
                 type: GET_GAME_SUCCESS,
                 payload: data
             });
-        }).fail(xhr => {
+        }).fail(function (xhr) {
             dispatch({
                 type: ERROR,
                 payload: 'Get game error: ' + (xhr.responseJSON ? xhr.responseJSON['Message'] : '')
@@ -265,3 +265,5 @@ getGame = function (gameId) {
         });
     };
 };
+
+//# sourceMappingURL=actions.js.map

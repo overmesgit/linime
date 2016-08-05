@@ -88,7 +88,13 @@ func (g *Game) getExistedChar(requiredForLine bool) (GameCharPosition, error) {
 		}
 		if len(characters) > 0 {
 			randomCharacters := GetRandomCharactersByFavorites(selectedTitleId, characters, 1, g.CharDiff)
-			return g.AddCharacterToRandomPos(randomCharacters[0], selectedTitleId), nil
+			for {
+				pos := g.AddCharacterToRandomPos(randomCharacters[0], selectedTitleId)
+				completed, _ := g.CheckCompleted()
+				if len(completed) == 0 || !g.HasFreePositions() {
+					return pos, nil
+				}
+			}
 		}
 	}
 	return g.getNewGroupChar()
@@ -176,14 +182,26 @@ func (g *Game) ShuffleField() {
 	}
 }
 
-func (g *Game) GetRandomPositions() (int, int) {
+func (g *Game) initRandomPositions() {
 	if g.positions == nil {
 		g.positions = g.GetAllFreePositions()
 		g.randomPos = rand.Perm(len(g.positions))
 	}
+}
+
+func (g *Game) GetRandomPositions() (int, int) {
+	g.initRandomPositions()
 	res := g.positions[g.randomPos[g.currentRandomPos]]
 	g.currentRandomPos++
 	return res[0], res[1]
+}
+
+func (g *Game) HasFreePositions() bool {
+	g.initRandomPositions()
+	if g.currentRandomPos < len(g.positions) {
+		return true
+	}
+	return false
 }
 
 func (g *Game) GetAllFreePositions() [][2]int {

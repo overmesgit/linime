@@ -122,6 +122,7 @@ func (g *Game) UpdateGameScore(completedChars []GameCharPosition, notInLine []Ga
 	if len(g.Field) >= g.Width*g.Height {
 		g.CompleteCountTotalScore()
 	}
+	g.Turn++
 	return titles, nil
 }
 
