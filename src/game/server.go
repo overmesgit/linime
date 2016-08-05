@@ -36,9 +36,8 @@ type MoveMessage struct {
 }
 
 type CreateGameParam struct {
-	CharDiff  int
-	AnimeDiff int
-	UserName  string
+	Diff     int
+	UserName string
 }
 
 func serveTargetGame(gameUUID string, method string, action string, body io.ReadCloser) (int, []byte) {
@@ -57,7 +56,7 @@ func serveTargetGame(gameUUID string, method string, action string, body io.Read
 	case "PUT":
 		switch action {
 		case "move":
-			if game.Score.TotalScore >= 0 {
+			if game.isCompleted() {
 				return http.StatusInternalServerError, Message{Message: "Game completed"}.AsJson()
 			}
 			var message MoveMessage
@@ -104,7 +103,7 @@ func serveTargetGame(gameUUID string, method string, action string, body io.Read
 			}
 			return http.StatusOK, jsonResp
 		case "complete":
-			if game.Score.TotalScore >= 0 {
+			if game.isCompleted() {
 				return http.StatusInternalServerError, Message{Message: "Game completed"}.AsJson()
 			}
 			game.CompleteCountTotalScore()

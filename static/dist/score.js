@@ -182,7 +182,7 @@ var Advice = function (_React$Component4) {
                 for (var _iterator = adviceGroup[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                     var advice = _step.value;
 
-                    adviceNodes.push(React.createElement(StatsImagesGroup, { key: advice.Title, imagesArray: advice.Img, score: advice.Score != 0 ? advice.Score : "" }));
+                    adviceNodes.push(React.createElement(StatsImagesGroup, { key: advice.Title, imagesArray: advice.Img, score: advice.Score / advice.Img.length }));
                 }
             } catch (err) {
                 _didIteratorError = true;
@@ -233,7 +233,7 @@ var GameScore = function (_React$Component5) {
     }, {
         key: "getTotalScore",
         value: function getTotalScore() {
-            if (this.props.game.Score.TotalScore >= 0) {
+            if (this.props.game.Score.TotalScore != -1000) {
                 return this.props.game.Score.TotalScore;
             }
             var _props2 = this.props;
@@ -246,32 +246,15 @@ var GameScore = function (_React$Component5) {
                     totalScore += char.Score;
                 });
             });
-            totalScore -= game.Score.ChangeImgs.length;
-
-            var uniqueAdviceTitles = {};
-            game.Score.Advices.forEach(function (advice) {
-                uniqueAdviceTitles[advice.Title] = true;
-            });
-            totalScore -= 3 * Object.keys(uniqueAdviceTitles).length;
-
-            return totalScore;
-        }
-    }, {
-        key: "groupByTurn",
-        value: function groupByTurn(values) {
-            var result = {};
             var _iteratorNormalCompletion2 = true;
             var _didIteratorError2 = false;
             var _iteratorError2 = undefined;
 
             try {
-                for (var _iterator2 = values[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                    var val = _step2.value;
+                for (var _iterator2 = game.Score.ChangeImgs[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                    var change = _step2.value;
 
-                    if (!(val.Turn in result)) {
-                        result[val.Turn] = [];
-                    }
-                    result[val.Turn].push(val);
+                    totalScore += change.Score;
                 }
             } catch (err) {
                 _didIteratorError2 = true;
@@ -284,6 +267,65 @@ var GameScore = function (_React$Component5) {
                 } finally {
                     if (_didIteratorError2) {
                         throw _iteratorError2;
+                    }
+                }
+            }
+
+            var _iteratorNormalCompletion3 = true;
+            var _didIteratorError3 = false;
+            var _iteratorError3 = undefined;
+
+            try {
+                for (var _iterator3 = game.Score.Advices[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                    var advice = _step3.value;
+
+                    totalScore += advice.Score;
+                }
+            } catch (err) {
+                _didIteratorError3 = true;
+                _iteratorError3 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                        _iterator3.return();
+                    }
+                } finally {
+                    if (_didIteratorError3) {
+                        throw _iteratorError3;
+                    }
+                }
+            }
+
+            return totalScore;
+        }
+    }, {
+        key: "groupByTurn",
+        value: function groupByTurn(values) {
+            var result = {};
+            var _iteratorNormalCompletion4 = true;
+            var _didIteratorError4 = false;
+            var _iteratorError4 = undefined;
+
+            try {
+                for (var _iterator4 = values[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                    var val = _step4.value;
+
+                    if (!(val.Turn in result)) {
+                        result[val.Turn] = [];
+                    }
+                    result[val.Turn].push(val);
+                }
+            } catch (err) {
+                _didIteratorError4 = true;
+                _iteratorError4 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
+                        _iterator4.return();
+                    }
+                } finally {
+                    if (_didIteratorError4) {
+                        throw _iteratorError4;
                     }
                 }
             }
@@ -323,7 +365,7 @@ var GameScore = function (_React$Component5) {
                 startDate = new Date(game.Date).toLocaleString();
             }
             var gameTime = null;
-            if (game.Score.TotalScore >= 0 && game.Date != game.EndDate) {
+            if (game.Score.TotalScore != -1000 && game.Date != game.EndDate) {
                 gameTime = Math.round((new Date(game.EndDate) - new Date(game.Date)) / 1000 / 60);
             }
             return React.createElement(
@@ -367,10 +409,7 @@ var GameScore = function (_React$Component5) {
                         "p",
                         null,
                         "Difficulty: ",
-                        game.CharDiff + 1,
-                        "C ",
-                        game.AnimeDiff + 1,
-                        "A"
+                        game.Difficulty + 1
                     )
                 ),
                 titlesNodes.map(function (item) {

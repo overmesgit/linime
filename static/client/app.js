@@ -1,3 +1,10 @@
+function nocontext(e) {
+    var clickedTag = (e == null) ? event.srcElement.tagName : e.target.tagName;
+    if (clickedTag == "IMG")
+        return false;
+}
+document.oncontextmenu = nocontext;
+
 class Error extends React.Component {
     render() {
         const {error} = this.props;

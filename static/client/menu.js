@@ -4,7 +4,7 @@ class Menu extends React.Component {
     }
 
     createGame(e) {
-        this.props.createGame(+this.refs.charDiff.value, +this.refs.animeDiff.value, this.refs.userName.value);
+        this.props.createGame(+this.refs.diff.value, this.refs.userName.value);
     }
 
     completeGame(e) {
@@ -19,7 +19,7 @@ class Menu extends React.Component {
         });
 
         var completeNode = "";
-        if(game.Score.TotalScore == -1) {
+        if(game.Score.TotalScore == -1000) {
             completeNode = <h2 className="menu-content-button btn complete-game" onClick={this.completeGame.bind(this)}>Complete game</h2>
         }
 
@@ -32,17 +32,13 @@ class Menu extends React.Component {
                 <div className="game-control">
                     <h2 className="menu-content-button btn" onClick={toggleCreateGame}>New game</h2>
                     <div className={"difficulty" + (createGameStatus.hidden ? " difficulty-hidden": "")}>
-                        <p>Character Popularity:</p>
-                        <select className="select-style" ref="charDiff" >
-                            <option value="0">Easy</option>
-                            <option value="1">Normal</option>
-                            <option value="2">Hard</option>
-                        </select>
-                        <p>Anime Popularity:</p>
-                        <select className="select-style" ref="animeDiff" >
-                            <option value="0">Easy</option>
-                            <option value="1">Normal</option>
-                            <option value="2">Hard</option>
+                        <p>Difficulty:</p>
+                        <select className="select-style" ref="diff" >
+                            <option value="0">For normal people</option>
+                            <option value="1" selected>Easy</option>
+                            <option value="2">Normal</option>
+                            <option value="3">Hard</option>
+                            <option value="4">Flappy bird</option>
                         </select>
                         <p>Use MyAnimeList (Optional):</p>
                         <input className="mal-username" ref="userName"  placeholder="MyAnimeList username"/>

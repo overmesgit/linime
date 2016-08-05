@@ -64,7 +64,7 @@ class Advice extends React.Component {
         const {adviceGroup} = this.props;
         var adviceNodes = [];
         for (var advice of adviceGroup) {
-            adviceNodes.push(<StatsImagesGroup key={advice.Title} imagesArray={advice.Img} score={advice.Score != 0?advice.Score:""} />)
+            adviceNodes.push(<StatsImagesGroup key={advice.Title} imagesArray={advice.Img} score={advice.Score/advice.Img.length} />)
         }
 
         return <div className="title-scores">
@@ -80,7 +80,7 @@ class GameScore extends React.Component {
     }
 
     getTotalScore() {
-        if (this.props.game.Score.TotalScore >= 0) {
+        if (this.props.game.Score.TotalScore != -1000) {
             return this.props.game.Score.TotalScore;
         }
         const {completedTitles, game} = this.props;
@@ -90,13 +90,12 @@ class GameScore extends React.Component {
                 totalScore += char.Score;
             })
         });
-        totalScore -= game.Score.ChangeImgs.length;
-
-        var uniqueAdviceTitles = {};
-        game.Score.Advices.forEach(advice => {
-            uniqueAdviceTitles[advice.Title] = true;
-        });
-        totalScore -= 3*Object.keys(uniqueAdviceTitles).length;
+        for (var change of game.Score.ChangeImgs) {
+            totalScore += change.Score
+        }
+        for (var advice of game.Score.Advices) {
+            totalScore += advice.Score
+        }
 
         return totalScore;
     }
@@ -137,7 +136,7 @@ class GameScore extends React.Component {
             startDate = new Date(game.Date).toLocaleString()
         }
         var gameTime = null;
-        if (game.Score.TotalScore >= 0 && game.Date != game.EndDate) {
+        if (game.Score.TotalScore != -1000 && game.Date != game.EndDate) {
             gameTime = Math.round((new Date(game.EndDate) - new Date(game.Date))/1000/60)
         }
         return <div id="score" className="window">
@@ -147,7 +146,7 @@ class GameScore extends React.Component {
                 <p>Start date: {startDate}</p>
                 {gameTime ? <p>Game time: {gameTime} min</p>:""}
                 {game.UserName != "" ? <p>MAL User: {game.UserName}</p>: ""}
-                <p>Difficulty: {game.CharDiff+1}C {game.AnimeDiff+1}A</p>
+                <p>Difficulty: {game.Difficulty+1}</p>
             </div>
             {titlesNodes.map(item => item[1])}
 

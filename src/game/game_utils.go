@@ -87,7 +87,7 @@ func (g *Game) getExistedChar(requiredForLine bool) (GameCharPosition, error) {
 			return res, err
 		}
 		if len(characters) > 0 {
-			randomCharacters := GetRandomCharactersByFavorites(selectedTitleId, characters, 1, g.CharDiff)
+			randomCharacters := GetRandomCharactersByFavorites(selectedTitleId, characters, 1, g.Difficulty)
 			for {
 				pos := g.AddCharacterToRandomPos(randomCharacters[0], selectedTitleId)
 				completed, _ := g.CheckCompleted()
@@ -124,18 +124,23 @@ func (g *Game) getNewGroupChar() (GameCharPosition, error) {
 			return res, err
 		}
 	}
-	if len(newGroups) == 0 {
-		animeLimit := 500 + 500*g.AnimeDiff*g.AnimeDiff
-		scoreFilter := 8 - g.AnimeDiff
-		var titles []parser.Title
+	var titles []parser.Title
+	limitAdd := 0
+	for len(titles) == 0 && len(newGroups) == 0 {
+		animeLimit := 100 + 100*g.Difficulty*g.Difficulty + limitAdd
+		scoreFilter := 8 - g.Difficulty
+
 		err = anime.Find(bson.M{"characters.2": exists, "group": bson.M{"$nin": currentGroups},
 			"members_score": bson.M{"$gte": scoreFilter}}).Sort("-members").Limit(animeLimit).All(&titles)
 		if err != nil {
 			return res, err
 		}
-		for _, title := range titles {
-			newGroups = append(newGroups, title.Group)
+		if len(titles) == 0 {
+			limitAdd += 100
 		}
+	}
+	for _, title := range titles {
+		newGroups = append(newGroups, title.Group)
 	}
 
 	uniquerGroups := GetUniqueValues(newGroups)
@@ -252,21 +257,28 @@ func GetRandomCharactersByFavorites(titleId int, c parser.CharacterSlice, n int,
 	sort.Sort(sort.Reverse(c))
 	fullFavoritesSum := 0
 	for i := range c {
+		favAdd := 0
 		switch charDiff {
 		case 0:
-			for _, mainTitleId := range c[i].Main {
-				if titleId == mainTitleId {
-					c[i].Favorites += 10000
-				}
-			}
 		case 1:
-
+			if c[i].IsMain(titleId) {
+				favAdd = 10000
+			}
 		case 2:
+			if c[i].Favorites == 0 {
+				favAdd = 1
+			}
+		case 3:
+			if c[i].Favorites == 0 {
+				favAdd = 3
+			}
+		case 4:
 			c[i].Favorites = int(math.Sqrt(float64(c[i].Favorites)))
 			if c[i].Favorites == 0 {
-				c[i].Favorites = 1
+				favAdd = 5
 			}
 		}
+		c[i].Favorites += favAdd
 		fullFavoritesSum += c[i].Favorites
 	}
 

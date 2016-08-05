@@ -209,14 +209,14 @@ var selectChar = function selectChar(char) {
     };
 };
 
-var createGame = function createGame(charDiff, animeDiff, userName) {
+var createGame = function createGame(diff, userName) {
     return function (dispatch) {
         dispatch({
             type: GET_GAME_REQUEST
         });
         $.post({
             'url': '/game',
-            'data': JSON.stringify({ CharDiff: charDiff, AnimeDiff: animeDiff, UserName: userName }),
+            'data': JSON.stringify({ Diff: diff, UserName: userName }),
             contentType: 'application/json'
         }).done(function (data) {
             window.location.hash = '#game/' + data.Id;

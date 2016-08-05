@@ -25,7 +25,7 @@ var Menu = function (_React$Component) {
     }, {
         key: "createGame",
         value: function createGame(e) {
-            this.props.createGame(+this.refs.charDiff.value, +this.refs.animeDiff.value, this.refs.userName.value);
+            this.props.createGame(+this.refs.diff.value, this.refs.userName.value);
         }
     }, {
         key: "completeGame",
@@ -56,7 +56,7 @@ var Menu = function (_React$Component) {
             });
 
             var completeNode = "";
-            if (game.Score.TotalScore == -1) {
+            if (game.Score.TotalScore == -1000) {
                 completeNode = React.createElement(
                     "h2",
                     { className: "menu-content-button btn complete-game", onClick: this.completeGame.bind(this) },
@@ -98,49 +98,35 @@ var Menu = function (_React$Component) {
                             React.createElement(
                                 "p",
                                 null,
-                                "Character Popularity:"
+                                "Difficulty:"
                             ),
                             React.createElement(
                                 "select",
-                                { className: "select-style", ref: "charDiff" },
+                                { className: "select-style", ref: "diff" },
                                 React.createElement(
                                     "option",
                                     { value: "0" },
+                                    "For normal people"
+                                ),
+                                React.createElement(
+                                    "option",
+                                    { value: "1", selected: true },
                                     "Easy"
                                 ),
                                 React.createElement(
                                     "option",
-                                    { value: "1" },
+                                    { value: "2" },
                                     "Normal"
                                 ),
                                 React.createElement(
                                     "option",
-                                    { value: "2" },
+                                    { value: "3" },
                                     "Hard"
-                                )
-                            ),
-                            React.createElement(
-                                "p",
-                                null,
-                                "Anime Popularity:"
-                            ),
-                            React.createElement(
-                                "select",
-                                { className: "select-style", ref: "animeDiff" },
-                                React.createElement(
-                                    "option",
-                                    { value: "0" },
-                                    "Easy"
                                 ),
                                 React.createElement(
                                     "option",
-                                    { value: "1" },
-                                    "Normal"
-                                ),
-                                React.createElement(
-                                    "option",
-                                    { value: "2" },
-                                    "Hard"
+                                    { value: "4" },
+                                    "Flappy bird"
                                 )
                             ),
                             React.createElement(

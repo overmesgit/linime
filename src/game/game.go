@@ -11,7 +11,8 @@ import (
 )
 
 const (
-	MAX_FROM_ONE_TITLE = 5
+	MAX_FROM_ONE_TITLE    = 5
+	NOT_ENDED_GAME_SCORES = -1000
 )
 
 type GameCharPosition struct {
@@ -36,8 +37,7 @@ type Game struct {
 	currentRandomPos int
 	Date             time.Time `bson:"date"`
 	EndDate          time.Time `bson:"enddate"`
-	CharDiff         int
-	AnimeDiff        int
+	Difficulty       int
 	UserName         string
 	UserItems        []int
 }
@@ -51,17 +51,16 @@ type MoveResponse struct {
 }
 
 func NewGame() *Game {
-	gameScore := GameScore{CompletedTitles: make([]CompleteTitle, 0), CompletedGroups: make([]int, 0), TotalScore: -1,
+	gameScore := GameScore{CompletedTitles: make([]CompleteTitle, 0), CompletedGroups: make([]int, 0), TotalScore: NOT_ENDED_GAME_SCORES,
 		ChangeImgs: make([]ChangedImage, 0), Advices: make([]Advice, 0)}
 	return &Game{Id: RandString(8), Field: make([]GameCharPosition, 0), Height: 9, Width: 9, Line: 3, MaxTitleChar: 5, Turn: 1,
 		Score: gameScore, positions: nil, randomPos: nil, currentRandomPos: 0, Date: time.Now(), EndDate: time.Now(),
-		CharDiff: 0, AnimeDiff: 0, UserName: "", UserItems: make([]int, 0)}
+		Difficulty: 0, UserName: "", UserItems: make([]int, 0)}
 }
 
 func NewGameWithParam(param CreateGameParam) *Game {
 	game := NewGame()
-	game.CharDiff = param.CharDiff
-	game.AnimeDiff = param.AnimeDiff
+	game.Difficulty = param.Diff
 	game.UserName = param.UserName
 	return game
 }
@@ -105,7 +104,7 @@ outer:
 			images = append(images, pos.Img)
 		}
 		score := -3
-		if g.isCompleted() || viewedAdvice {
+		if g.isCompleted() || viewedAdvice || g.Difficulty == 0 {
 			score = 0
 		}
 		res = Advice{Img: images, Title: adviceTitle, Turn: g.Turn, Score: score}
@@ -148,7 +147,9 @@ func (g *Game) ChangeImage(character GameCharPosition) (ChangedImage, error) {
 
 			result = ChangedImage{OldImg: character.Img, NewImg: nextImage, Turn: g.Turn, Score: 0}
 			if !sameChange {
-				result.Score = -1
+				if g.Difficulty > 0 && !g.isCompleted() {
+					result.Score = -1
+				}
 				g.Score.ChangeImgs = append(g.Score.ChangeImgs, result)
 			}
 			return result, nil
@@ -183,7 +184,11 @@ func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, erro
 		if err != nil {
 			return res, err
 		}
-		if g.Score.TotalScore >= 0 {
+		if len(g.Field) >= g.Width*g.Height {
+			g.CompleteCountTotalScore()
+		}
+		if g.isCompleted() {
+			// delete user list, it can be huge
 			g.UserItems = make([]int, 0)
 		}
 		g.Update()
@@ -198,7 +203,15 @@ func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, erro
 
 func (g *Game) AddNewChars() ([]GameCharPosition, error) {
 	result := make([]GameCharPosition, 0)
-	for i := 0; i < 3; i++ {
+	addByTurn := 2
+	if g.Difficulty > 1 {
+		addByTurn = 3
+	}
+	for i := 0; i < addByTurn; i++ {
+		if !g.HasFreePositions() {
+			break
+		}
+
 		var newChar GameCharPosition
 		var err error
 		full, required := g.getFullAndRequiredCount()
@@ -379,7 +392,7 @@ func (g *Game) AddRandomCharacterByGroup(GroupId, CharCount int) ([]GameCharPosi
 	if err != nil {
 		return res, err
 	}
-	randomCharacters := GetRandomCharactersByFavorites(titleId, characters, CharCount, g.CharDiff)
+	randomCharacters := GetRandomCharactersByFavorites(titleId, characters, CharCount, g.Difficulty)
 	return g.AddCharactersToRandomPos(randomCharacters, titleId), nil
 
 }

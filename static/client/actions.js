@@ -205,14 +205,14 @@ var selectChar = function (char) {
     }
 };
 
-var createGame = function (charDiff, animeDiff, userName) {
+var createGame = function (diff, userName) {
     return (dispatch) => {
         dispatch({
             type: GET_GAME_REQUEST
         });
         $.post({
             'url': '/game',
-            'data': JSON.stringify({CharDiff: charDiff, AnimeDiff: animeDiff, UserName: userName}),
+            'data': JSON.stringify({Diff: diff, UserName: userName}),
             contentType: 'application/json'
         })
             .done((data) => {

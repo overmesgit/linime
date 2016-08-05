@@ -57,7 +57,7 @@ func (g *Game) GetCompletedGroups(completedChars []GameCharPosition) []int {
 }
 
 func (g *Game) isCompleted() bool {
-	return g.Score.TotalScore >= 0
+	return g.Score.TotalScore != NOT_ENDED_GAME_SCORES
 }
 
 func (g *Game) GetCompletedTitles(completedChars []GameCharPosition, notInLine []GameCharPosition) ([]CompleteTitle, error) {
@@ -119,9 +119,6 @@ func (g *Game) UpdateGameScore(completedChars []GameCharPosition, notInLine []Ga
 	}
 	g.Score.CompletedTitles = append(g.Score.CompletedTitles, titles...)
 
-	if len(g.Field) >= g.Width*g.Height {
-		g.CompleteCountTotalScore()
-	}
 	g.Turn++
 	return titles, nil
 }
@@ -134,7 +131,11 @@ func (g *Game) CompleteCountTotalScore() {
 		}
 	}
 	g.Score.TotalScore = totalScore
-	g.Score.TotalScore -= len(g.Score.ChangeImgs)
-	g.Score.TotalScore -= 3 * len(g.Score.Advices)
+	for _, change := range g.Score.ChangeImgs {
+		g.Score.TotalScore += change.Score
+	}
+	for _, advice := range g.Score.Advices {
+		g.Score.TotalScore += advice.Score
+	}
 	g.EndDate = time.Now()
 }

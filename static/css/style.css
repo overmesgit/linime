@@ -241,7 +241,7 @@ p {
     padding: 0 10px 0 10px;
     overflow: hidden;
     transition: height 0.5s;
-    height: 200px;
+    height: 140px;
 }
 
 .difficulty-hidden {
@@ -298,6 +298,15 @@ p {
 .complete-game {
     margin-top: 10px;
     margin-bottom: 10px;
+}
+img {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  user-drag: none;
+  -webkit-touch-callout: none;
 }
 
 
