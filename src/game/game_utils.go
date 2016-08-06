@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"gopkg.in/mgo.v2/bson"
 	"mal/parser"
@@ -120,37 +119,32 @@ func (g *Game) getNewGroupChar() (GameCharPosition, error) {
 
 	newGroups := make([]int, 0)
 	if g.UserName != "" {
-		userSliceOffset := int(float64(100)*rand.Float64() + float64(100)*rand.Float64()*float64(g.Difficulty*g.Difficulty))
+		userLimitAdd := 0
+		userOffsetStep := 100 + 100*g.Difficulty*g.Difficulty
+		userLimit := userOffsetStep + userLimitAdd
 		previousLength := 0
-		for len(newGroups) == 0 && userSliceOffset < len(g.UserItems)+100 {
-			err = anime.Find(bson.M{"characters.2": exists, "group": bson.M{"$nin": currentGroups}, "_id.i": bson.M{"$in": g.UserItems[:userSliceOffset]}}).Distinct("group", &newGroups)
+		for len(newGroups) == 0 && userLimit < len(g.UserItems)+userOffsetStep {
+			err = anime.Find(bson.M{"characters.2": exists, "group": bson.M{"$nin": currentGroups}, "_id.i": bson.M{"$in": g.UserItems[:userLimit]}}).Distinct("group", &newGroups)
 			if err != nil {
 				return res, err
 			}
-			if len(newGroups) < 25*(g.Difficulty*g.Difficulty+1) && len(newGroups) != 0 && len(newGroups) != previousLength {
-				fmt.Println("extend")
+			if len(newGroups) < userLimit/2 && len(newGroups) != 0 && len(newGroups) != previousLength {
 				previousLength = len(newGroups)
 				newGroups = newGroups[:0]
-				userSliceOffset += 100 + 100*g.Difficulty
+				userLimit += userOffsetStep
 			}
 		}
 	}
 	var titles []parser.Title
-	limitAdd := 0
-	previousLength := 0
-	for len(titles) == 0 && len(newGroups) == 0 {
-		animeLimit := int(float64(200)*rand.Float64()+float64(200)*rand.Float64()*float64(g.Difficulty*g.Difficulty)) + limitAdd
+	offsetStep := 100 + 200*g.Difficulty*g.Difficulty
+	if len(newGroups) == 0 {
+		animeLimit := offsetStep
 
 		err = anime.Find(bson.M{"characters.2": exists, "group": bson.M{"$nin": currentGroups}}).Sort("-members").Limit(animeLimit).All(&titles)
 		if err != nil {
 			return res, err
 		}
-		if len(titles) < 50*(g.Difficulty*g.Difficulty+1) && len(titles) != 0 && len(titles) != previousLength {
-			fmt.Println("extend")
-			previousLength = len(titles)
-			titles = titles[:0]
-			limitAdd += 100 + 100*g.Difficulty
-		}
+
 	}
 	for _, title := range titles {
 		newGroups = append(newGroups, title.Group)

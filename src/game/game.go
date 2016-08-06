@@ -74,7 +74,7 @@ func (g *Game) GetAdvice() (Advice, error) {
 outer:
 	for titleId, positions := range titlesMap {
 		if len(positions) < 2 {
-			break
+			continue
 		}
 		for _, advice := range g.Score.Advices {
 			if advice.Title == titleId {
@@ -216,7 +216,7 @@ func (g *Game) AddNewChars() ([]GameCharPosition, error) {
 		var newChar GameCharPosition
 		var err error
 		full, required := g.getFullAndRequiredCount()
-		if required >= full/2 {
+		if (required - 2) >= full/2 {
 			newChar, err = g.getExistedChar(true)
 		} else {
 			funcRandom := rand.Intn(100)
