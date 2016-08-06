@@ -181,7 +181,7 @@ func StartServer() {
 	http.HandleFunc("/game", serveGame)
 	http.HandleFunc("/", serveHome)
 
-	err = http.ListenAndServe(":1502", nil)
+	err = http.ListenAndServe(":1515", nil)
 	if err != nil {
 		panic(err)
 	}
