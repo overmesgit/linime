@@ -4,7 +4,9 @@ class Menu extends React.Component {
     }
 
     createGame(e) {
-        this.props.createGame(+this.refs.diff.value, this.refs.userName.value);
+        if (!this.props.game.creating) {
+            this.props.createGame(+this.refs.diff.value, this.refs.userName.value);
+        }
     }
 
     completeGame(e) {
@@ -42,7 +44,7 @@ class Menu extends React.Component {
                         </select>
                         <p>MyAnimeList (Optional):</p>
                         <input className="mal-username" ref="userName"  placeholder="MyAnimeList username"/>
-                        <div className="btn create-game" onClick={this.createGame.bind(this)}>Create Game</div>
+                        <div className="btn create-game" onClick={this.createGame.bind(this)}>{!game.creating ? "Create Game": "Loading"}</div>
                     </div>
                     {completeNode}
                     {game.Turn > 0 ? <h2 className="menu-content-button btn btn-green" onClick={getAdvice.bind(this, game.Id)}>Random advice</h2>: ""}

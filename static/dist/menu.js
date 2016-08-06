@@ -25,7 +25,9 @@ var Menu = function (_React$Component) {
     }, {
         key: "createGame",
         value: function createGame(e) {
-            this.props.createGame(+this.refs.diff.value, this.refs.userName.value);
+            if (!this.props.game.creating) {
+                this.props.createGame(+this.refs.diff.value, this.refs.userName.value);
+            }
         }
     }, {
         key: "completeGame",
@@ -138,7 +140,7 @@ var Menu = function (_React$Component) {
                             React.createElement(
                                 "div",
                                 { className: "btn create-game", onClick: this.createGame.bind(this) },
-                                "Create Game"
+                                !game.creating ? "Create Game" : "Loading"
                             )
                         ),
                         completeNode,

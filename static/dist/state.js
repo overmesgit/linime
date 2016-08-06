@@ -23,7 +23,7 @@ if (supports_html5_storage()) {
 }
 
 var initialState = {
-    game: { Field: [], Turn: 0, Difficulty: 0, UserName: '',
+    game: { Field: [], Turn: 0, Difficulty: 0, UserName: '', creating: false,
         Score: { CompletedTitles: [], TotalScore: 0, ChangeImgs: [], Advices: [] } },
     error: "",
     fetchingGame: gameId,
@@ -41,12 +41,15 @@ function viewState() {
         case COMPLETE_GAME:
             return _extends({}, state, { game: _extends({}, state.game, { Score: _extends({}, state.game.Score, { TotalScore: 0 }) }) });
         case GET_GAME_REQUEST:
-            return _extends({}, state);
+            return _extends({}, state, { game: _extends({}, state.game, { creating: true }) });
         case ADD_MY_GAME:
             state.myGames.unshift(action.payload);
             return _extends({}, state);
         case GET_GAME_SUCCESS:
+            action.payload.creating = false;
             return _extends({}, state, { game: action.payload, createGameStatus: _extends({}, state.createGame, { hidden: true }) });
+        case GET_GAME_ERROR:
+            return _extends({}, state, { game: _extends({}, state.game, { creating: false }) });
         case ERROR:
             return _extends({}, state, { error: action.payload });
         case GET_ADVICE:

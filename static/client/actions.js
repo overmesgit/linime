@@ -1,5 +1,6 @@
 var GET_GAME_REQUEST = 'GET_GAME_REQUEST';
 var GET_GAME_SUCCESS = 'GET_GAME_SUCCESS';
+var GET_GAME_ERROR = 'GET_GAME_ERROR';
 var ERROR = 'ERROR';
 var CHAR_SELECTED = 'CHAR_SELECTED';
 var MOVE_SELECTED = 'MOVE_SELECTED';
@@ -234,6 +235,9 @@ var createGame = function (diff, userName) {
                 })
             })
             .fail((xhr) => {
+                dispatch({
+                    type: GET_GAME_ERROR
+                });
                 dispatch({
                     type: ERROR,
                     payload: 'Create new game error: ' + (xhr.responseJSON ? xhr.responseJSON['Message'] : '')
