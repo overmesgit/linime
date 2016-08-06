@@ -7,6 +7,7 @@ import (
 	"mal/parser"
 	"malpar"
 	"math/rand"
+	"sort"
 	"time"
 )
 
@@ -222,9 +223,9 @@ func (g *Game) AddNewChars() ([]GameCharPosition, error) {
 			switch {
 			case len(g.Field) >= g.Width*g.Height:
 				break
-			case funcRandom < 40:
+			case funcRandom < 30:
 				newChar, err = g.getExistedChar(true)
-			case funcRandom < 70:
+			case funcRandom < 60:
 				newChar, err = g.getExistedChar(false)
 			case funcRandom < 100:
 				newChar, err = g.getNewGroupChar()
@@ -397,6 +398,28 @@ func (g *Game) AddRandomCharacterByGroup(GroupId, CharCount int) ([]GameCharPosi
 
 }
 
+type AnimeTitleSlice []malpar.AnimeTitle
+
+func (a AnimeTitleSlice) Len() int {
+	return len(a)
+}
+
+func (a AnimeTitleSlice) Swap(i, j int) {
+	a[i], a[j] = a[j], a[i]
+}
+
+var halfYear = 365 * 24 * 60 * 60
+
+func (a AnimeTitleSlice) Less(i, j int) bool {
+	// less than half year = 10 points
+	// 10 score = 10 points
+
+	currentUnix := int(time.Now().Unix())
+	ai_time_points := 10 - (currentUnix-a[i].LastUpdate)/halfYear
+	aj_time_points := 10 - (currentUnix-a[j].LastUpdate)/halfYear
+	return int(a[i].Score)+ai_time_points < int(a[j].Score)+aj_time_points
+}
+
 func CreateNewGame(gameParam CreateGameParam) (*Game, error) {
 	game := NewGameWithParam(gameParam)
 	if gameParam.UserName != "" {
@@ -404,7 +427,9 @@ func CreateNewGame(gameParam CreateGameParam) (*Game, error) {
 		if err != nil {
 			return game, err
 		}
-		for _, item := range userList.AnimeList {
+		userListSlice := AnimeTitleSlice(userList.AnimeList)
+		sort.Sort(sort.Reverse(userListSlice))
+		for _, item := range userListSlice {
 			// 1 watching, 2 completed, 3 on hold, 4 drop
 			if item.Status > 0 && item.Status <= 3 {
 				game.UserItems = append(game.UserItems, int(item.Id))
