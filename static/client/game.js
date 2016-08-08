@@ -1,4 +1,4 @@
-ReactCSSTransitionGroup = React.ReactCSSTransitionGroup;
+var ReactCSSTransitionGroup = React.ReactCSSTransitionGroup;
 
 class Character extends React.Component {
     selectChar() {

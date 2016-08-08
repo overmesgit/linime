@@ -21,7 +21,7 @@ class Menu extends React.Component {
         });
 
         var completeNode = "";
-        if(game.Score.TotalScore == -1000) {
+        if(game.Score.TotalScore == -1000 && game.Id != 'test') {
             completeNode = <h2 className="menu-content-button btn complete-game" onClick={this.completeGame.bind(this)}>Complete game</h2>
         }
 
@@ -47,8 +47,8 @@ class Menu extends React.Component {
                         <div className="btn create-game" onClick={this.createGame.bind(this)}>{!game.creating ? "Create Game": "Loading"}</div>
                     </div>
                     {completeNode}
-                    {game.Turn > 0 ? <h2 className="menu-content-button btn btn-green" onClick={getAdvice.bind(this, game.Id)}>Random advice</h2>: ""}
-                    {selectedChar == 0 || <h2 className="menu-content-button btn" onClick={changeImage.bind(this, game.Id, selectedChar[0])}>
+                    {game.Turn > 0 && game.Id != 'test' ? <h2 className="menu-content-button btn btn-green" onClick={getAdvice.bind(this, game.Id)}>Random advice</h2>: ""}
+                    {(selectedChar == 0 || game.Id == 'test') || <h2 className="menu-content-button btn" onClick={changeImage.bind(this, game.Id, selectedChar[0])}>
                         Change image</h2>}
                 </div>
                 <div className="my-games-list">

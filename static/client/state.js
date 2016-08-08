@@ -21,6 +21,7 @@ const initialState = {
         Score: {CompletedTitles: [], TotalScore: 0, ChangeImgs: [], Advices: []}},
     error: "",
     fetchingGame: gameId,
+    fetchingAdvice: false,
     myGames: myGames,
     createGameStatus: {hidden: true}
 };

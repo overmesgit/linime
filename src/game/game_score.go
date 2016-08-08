@@ -49,7 +49,7 @@ func (g *Game) GetCompletedGroups(completedChars []GameCharPosition) []int {
 		completedTitles = append(completedTitles, char.TitleId)
 	}
 
-	anime := mongoDB.C("anime")
+	anime := GetCollection("anime")
 	notEmpty := bson.M{"$not": bson.M{"$size": 0}}
 	var completedGroups []int
 	anime.Find(bson.M{"characters": notEmpty, "_id.i": bson.M{"$in": completedTitles}}).Distinct("group", &completedGroups)
@@ -67,7 +67,7 @@ func (g *Game) GetCompletedTitles(completedChars []GameCharPosition, notInLine [
 		charactersIds = append(charactersIds, char.Id)
 	}
 
-	char := mongoDB.C("char")
+	char := GetCollection("char")
 	var charactersData parser.CharacterSlice
 	err := char.Find(bson.M{"_id": bson.M{"$in": charactersIds}}).All(&charactersData)
 	if err != nil {
@@ -78,7 +78,7 @@ func (g *Game) GetCompletedTitles(completedChars []GameCharPosition, notInLine [
 		charNames[char.Id] = char.Name
 	}
 
-	anime := mongoDB.C("anime")
+	anime := GetCollection("anime")
 	exists := bson.M{"$exists": true}
 	completedTitlesMap := make(map[int]*CompleteTitle, 0)
 	for _, char := range completedChars {

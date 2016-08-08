@@ -133,7 +133,7 @@ func (g *Game) ChangeImage(character GameCharPosition) (ChangedImage, error) {
 	}
 
 	var char parser.Character
-	charCol := mongoDB.C("char")
+	charCol := GetCollection("char")
 	err = charCol.Find(bson.M{"_id": gameChar.Id}).One(&char)
 	if err != nil {
 		return result, err
@@ -335,11 +335,11 @@ func (g *Game) AddCharactersToRandomPos(characters parser.CharacterSlice, titleI
 }
 
 func (g *Game) Save() error {
-	return mongoDB.C("game").Insert(g)
+	return GetCollection("game").Insert(g)
 }
 
 func (g *Game) Update() error {
-	return mongoDB.C("game").UpdateId(g.Id, g)
+	return GetCollection("game").UpdateId(g.Id, g)
 }
 
 func (g *Game) AsJson() ([]byte, error) {
@@ -348,7 +348,7 @@ func (g *Game) AsJson() ([]byte, error) {
 
 func GetGame(uuid string) (*Game, error) {
 	game := NewGame()
-	err := mongoDB.C("game").FindId(uuid).One(game)
+	err := GetCollection("game").FindId(uuid).One(game)
 	if err != nil {
 		return nil, err
 	}
@@ -369,8 +369,8 @@ type AnimeGroupMembers struct {
 
 func (g *Game) AddRandomCharacterByGroup(GroupId, CharCount int) ([]GameCharPosition, error) {
 	var res []GameCharPosition
-	anime := mongoDB.C("anime")
-	char := mongoDB.C("char")
+	anime := GetCollection("anime")
+	char := GetCollection("char")
 	exists := bson.M{"$exists": true}
 
 	//get random anime from group by members

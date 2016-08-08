@@ -57,13 +57,37 @@ var AppClass = function (_React$Component2) {
             }
         }
     }, {
-        key: "render",
-        value: function render() {
+        key: "componentDidMount",
+        value: function componentDidMount() {
             var _props$app = this.props.app;
             var game = _props$app.game;
-            var error = _props$app.error;
-            var myGames = _props$app.myGames;
-            var createGameStatus = _props$app.createGameStatus;
+            var fetchingGame = _props$app.fetchingGame;
+            var startTestGame = this.props.appActions.startTestGame;
+
+            if (!game.Id && fetchingGame == '') {
+                startTestGame();
+            }
+        }
+    }, {
+        key: "componentDidUpdate",
+        value: function componentDidUpdate() {
+            var game = this.props.app.game;
+            var getAdvice = this.props.appActions.getAdvice;
+
+            if (game.Id && game.Difficulty == 0 && game.Field.filter(function (char) {
+                return char.advice;
+            }).length == 0) {
+                getAdvice(game.Id);
+            }
+        }
+    }, {
+        key: "render",
+        value: function render() {
+            var _props$app2 = this.props.app;
+            var game = _props$app2.game;
+            var error = _props$app2.error;
+            var myGames = _props$app2.myGames;
+            var createGameStatus = _props$app2.createGameStatus;
             var _props$appActions = this.props.appActions;
             var createGame = _props$appActions.createGame;
             var completeGame = _props$appActions.completeGame;
@@ -73,6 +97,8 @@ var AppClass = function (_React$Component2) {
             var toggleCreateGame = _props$appActions.toggleCreateGame;
             var changeImage = _props$appActions.changeImage;
             var getAdvice = _props$appActions.getAdvice;
+            var startTestGame = _props$appActions.startTestGame;
+
 
             return React.createElement(
                 "div",
@@ -98,7 +124,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return {
         appActions: Redux.bindActionCreators({ createGame: createGame, completeGame: completeGame, getGame: getGame, selectChar: selectChar,
-            moveSelected: moveSelected, toggleCreateGame: toggleCreateGame, changeImage: changeImage, getAdvice: getAdvice }, dispatch)
+            moveSelected: moveSelected, toggleCreateGame: toggleCreateGame, changeImage: changeImage, getAdvice: getAdvice, startTestGame: startTestGame }, dispatch)
     };
 }
 

@@ -22,9 +22,26 @@ class AppClass extends React.Component {
         }
     }
 
+    componentDidMount() {
+        const {game, fetchingGame} = this.props.app;
+        const {startTestGame} = this.props.appActions;
+        if (!game.Id && fetchingGame == '') {
+            startTestGame();
+        }
+    }
+
+    componentDidUpdate() {
+        const {game} = this.props.app;
+        const {getAdvice} = this.props.appActions;
+        if (game.Id && game.Difficulty == 0 && game.Field.filter(char => char.advice).length == 0) {
+            getAdvice(game.Id);
+        }
+    }
+
     render() {
         const {game, error, myGames, createGameStatus} = this.props.app;
-        const {createGame, completeGame, selectChar, moveSelected, getGame, toggleCreateGame, changeImage, getAdvice} = this.props.appActions;
+        const {createGame, completeGame, selectChar, moveSelected, getGame, toggleCreateGame, changeImage, getAdvice, startTestGame} = this.props.appActions;
+
         return <div className="content fa">
             <Menu createGame={createGame} completeGame={completeGame} getGame={getGame} game={game} myGames={myGames}
             toggleCreateGame={toggleCreateGame} createGameStatus={createGameStatus} changeImage={changeImage} getAdvice={getAdvice}/>
@@ -44,7 +61,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return {
         appActions: Redux.bindActionCreators({createGame, completeGame, getGame, selectChar,
-            moveSelected, toggleCreateGame, changeImage, getAdvice}, dispatch)
+            moveSelected, toggleCreateGame, changeImage, getAdvice, startTestGame}, dispatch)
     }
 }
 

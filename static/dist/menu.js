@@ -58,7 +58,7 @@ var Menu = function (_React$Component) {
             });
 
             var completeNode = "";
-            if (game.Score.TotalScore == -1000) {
+            if (game.Score.TotalScore == -1000 && game.Id != 'test') {
                 completeNode = React.createElement(
                     "h2",
                     { className: "menu-content-button btn complete-game", onClick: this.completeGame.bind(this) },
@@ -144,12 +144,12 @@ var Menu = function (_React$Component) {
                             )
                         ),
                         completeNode,
-                        game.Turn > 0 ? React.createElement(
+                        game.Turn > 0 && game.Id != 'test' ? React.createElement(
                             "h2",
                             { className: "menu-content-button btn btn-green", onClick: getAdvice.bind(this, game.Id) },
                             "Random advice"
                         ) : "",
-                        selectedChar == 0 || React.createElement(
+                        selectedChar == 0 || game.Id == 'test' || React.createElement(
                             "h2",
                             { className: "menu-content-button btn", onClick: changeImage.bind(this, game.Id, selectedChar[0]) },
                             "Change image"

@@ -21,24 +21,83 @@ var CHANGE_CHAR_IMAGE = 'CHANGE_CHAR_IMAGE';
 var CHAR_IMAGE_CHANGED = 'CHAR_IMAGE_CHANGED';
 var GET_ADVICE = 'GET_ADVICE';
 
+var startTestGame = function startTestGame() {
+    var _this = this;
+
+    return function (dispatch) {
+        var initialGame = {
+            "Id": "test",
+            "Field": [{ "Img": "http://cdn.myanimelist.net/images/characters/10/240997.jpg", "Row": 2, "Col": 0 }, { "Img": "http://cdn.myanimelist.net/images/characters/12/292611.jpg", "Row": 2, "Col": 4 }, { "Img": "http://cdn.myanimelist.net/images/characters/6/83657.jpg", "Row": 7, "Col": 4 }, { "Img": "http://cdn.myanimelist.net/images/characters/11/200455.jpg", "Row": 3, "Col": 3 }, { "Img": "http://cdn.myanimelist.net/images/characters/10/103220.jpg", "Row": 4, "Col": 1 }, { "Img": "http://cdn.myanimelist.net/images/characters/3/55714.jpg", "Row": 8, "Col": 0 }, { "Img": "http://cdn.myanimelist.net/images/characters/14/80297.jpg", "Row": 4, "Col": 5 }],
+            "Height": 9,
+            "Width": 9,
+            "Line": 3,
+            "MaxTitleChar": 5,
+            "Turn": 1,
+            "Score": {
+                "CompletedTitles": [],
+                "CompletedGroups": [],
+                "TotalScore": -1000,
+                "ChangeImgs": [],
+                "Advices": []
+            },
+            "Date": "2016-08-08T22:21:52.819+03:00",
+            "EndDate": "2016-08-08T22:21:52.819+03:00",
+            "Difficulty": 1,
+            "UserName": "",
+            "UserItems": []
+        };
+        dispatch({
+            type: GET_GAME_SUCCESS,
+            payload: initialGame
+        });
+        var moves = [];
+        var firstMove = { "Path": [[1, 5], [1, 4], [1, 3], [2, 3], [2, 2], [2, 1]],
+            "Completed": [[3, 3], [2, 4], [1, 5]],
+            "NewChars": [], "NextTurn": 2,
+            "GameScore": [{ "Id": 17265, "Title": "Log Horizon", "English": "Log Horizon", "Turn": 5, "Characters": [{ "Id": 81371, "Name": "Naotsugu", "Img": "http://cdn.myanimelist.net/images/characters/11/200455.jpg", "Score": 1 }, { "Id": 81369, "Name": "Akatsuki", "Img": "http://cdn.myanimelist.net/images/characters/12/292611.jpg", "Score": 2 }, { "Id": 81367, "Name": "Shiroe", "Img": "http://cdn.myanimelist.net/images/characters/10/240997.jpg",
+                    "Score": 3 }] }] };
+        var secondMove = { "Path": [[6, 3], [7, 3], [8, 3], [8, 2], [8, 1]],
+            "Completed": [], "NewChars": [], "NextTurn": 3, "GameScore": [] };
+        var thirdMove = { "Path": [[5, 2], [4, 2], [4, 3], [4, 4]],
+            "Completed": [[6, 3], [5, 2], [4, 1], [7, 4], [1, 4]], "NewChars": [],
+            "NextTurn": 4,
+            "GameScore": [{ "Id": 2966, "Title": "Ookami to Koushinryou", "English": "Spice and Wolf", "Turn": 7, "Characters": [{ "Id": 7376, "Name": "Arendt, Norah", "Img": "http://cdn.myanimelist.net/images/characters/3/55714.jpg", "Score": 1 }, { "Id": 24360, "Name": "Liechten, Marhait", "Img": "http://cdn.myanimelist.net/images/characters/14/80297.jpg", "Score": 2 }, { "Id": 7374, "Name": "Lawrence, Kraft", "Img": "http://cdn.myanimelist.net/images/characters/10/103220.jpg", "Score": 3 }, { "Id": 7373, "Name": "Holo", "Img": "http://cdn.myanimelist.net/images/characters/6/83657.jpg", "Score": 4 }] }]
+        };
+        moves.push([{ "Row": 2, "Col": 0 }, firstMove]);
+        moves.push([{ "Row": 8, "Col": 0 }, secondMove]);
+        moves.push([{ "Row": 4, "Col": 5 }, thirdMove]);
+        for (var i = 1; i <= moves.length; i++) {
+            setTimeout(function (char, data) {
+                moveCallbackFactory(dispatch, char)(data);
+            }.bind(_this, moves[i - 1][0], moves[i - 1][1]), 1000 * i);
+        }
+    };
+};
+
+var fetchingAdvice = false;
 var getAdvice = function getAdvice(gameId) {
     return function (dispatch) {
-        $.ajax({
-            method: "PUT",
-            url: '/game?gameId=' + gameId + '&action=advice',
-            contentType: 'application/json'
-        }).done(function (data) {
-            dispatch({
-                type: GET_ADVICE,
-                payload: data
+        if (!fetchingAdvice) {
+            fetchingAdvice = true;
+            $.ajax({
+                method: "PUT",
+                url: '/game?gameId=' + gameId + '&action=advice',
+                contentType: 'application/json'
+            }).done(function (data) {
+                fetchingAdvice = false;
+                dispatch({
+                    type: GET_ADVICE,
+                    payload: data
+                });
+            }).fail(function (xhr) {
+                fetchingAdvice = false;
+                dispatch({
+                    type: ERROR,
+                    payload: 'Get advice error: ' + (xhr.responseJSON ? xhr.responseJSON['Message'] : '')
+                });
+                removeErrorAfter(5000, dispatch);
             });
-        }).fail(function (xhr) {
-            dispatch({
-                type: ERROR,
-                payload: 'Get advice error: ' + (xhr.responseJSON ? xhr.responseJSON['Message'] : '')
-            });
-            removeErrorAfter(5000, dispatch);
-        });
+        }
     };
 };
 

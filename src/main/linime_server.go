@@ -1,7 +1,10 @@
 package main
 
-import "game"
+import (
+	"game"
+	"os"
+)
 
 func main() {
-	game.StartServer()
+	game.StartServer(os.Args[1])
 }

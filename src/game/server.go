@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"io"
 	"net/http"
+	"time"
 )
 
 type Message struct {
@@ -158,8 +159,23 @@ func serveGame(w http.ResponseWriter, r *http.Request) {
 
 var mongoSession *mgo.Session
 var mongoDB *mgo.Database
+var lastCheck time.Time
 
-func StartServer() {
+func GetCollection(collection string) *mgo.Collection {
+	now := time.Now()
+	if now.After(lastCheck.Add(5 * time.Second)) {
+		err := mongoSession.Ping()
+		mongoSessionNext, err := mgo.DialWithTimeout("127.0.0.1", time.Second)
+		if err == nil && mongoSessionNext != nil {
+			mongoSession = mongoSessionNext
+		}
+		mongoDB = mongoSession.DB("mal")
+		lastCheck = now
+	}
+	return mongoDB.C(collection)
+}
+
+func StartServer(port string) {
 	var err error
 	mongoSession, err = mgo.Dial("127.0.0.1")
 	if err != nil {
@@ -173,15 +189,12 @@ func StartServer() {
 
 	homeTemplate = template.Must(template.ParseFiles("templates/prod.html"))
 
-	char_fs := http.FileServer(http.Dir("/home/overmes/PycharmProjects/maspy/char_images"))
-	http.Handle("/static/char/", http.StripPrefix("/static/char/", char_fs))
-
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/game", serveGame)
 	http.HandleFunc("/", serveHome)
 
-	err = http.ListenAndServe(":1515", nil)
+	err = http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		panic(err)
 	}

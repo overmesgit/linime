@@ -69,8 +69,8 @@ func (g *Game) getExistedChar(requiredForLine bool) (GameCharPosition, error) {
 		for _, char := range titleMap[selectedTitleId] {
 			existedCharacters = append(existedCharacters, char.Id)
 		}
-		char := mongoDB.C("char")
-		anime := mongoDB.C("anime")
+		char := GetCollection("char")
+		anime := GetCollection("anime")
 		notEmpty := bson.M{"$not": bson.M{"$size": 0}}
 
 		var titleCharacters []int
@@ -107,7 +107,7 @@ func (g *Game) getNewGroupChar() (GameCharPosition, error) {
 		currentTitles = append(currentTitles, v.TitleId)
 	}
 
-	anime := mongoDB.C("anime")
+	anime := GetCollection("anime")
 	exists := bson.M{"$exists": true}
 	var currentGroups []int
 	err := anime.Find(bson.M{"characters.2": exists, "_id.i": bson.M{"$in": currentTitles}}).Distinct("group", &currentGroups)
