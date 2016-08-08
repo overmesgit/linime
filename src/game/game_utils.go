@@ -124,6 +124,9 @@ func (g *Game) getNewGroupChar() (GameCharPosition, error) {
 		userLimit := userOffsetStep + userLimitAdd
 		previousLength := 0
 		for len(newGroups) == 0 && userLimit < len(g.UserItems)+userOffsetStep {
+			if userLimit > len(g.UserItems) {
+				userLimit = len(g.UserItems)
+			}
 			err = anime.Find(bson.M{"characters.2": exists, "group": bson.M{"$nin": currentGroups}, "_id.i": bson.M{"$in": g.UserItems[:userLimit]}}).Distinct("group", &newGroups)
 			if err != nil {
 				return res, err
