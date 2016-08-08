@@ -59,12 +59,10 @@ var AppClass = function (_React$Component2) {
     }, {
         key: "componentDidMount",
         value: function componentDidMount() {
-            var _props$app = this.props.app;
-            var game = _props$app.game;
-            var fetchingGame = _props$app.fetchingGame;
+            var game = this.props.app.game;
             var startTestGame = this.props.appActions.startTestGame;
 
-            if (!game.Id && fetchingGame == '') {
+            if (!game.Id && gameId == '') {
                 startTestGame();
             }
         }
@@ -83,11 +81,11 @@ var AppClass = function (_React$Component2) {
     }, {
         key: "render",
         value: function render() {
-            var _props$app2 = this.props.app;
-            var game = _props$app2.game;
-            var error = _props$app2.error;
-            var myGames = _props$app2.myGames;
-            var createGameStatus = _props$app2.createGameStatus;
+            var _props$app = this.props.app;
+            var game = _props$app.game;
+            var error = _props$app.error;
+            var myGames = _props$app.myGames;
+            var createGameStatus = _props$app.createGameStatus;
             var _props$appActions = this.props.appActions;
             var createGame = _props$appActions.createGame;
             var completeGame = _props$appActions.completeGame;

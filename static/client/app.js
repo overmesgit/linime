@@ -23,9 +23,9 @@ class AppClass extends React.Component {
     }
 
     componentDidMount() {
-        const {game, fetchingGame} = this.props.app;
+        const {game} = this.props.app;
         const {startTestGame} = this.props.appActions;
-        if (!game.Id && fetchingGame == '') {
+        if (!game.Id && gameId == '') {
             startTestGame();
         }
     }
