@@ -1,7 +1,12 @@
 package game
 
 import (
+	"bytes"
+	"encoding/gob"
 	"encoding/json"
+	"fmt"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"gopkg.in/mgo.v2/bson"
 	"mal/parser"
@@ -17,27 +22,27 @@ const (
 )
 
 type GameCharPosition struct {
-	TitleId int    `bson:"titleid" json:"-"`
-	Id      int    `bson:"id" json:"-"`
-	Img     string `bson:"img"`
-	Row     int    `bson:"row"`
-	Col     int    `bson:"col"`
+	TitleId int `json:"-"`
+	Id      int `json:"-"`
+	Img     string
+	Row     int
+	Col     int
 }
 
 type Game struct {
-	Id               string             `bson:"_id"`
-	Field            []GameCharPosition `bson:"field"`
-	Height           int                `bson:"height"`
-	Width            int                `bson:"width"`
-	Line             int                `bson:"line"`
-	MaxTitleChar     int                `bson:"max_title_char"`
-	Turn             int                `bson:"turn"`
+	Id               string
+	Field            []GameCharPosition
+	Height           int
+	Width            int
+	Line             int
+	MaxTitleChar     int
+	Turn             int
 	Score            GameScore
 	positions        [][2]int
 	randomPos        []int
 	currentRandomPos int
-	Date             time.Time `bson:"date"`
-	EndDate          time.Time `bson:"enddate"`
+	Date             time.Time
+	EndDate          time.Time
 	Difficulty       int
 	UserName         string
 	UserItems        []int
@@ -192,7 +197,6 @@ func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, erro
 			// delete user list, it can be huge
 			g.UserItems = make([]int, 0)
 		}
-		g.Update()
 
 		completedIndexes := make([][2]int, 0)
 		for _, char := range append(completed, notInLine...) {
@@ -334,25 +338,66 @@ func (g *Game) AddCharactersToRandomPos(characters parser.CharacterSlice, titleI
 	return result
 }
 
-func (g *Game) Save() error {
-	return GetCollection("game").Insert(g)
+func (g *Game) Serialize() ([]byte, error) {
+	var buffer bytes.Buffer
+	enc := gob.NewEncoder(&buffer)
+	err := enc.Encode(g)
+	return buffer.Bytes(), err
 }
 
-func (g *Game) Update() error {
-	return GetCollection("game").UpdateId(g.Id, g)
+func (g *Game) GetGameModel() (GameModel, error) {
+	var res GameModel
+	data, err := g.Serialize()
+	if err != nil {
+		return res, err
+	}
+	return GameModel{Id: g.Id, GobData: data}, nil
 }
 
-func (g *Game) AsJson() ([]byte, error) {
-	return json.Marshal(g)
+func GetGormError(db *gorm.DB) error {
+	errs := db.GetErrors()
+	if len(errs) > 0 {
+		return errors.New(fmt.Sprint(errs))
+	}
+	return nil
 }
 
 func GetGame(uuid string) (*Game, error) {
 	game := NewGame()
-	err := GetCollection("game").FindId(uuid).One(game)
+	var data []byte
+	model := GameModel{Id: uuid, GobData: data}
+	err := GetGormError(gormDB.First(&model))
 	if err != nil {
-		return nil, err
+		return game, err
+	}
+	var buffer bytes.Buffer
+	buffer.Write(model.GobData)
+	dec := gob.NewDecoder(&buffer)
+	err = dec.Decode(game)
+	if err != nil {
+		return game, err
 	}
 	return game, err
+}
+
+func (g *Game) Save() error {
+	model, err := g.GetGameModel()
+	if err != nil {
+		return err
+	}
+	return GetGormError(gormDB.Create(&model))
+}
+
+func (g *Game) Update() error {
+	model, err := g.GetGameModel()
+	if err != nil {
+		return err
+	}
+	return GetGormError(gormDB.Save(&model))
+}
+
+func (g *Game) AsJson() ([]byte, error) {
+	return json.Marshal(g)
 }
 
 func GetRandomImage(char parser.Character) string {
@@ -420,22 +465,29 @@ func (a AnimeTitleSlice) Less(i, j int) bool {
 	return int(a[i].Score)+ai_time_points < int(a[j].Score)+aj_time_points
 }
 
+func (g *Game) AddUserScores() error {
+	userList, err := malpar.GetUserScoresByName(g.UserName, 2)
+	if err != nil {
+		return err
+	}
+	userListSlice := AnimeTitleSlice(userList.AnimeList)
+	sort.Sort(sort.Reverse(userListSlice))
+	for _, item := range userListSlice {
+		// 1 watching, 2 completed, 3 on hold, 4 drop
+		if item.Status > 0 && item.Status <= 3 {
+			g.UserItems = append(g.UserItems, int(item.Id))
+		}
+	}
+	return nil
+}
+
 func CreateNewGame(gameParam CreateGameParam) (*Game, error) {
 	game := NewGameWithParam(gameParam)
 	if gameParam.UserName != "" {
-		userList, err := malpar.GetUserScoresByName(game.UserName, 2)
+		err := game.AddUserScores()
 		if err != nil {
 			return game, err
 		}
-		userListSlice := AnimeTitleSlice(userList.AnimeList)
-		sort.Sort(sort.Reverse(userListSlice))
-		for _, item := range userListSlice {
-			// 1 watching, 2 completed, 3 on hold, 4 drop
-			if item.Status > 0 && item.Status <= 3 {
-				game.UserItems = append(game.UserItems, int(item.Id))
-			}
-		}
-
 	}
 
 	for i := 0; i < 3; i++ {

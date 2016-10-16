@@ -3,6 +3,8 @@ package game
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"gopkg.in/mgo.v2"
 	"html/template"
 	"io"
@@ -70,6 +72,7 @@ func serveTargetGame(gameUUID string, method string, action string, body io.Read
 			if err != nil {
 				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
 			}
+			game.Update()
 			jsonResp, err := json.Marshal(resp)
 			if err != nil {
 				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
@@ -159,6 +162,7 @@ func serveGame(w http.ResponseWriter, r *http.Request) {
 
 var mongoSession *mgo.Session
 var mongoDB *mgo.Database
+var gormDB *gorm.DB
 var lastCheck time.Time
 
 func GetCollection(collection string) *mgo.Collection {
@@ -184,6 +188,14 @@ func StartServer(port string) {
 	defer mongoSession.Close()
 	//mongoSession.SetMode(mgo.Eventual, true)
 	mongoDB = mongoSession.DB("mal")
+
+	gormDB, err = gorm.Open("postgres", "host=127.0.0.1 port=5432 user=user dbname=user sslmode=disable password=user")
+	if err != nil {
+		panic("failed to connect database")
+	}
+	defer gormDB.Close()
+
+	gormDB.AutoMigrate(&GameModel{})
 
 	fmt.Println("start")
 

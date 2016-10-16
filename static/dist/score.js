@@ -84,9 +84,8 @@ var StatsImagesGroup = function (_React$Component2) {
     _createClass(StatsImagesGroup, [{
         key: "render",
         value: function render() {
-            var _props = this.props;
-            var imagesArray = _props.imagesArray;
-            var score = _props.score;
+            var imagesArray = this.props.imagesArray;
+            var score = this.props.score;
 
             var imagesGroup = [];
             for (var i = 0; i < imagesArray.length; i += 5) {
