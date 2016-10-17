@@ -141,7 +141,9 @@ func serveGame(w http.ResponseWriter, r *http.Request) {
 		err := json.NewDecoder(r.Body).Decode(&gameParam)
 		defer r.Body.Close()
 		if err != nil {
-			panic(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write(Message{err.Error()}.AsJson())
+			return
 		}
 		if r.Method == "POST" {
 			game, err := CreateNewGame(gameParam)

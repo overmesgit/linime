@@ -2,14 +2,11 @@ package game
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"malmodel"
 	"math"
 	"math/rand"
 	"sort"
-	"strconv"
-	"strings"
 )
 
 func GetUniqueValues(values []int) []int {
@@ -38,144 +35,120 @@ func (g *Game) getFullAndRequiredCount() (float64, float64) {
 	return full, required
 }
 
-func (g *Game) getTitleMap() map[int][]GameCharPosition {
-	titleMap := make(map[int][]GameCharPosition, 0)
+func (g *Game) getTitleMap() map[int]GameCharPositionSlice {
+	titleMap := make(map[int]GameCharPositionSlice, 0)
 	for _, v := range g.Field {
 		if _, ok := titleMap[v.TitleId]; !ok {
-			titleMap[v.TitleId] = make([]GameCharPosition, 0)
+			titleMap[v.TitleId] = make(GameCharPositionSlice, 0)
 		}
 		titleMap[v.TitleId] = append(titleMap[v.TitleId], v)
 	}
 	return titleMap
 }
 
-func (g *Game) getExistedChar(requiredForLine bool) (GameCharPosition, error) {
+func (g *Game) addExistedChar(requiredForLine bool) (GameCharPosition, error) {
 	var res GameCharPosition
-	titleMap := g.getTitleMap()
 
-	targetTitles := make([]int, 0)
-	for key, titlesChars := range titleMap {
-		if requiredForLine {
-			if len(titlesChars) < g.Line {
-				targetTitles = append(targetTitles, key)
-			}
-		} else {
-			if len(titlesChars) >= g.Line && len(titlesChars) < MAX_FROM_ONE_TITLE {
-				targetTitles = append(targetTitles, key)
-			}
-		}
+	nextTitles := make([]int, 0)
+	if requiredForLine {
+		nextTitles = g.GetLessLineTitles()
+	} else {
+		nextTitles = g.GetMoreLineTitles()
 	}
 
-	if len(targetTitles) > 0 {
-		selectedTitleId := targetTitles[rand.Intn(len(targetTitles))]
-		existedCharacters := make([]string, 0)
-		for _, char := range titleMap[selectedTitleId] {
-			existedCharacters = append(existedCharacters, strconv.Itoa(char.Id))
-		}
+	if len(nextTitles) > 0 {
+		nextTitleId := nextTitles[rand.Intn(len(nextTitles))]
 
-		selectedTitle := malmodel.AnimeModel{Id: selectedTitleId}
+		selectedTitle := malmodel.AnimeModel{Id: nextTitleId}
 		query := gormDB.First(&selectedTitle)
-		err := GetGormError(query)
-		if err != nil {
+		if err := GetGormError(query); err != nil {
 			return res, errors.New(fmt.Sprintf("error: get title %v", err.Error()))
 		}
 
-		var titleCharacters []string
-		for _, char := range selectedTitle.GetStoredChars() {
-			titleCharacters = append(titleCharacters, strconv.Itoa(char.Id))
-		}
+		animeChars := selectedTitle.GetStoredChars()
+		titleCharacters := animeChars.GetIds()
+		titleMap := g.getTitleMap()
+		usedCharacters := titleMap[nextTitleId].GetIds()
 
 		var characters CharModelSlice
-		query = gormDB.Where("id in (?) and id not in (?)", titleCharacters, existedCharacters).Find(&characters)
-		err = GetGormError(query)
-		if err != nil {
+		query = gormDB.Where("id in (?) and id not in (?)", titleCharacters, usedCharacters).Find(&characters)
+		if err := GetGormError(query); err != nil {
 			return res, errors.New(fmt.Sprintf("error: get new characters %v", err.Error()))
 		}
 		if len(characters) > 0 {
-			randomCharacters := GetRandomCharactersByFavorites(selectedTitle, characters, 1, g.Difficulty)
-			for {
-				pos := g.AddCharacterToRandomPos(randomCharacters[0], selectedTitleId)
-				completed, _ := g.CheckCompleted()
-				if len(completed) == 0 || !g.HasFreePositions() {
-					return pos, nil
-				}
-			}
+			randomCharacters := characters.GetRandomByFavorites(animeChars.GetMainCharsMap(), 1, g.Difficulty)
+			pos := g.AddCharacterToRandomPos(randomCharacters[0], nextTitleId)
+			return pos, nil
 		}
 	}
-	return g.getNewGroupChar()
+	return g.addNewGroupChar()
 }
 
-func (g *Game) getNewGroupChar() (GameCharPosition, error) {
+func (g *Game) GetUserGroups(filteredGroups []int) ([]int, error) {
+	res := make([]int, 0)
+	userLimitAdd := 0
+	userOffsetStep := 100 + 100*g.Difficulty*g.Difficulty
+	userLimit := userOffsetStep + userLimitAdd
+	previousLength := 0
+	for len(res) == 0 && userLimit < len(g.UserItems)+userOffsetStep {
+		if userLimit > len(g.UserItems) {
+			userLimit = len(g.UserItems)
+		}
+		where := "jsonb_array_length(chars_json) > ? and id in (?)"
+		query := gormDB.Table("anime_models").Where(where, 2, g.UserItems[:userLimit])
+		if len(filteredGroups) > 0 {
+			query = query.Where("group_id not in (?)", filteredGroups).Pluck("group_id", &res)
+		}
+		if err := GetGormError(query); err != nil {
+			return res, errors.New(fmt.Sprintf("error: get new user groups %v", err.Error()))
+		}
+		if len(res) < userLimit/2 && len(res) != 0 && len(res) != previousLength {
+			previousLength = len(res)
+			res = res[:0]
+			userLimit += userOffsetStep
+		}
+	}
+	return res, nil
+}
+
+func (g *Game) addNewGroupChar() (GameCharPosition, error) {
 	var res GameCharPosition
 	var err error
-	currentTitles := make([]string, 0)
-	for _, v := range g.Field {
-		currentTitles = append(currentTitles, strconv.Itoa(v.TitleId))
-	}
+	currentTitles := g.Field.GetIds()
 
-	var currentGroups []int
+	var usedGroups []int
 	if len(currentTitles) > 0 {
-		query := gormDB.Table("anime_models").Where("id in (?)", currentTitles).Pluck(`"group"`, &currentGroups)
-		err := GetGormError(query)
-		if err != nil {
+		query := gormDB.Table("anime_models").Where("id in (?)", currentTitles).Pluck("group_id", &usedGroups)
+		if err := GetGormError(query); err != nil {
 			return res, errors.New(fmt.Sprintf("error: get existed groups %v", err.Error()))
 		}
 	}
 
-	currentGroups = append(currentGroups, g.Score.CompletedGroups...)
-	currentGroupsStr := strings.Trim(fmt.Sprint(currentGroups), "[]")
-
-	newGroups := make([]int, 0)
-	if g.UserName != "" {
-		userLimitAdd := 0
-		userOffsetStep := 100 + 100*g.Difficulty*g.Difficulty
-		userLimit := userOffsetStep + userLimitAdd
-		previousLength := 0
-		for len(newGroups) == 0 && userLimit < len(g.UserItems)+userOffsetStep {
-			if userLimit > len(g.UserItems) {
-				userLimit = len(g.UserItems)
-			}
-			userItemsStr := strings.Trim(fmt.Sprint(g.UserItems[:userLimit]), "[]")
-			where := "jsonb_array_length(chars_json) > ? and group not in (?) and id in (?)"
-			query := gormDB.Table("anime_models").Where(where, 2, currentGroupsStr, userItemsStr).Pluck("group", &newGroups)
-			err = GetGormError(query)
-			if err != nil {
-				return res, errors.New(fmt.Sprintf("error: get new user groups %v", err.Error()))
-			}
-			if len(newGroups) < userLimit/2 && len(newGroups) != 0 && len(newGroups) != previousLength {
-				previousLength = len(newGroups)
-				newGroups = newGroups[:0]
-				userLimit += userOffsetStep
-			}
+	usedGroups = append(usedGroups, g.Score.CompletedGroups...)
+	var notUsedGroups []int
+	if len(g.UserItems) > 0 {
+		notUsedGroups, err = g.GetUserGroups(usedGroups)
+		if err != nil {
+			return res, err
 		}
 	}
-	var titles AnimeModelSlice
-	offsetStep := 100 + 200*g.Difficulty*g.Difficulty
-	if len(newGroups) == 0 {
-		animeLimit := offsetStep
-		var query *gorm.DB
 
-		if len(currentGroups) > 0 {
-			where := "jsonb_array_length(chars_json) > ? and 'group' not in (?)"
-			query = gormDB.Where(where, 2, currentGroups)
-		} else {
-			where := "jsonb_array_length(chars_json) > ?"
-			query = gormDB.Where(where, 2)
+	// not found user groups
+	if len(notUsedGroups) == 0 {
+		animeLimit := 100 + 200*g.Difficulty*g.Difficulty
+		query := gormDB.Where("jsonb_array_length(chars_json) > ?", 2)
+		if len(usedGroups) > 0 {
+			query = gormDB.Where("group_id not in (?)", usedGroups)
 		}
-		query = query.Order("score_count desc").Limit(animeLimit).Find(&titles)
-		err = GetGormError(query)
-		if err != nil {
+		query = query.Table("anime_models").Order("score_count desc").Limit(animeLimit).Pluck("group_id", &notUsedGroups)
+		if err = GetGormError(query); err != nil {
 			return res, errors.New(fmt.Sprintf("error: get new groups %v", err.Error()))
 		}
-
-	}
-	for _, title := range titles {
-		newGroups = append(newGroups, title.Group)
 	}
 
-	uniquerGroups := GetUniqueValues(newGroups)
-	targetGroup := uniquerGroups[rand.Intn(len(uniquerGroups))]
-	val, err := g.AddRandomCharacterByGroup(targetGroup, 1)
+	uniquerGroups := GetUniqueValues(notUsedGroups)
+	randomGroupId := uniquerGroups[rand.Intn(len(uniquerGroups))]
+	val, err := g.AddRandomCharacterByGroup(randomGroupId, 1)
 	if err != nil {
 		return res, err
 	}
@@ -185,25 +158,25 @@ func (g *Game) getNewGroupChar() (GameCharPosition, error) {
 	return val[0], nil
 }
 
-func checkLeft(pos map[int]map[int]GameCharPosition, char GameCharPosition, prevResult []GameCharPosition) []GameCharPosition {
+func checkLeft(pos map[int]map[int]GameCharPosition, char GameCharPosition, prevResult GameCharPositionSlice) GameCharPositionSlice {
 	if leftChar, ok := pos[char.Row][char.Col-1]; ok && leftChar.TitleId == char.TitleId {
 		return checkLeft(pos, leftChar, append(prevResult, leftChar))
 	}
 	return prevResult
 }
-func checkLeftTop(pos map[int]map[int]GameCharPosition, char GameCharPosition, prevResult []GameCharPosition) []GameCharPosition {
+func checkLeftTop(pos map[int]map[int]GameCharPosition, char GameCharPosition, prevResult GameCharPositionSlice) GameCharPositionSlice {
 	if leftChar, ok := pos[char.Row-1][char.Col-1]; ok && leftChar.TitleId == char.TitleId {
 		return checkLeftTop(pos, leftChar, append(prevResult, leftChar))
 	}
 	return prevResult
 }
-func checkTop(pos map[int]map[int]GameCharPosition, char GameCharPosition, prevResult []GameCharPosition) []GameCharPosition {
+func checkTop(pos map[int]map[int]GameCharPosition, char GameCharPosition, prevResult GameCharPositionSlice) GameCharPositionSlice {
 	if leftChar, ok := pos[char.Row-1][char.Col]; ok && leftChar.TitleId == char.TitleId {
 		return checkTop(pos, leftChar, append(prevResult, leftChar))
 	}
 	return prevResult
 }
-func checkTopRight(pos map[int]map[int]GameCharPosition, char GameCharPosition, prevResult []GameCharPosition) []GameCharPosition {
+func checkTopRight(pos map[int]map[int]GameCharPosition, char GameCharPosition, prevResult GameCharPositionSlice) GameCharPositionSlice {
 	if leftChar, ok := pos[char.Row-1][char.Col+1]; ok && leftChar.TitleId == char.TitleId {
 		return checkTopRight(pos, leftChar, append(prevResult, leftChar))
 	}
@@ -254,6 +227,14 @@ func (g *Game) GetAllFreePositions() [][2]int {
 
 type AnimeModelSlice []malmodel.AnimeModel
 
+func (a AnimeModelSlice) GetIds() []int {
+	res := make([]int, 0)
+	for _, model := range a {
+		res = append(res, model.Id)
+	}
+	return res
+}
+
 func (a AnimeModelSlice) Len() int {
 	return len(a)
 }
@@ -272,7 +253,7 @@ func (a AnimeModelSlice) GetRandomByMembers() malmodel.AnimeModel {
 	for _, a := range a {
 		fullMembersSum += a.ScoreCount
 	}
-	randomInt := rand.Intn(fullMembersSum)
+	randomInt := rand.Intn(fullMembersSum + 1)
 	currentSum := 0
 	for _, a := range a {
 		currentSum += a.ScoreCount
@@ -305,50 +286,46 @@ func (c CharModelSlice) Less(i, j int) bool {
 	return c[i].Favorites < c[j].Favorites
 }
 
-func GetRandomCharactersByFavorites(title malmodel.AnimeModel, c CharModelSlice, n int, charDiff int) CharModelSlice {
-	sort.Sort(sort.Reverse(c))
+func (chars CharModelSlice) PrepareFavoritesByDifficulty(animeMainCharsMap map[int]bool, diff int) int {
 	fullFavoritesSum := 0
-	mainCharsMap := map[int]bool{}
-	for _, char := range title.GetStoredChars() {
-		if char.Main {
-			mainCharsMap[char.Id] = true
-		}
-	}
-	for i := range c {
+	for i := range chars {
 		favAdd := 0
-		switch charDiff {
-		case 0:
-		case 1:
-			if isMain, _ := mainCharsMap[c[i].Id]; isMain {
+		switch diff {
+		case 0, 1:
+			if isMain, _ := animeMainCharsMap[chars[i].Id]; isMain {
 				favAdd = 10000
 			}
 		case 2:
-			if c[i].Favorites == 0 {
+			if chars[i].Favorites == 0 {
 				favAdd = 1
 			}
 		case 3:
-			if c[i].Favorites == 0 {
+			if chars[i].Favorites == 0 {
 				favAdd = 3
 			}
 		case 4:
-			c[i].Favorites = int(math.Sqrt(float64(c[i].Favorites)))
-			if c[i].Favorites == 0 {
+			chars[i].Favorites = int(math.Sqrt(float64(chars[i].Favorites)))
+			if chars[i].Favorites == 0 {
 				favAdd = 5
 			}
 		}
-		c[i].Favorites += favAdd
-		fullFavoritesSum += c[i].Favorites
+		chars[i].Favorites += favAdd
+		fullFavoritesSum += chars[i].Favorites
 	}
+	return fullFavoritesSum
+
+}
+
+func (chars CharModelSlice) GetRandomByFavorites(animeMainCharsMap map[int]bool, n int, diff int) CharModelSlice {
+	sort.Sort(sort.Reverse(chars))
+	fullFavoritesSum := chars.PrepareFavoritesByDifficulty(animeMainCharsMap, diff)
 
 	resultIndexes := make(map[int]bool, 0)
-	for i := 0; i < n; i++ {
-		randomInt := 0
-		if fullFavoritesSum > 0 {
-			randomInt = rand.Intn(fullFavoritesSum)
-		}
+	for i := 0; i < n && i < len(chars); i++ {
+		randomInt := rand.Intn(fullFavoritesSum + 1)
 
 		currentSum := 0
-		for charIndex, char := range c {
+		for charIndex, char := range chars {
 			currentSum += char.Favorites
 			if _, ok := resultIndexes[charIndex]; currentSum >= randomInt && !ok {
 				resultIndexes[charIndex] = true
@@ -359,7 +336,7 @@ func GetRandomCharactersByFavorites(title malmodel.AnimeModel, c CharModelSlice,
 
 	result := make(CharModelSlice, 0)
 	for index := range resultIndexes {
-		result = append(result, c[index])
+		result = append(result, chars[index])
 	}
 	return result
 }

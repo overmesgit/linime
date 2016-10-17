@@ -55,7 +55,7 @@ func (g *Game) GetCompletedGroups(completedChars []GameCharPosition) ([]int, err
 	var completedGroups []int
 	var query *gorm.DB
 	if len(completedGroups) > 0 {
-		query = gormDB.Table("anime_models").Where("jsonb_array_length(chars_json) > ? and id in (?)", 2, completedTitles).Pluck("group", &completedGroups)
+		query = gormDB.Table("anime_models").Where("jsonb_array_length(chars_json) > ? and id in (?)", 2, completedTitles).Pluck("group_id", &completedGroups)
 		err := GetGormError(query)
 		if err != nil {
 			return completedGroups, errors.New(fmt.Sprintf("error: get completed groups %v", err.Error()))

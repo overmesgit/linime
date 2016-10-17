@@ -20,6 +20,8 @@ const (
 	NOT_ENDED_GAME_SCORES = -1000
 )
 
+type GameCharPositionSlice []GameCharPosition
+
 type GameCharPosition struct {
 	TitleId int `json:"-"`
 	Id      int `json:"-"`
@@ -30,7 +32,7 @@ type GameCharPosition struct {
 
 type Game struct {
 	Id               string
-	Field            []GameCharPosition
+	Field            GameCharPositionSlice
 	Height           int
 	Width            int
 	Line             int
@@ -70,100 +72,6 @@ func NewGameWithParam(param CreateGameParam) *Game {
 	return game
 }
 
-func (g *Game) GetAdvice() (Advice, error) {
-	var res Advice
-	titlesMap := g.getTitleMap()
-	var adviceTitle int
-
-outer:
-	for titleId, positions := range titlesMap {
-		if len(positions) < 2 {
-			continue
-		}
-		for _, advice := range g.Score.Advices {
-			if advice.Title == titleId {
-				continue outer
-			}
-		}
-		adviceTitle = titleId
-		break
-
-	}
-
-	viewedAdvice := false
-	if adviceTitle == 0 && len(g.Score.Advices) > 0 {
-		for i, advice := range g.Score.Advices {
-			if _, ok := titlesMap[advice.Title]; ok {
-				adviceTitle = g.Score.Advices[i].Title
-				g.Score.Advices = append(g.Score.Advices[:i], g.Score.Advices[i+1:]...)
-				viewedAdvice = true
-				break
-			}
-		}
-	}
-
-	if adviceTitle != 0 {
-		positions, _ := titlesMap[adviceTitle]
-		images := make([]string, 0)
-		for _, pos := range positions {
-			images = append(images, pos.Img)
-		}
-		score := -3
-		if g.isCompleted() || viewedAdvice || g.Difficulty == 0 {
-			score = 0
-		}
-		res = Advice{Img: images, Title: adviceTitle, Turn: g.Turn, Score: score}
-		g.Score.Advices = append(g.Score.Advices, res)
-	} else {
-		return res, errors.New("Can't find advice")
-	}
-
-	return res, nil
-}
-
-func (g *Game) ChangeImage(character GameCharPosition) (ChangedImage, error) {
-	var result ChangedImage
-	gameChar, err := g.FindChar(character.Row, character.Col)
-	if err != nil {
-		return result, err
-	}
-
-	sameChange := false
-	for _, change := range g.Score.ChangeImgs {
-		if change.OldImg == gameChar.Img {
-			sameChange = true
-			break
-		}
-	}
-
-	char := malmodel.CharacterModel{Id: gameChar.Id}
-	query := gormDB.First(&char)
-	err = GetGormError(query)
-	if err != nil {
-		return result, errors.New(fmt.Sprintf("error: get char %v", err.Error()))
-	}
-	images := char.GetImages()
-	if len(images) == 1 {
-		return result, errors.New("Only one image")
-	}
-	for i, img := range images {
-		if img == gameChar.Img {
-			nextImage := images[(i+1)%len(images)]
-			gameChar.Img = nextImage
-
-			result = ChangedImage{OldImg: character.Img, NewImg: nextImage, Turn: g.Turn, Score: 0}
-			if !sameChange {
-				if g.Difficulty > 0 && !g.isCompleted() {
-					result.Score = -1
-				}
-				g.Score.ChangeImgs = append(g.Score.ChangeImgs, result)
-			}
-			return result, nil
-		}
-	}
-	return result, errors.New("No image for change")
-}
-
 func (g *Game) FindChar(row, col int) (*GameCharPosition, error) {
 	for i := range g.Field {
 		currentChar := &g.Field[i]
@@ -175,43 +83,16 @@ func (g *Game) FindChar(row, col int) (*GameCharPosition, error) {
 	return res, errors.New("Char not found")
 }
 
-func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, error) {
-	var res MoveResponse
-	path, err := g.MoveCharacter(char, row, col)
-	if err != nil {
-		return res, err
-	} else {
-		completed, notInLine := g.CheckCompleted()
-		titleScoreUpdate, err := g.UpdateGameScore(completed, notInLine)
-		if err != nil {
-			return res, err
-		}
-		newChars, err := g.AddNewChars()
-		if err != nil {
-			return res, err
-		}
-		if len(g.Field) >= g.Width*g.Height {
-			g.CompleteCountTotalScore()
-		}
-		if g.isCompleted() {
-			// delete user list, it can be huge
-			g.UserItems = make([]int, 0)
-		}
-
-		completedIndexes := make([][2]int, 0)
-		for _, char := range append(completed, notInLine...) {
-			completedIndexes = append(completedIndexes, [2]int{char.Row, char.Col})
-		}
-		return MoveResponse{path, completedIndexes, newChars, g.Turn, titleScoreUpdate}, nil
+func (g *Game) GetAddByTurn() int {
+	if g.Difficulty > 1 {
+		return 3
 	}
+	return 2
 }
 
 func (g *Game) AddNewChars() ([]GameCharPosition, error) {
 	result := make([]GameCharPosition, 0)
-	addByTurn := 2
-	if g.Difficulty > 1 {
-		addByTurn = 3
-	}
+	addByTurn := g.GetAddByTurn()
 	for i := 0; i < addByTurn; i++ {
 		if !g.HasFreePositions() {
 			break
@@ -219,20 +100,20 @@ func (g *Game) AddNewChars() ([]GameCharPosition, error) {
 
 		var newChar GameCharPosition
 		var err error
+		// full - maximum set of chars from title
+		// required - not full set
 		full, required := g.getFullAndRequiredCount()
 		if (required - 2) >= full/2 {
-			newChar, err = g.getExistedChar(true)
+			newChar, err = g.addExistedChar(true)
 		} else {
 			funcRandom := rand.Intn(100)
 			switch {
-			case len(g.Field) >= g.Width*g.Height:
-				break
 			case funcRandom < 30:
-				newChar, err = g.getExistedChar(true)
+				newChar, err = g.addExistedChar(true)
 			case funcRandom < 60:
-				newChar, err = g.getExistedChar(false)
+				newChar, err = g.addExistedChar(false)
 			case funcRandom < 100:
-				newChar, err = g.getNewGroupChar()
+				newChar, err = g.addNewGroupChar()
 			}
 		}
 		if err != nil {
@@ -410,20 +291,19 @@ func (g *Game) AddRandomCharacterByGroup(GroupId, CharCount int) ([]GameCharPosi
 
 	//get random anime from group by members
 	var animeModels AnimeModelSlice
-	query := gormDB.Where(`jsonb_array_length(chars_json) > ? AND "group" = ?`, 2, GroupId).Find(&animeModels)
-	errs := query.GetErrors()
-	if len(errs) > 0 {
+	query := gormDB.Where("jsonb_array_length(chars_json) > ? AND group_id = ?", 2, GroupId).Find(&animeModels)
+	if errs := query.GetErrors(); len(errs) > 0 {
 		return res, errors.New(fmt.Sprint(errs))
 	}
 	randomTitle := animeModels.GetRandomByMembers()
 
 	//get random character by favorites
 	//titleChars := randomTitle.GetChars()
-	characters, err := randomTitle.GetRelatedCharacters(gormDB)
+	characters, mainCharsMap, err := randomTitle.GetRelatedCharacters(gormDB)
 	if err != nil {
 		return res, err
 	}
-	randomCharacters := GetRandomCharactersByFavorites(randomTitle, CharModelSlice(characters), CharCount, g.Difficulty)
+	randomCharacters := CharModelSlice(characters).GetRandomByFavorites(mainCharsMap, CharCount, g.Difficulty)
 	return g.AddCharactersToRandomPos(randomCharacters, randomTitle.Id), nil
 
 }
@@ -451,6 +331,9 @@ func (a AnimeTitleSlice) Less(i, j int) bool {
 }
 
 func (g *Game) AddUserScores() error {
+	if g.UserName == "" {
+		return nil
+	}
 	userList, err := malpar.GetUserScoresByName(g.UserName, 2)
 	if err != nil {
 		return err
@@ -466,21 +349,32 @@ func (g *Game) AddUserScores() error {
 	return nil
 }
 
-func CreateNewGame(gameParam CreateGameParam) (*Game, error) {
-	game := NewGameWithParam(gameParam)
-	if gameParam.UserName != "" {
-		err := game.AddUserScores()
-		if err != nil {
-			return game, err
+func (g *Game) GetLessLineTitles() []int {
+	titleMap := g.getTitleMap()
+	targetTitles := make([]int, 0)
+	for key, titlesChars := range titleMap {
+		if len(titlesChars) < g.Line {
+			targetTitles = append(targetTitles, key)
 		}
 	}
+	return targetTitles
+}
 
-	for i := 0; i < 3; i++ {
-		_, err := game.AddNewChars()
-		if err != nil {
-			return game, err
+func (g *Game) GetMoreLineTitles() []int {
+	titleMap := g.getTitleMap()
+	targetTitles := make([]int, 0)
+	for key, titlesChars := range titleMap {
+		if len(titlesChars) >= g.Line && len(titlesChars) < MAX_FROM_ONE_TITLE {
+			targetTitles = append(targetTitles, key)
 		}
 	}
+	return targetTitles
+}
 
-	return game, nil
+func (chars GameCharPositionSlice) GetIds() []int {
+	existedCharacters := make([]int, 0)
+	for _, char := range chars {
+		existedCharacters = append(existedCharacters, char.Id)
+	}
+	return existedCharacters
 }
