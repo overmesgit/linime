@@ -8,8 +8,7 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/syndtr/goleveldb/leveldb/errors"
-	"gopkg.in/mgo.v2/bson"
-	"mal/parser"
+	"malmodel"
 	"malpar"
 	"math/rand"
 	"sort"
@@ -137,18 +136,19 @@ func (g *Game) ChangeImage(character GameCharPosition) (ChangedImage, error) {
 		}
 	}
 
-	var char parser.Character
-	charCol := GetCollection("char")
-	err = charCol.Find(bson.M{"_id": gameChar.Id}).One(&char)
+	char := malmodel.CharacterModel{Id: gameChar.Id}
+	query := gormDB.First(&char)
+	err = GetGormError(query)
 	if err != nil {
-		return result, err
+		return result, errors.New(fmt.Sprintf("error: get char %v", err.Error()))
 	}
-	if len(char.Images) == 1 {
+	images := char.GetImages()
+	if len(images) == 1 {
 		return result, errors.New("Only one image")
 	}
-	for i, img := range char.Images {
+	for i, img := range images {
 		if img == gameChar.Img {
-			nextImage := char.Images[(i+1)%len(char.Images)]
+			nextImage := images[(i+1)%len(images)]
 			gameChar.Img = nextImage
 
 			result = ChangedImage{OldImg: character.Img, NewImg: nextImage, Turn: g.Turn, Score: 0}
@@ -320,7 +320,7 @@ func (g *Game) MoveCharacter(char GameCharPosition, row, col int) ([][2]int, err
 
 }
 
-func (g *Game) AddCharacterToRandomPos(char parser.Character, titleId int) GameCharPosition {
+func (g *Game) AddCharacterToRandomPos(char malmodel.CharacterModel, titleId int) GameCharPosition {
 	randomRow, randomCol := g.GetRandomPositions()
 	randomImg := GetRandomImage(char)
 	newChar := GameCharPosition{titleId, char.Id, randomImg, randomRow, randomCol}
@@ -328,7 +328,7 @@ func (g *Game) AddCharacterToRandomPos(char parser.Character, titleId int) GameC
 	return newChar
 }
 
-func (g *Game) AddCharactersToRandomPos(characters parser.CharacterSlice, titleId int) []GameCharPosition {
+func (g *Game) AddCharactersToRandomPos(characters CharModelSlice, titleId int) []GameCharPosition {
 	result := make([]GameCharPosition, 0)
 	for i := range characters {
 		newChar := g.AddCharacterToRandomPos(characters[i], titleId)
@@ -368,7 +368,7 @@ func GetGame(uuid string) (*Game, error) {
 	model := GameModel{Id: uuid, GobData: data}
 	err := GetGormError(gormDB.First(&model))
 	if err != nil {
-		return game, err
+		return game, errors.New(fmt.Sprintf("error: get game %v", err.Error()))
 	}
 	var buffer bytes.Buffer
 	buffer.Write(model.GobData)
@@ -400,46 +400,31 @@ func (g *Game) AsJson() ([]byte, error) {
 	return json.Marshal(g)
 }
 
-func GetRandomImage(char parser.Character) string {
-	return char.Images[rand.Intn(len(char.Images))]
-}
-
-type AnimeGroupMembers struct {
-	Id         bson.M `bson:"_id"`
-	Members    int    `bson:"members"`
-	Title      string `bson:"title"`
-	English    string `bson:"english"`
-	Characters []int  `bson:"characters"`
+func GetRandomImage(char malmodel.CharacterModel) string {
+	images := char.GetImages()
+	return images[rand.Intn(len(images))]
 }
 
 func (g *Game) AddRandomCharacterByGroup(GroupId, CharCount int) ([]GameCharPosition, error) {
 	var res []GameCharPosition
-	anime := GetCollection("anime")
-	char := GetCollection("char")
-	exists := bson.M{"$exists": true}
 
 	//get random anime from group by members
-	var animeMembers AnimeGroupMembersSlice
-	err := anime.Find(bson.M{"characters.2": exists, "group": GroupId}).All(&animeMembers)
-	if err != nil {
-		return res, err
+	var animeModels AnimeModelSlice
+	query := gormDB.Where(`jsonb_array_length(chars_json) > ? AND "group" = ?`, 2, GroupId).Find(&animeModels)
+	errs := query.GetErrors()
+	if len(errs) > 0 {
+		return res, errors.New(fmt.Sprint(errs))
 	}
-	randomTitle := animeMembers.GetRandomByMembers()
-	titleId := 0
-	switch randomTitle.Id["i"].(type) {
-	case int:
-		titleId = randomTitle.Id["i"].(int)
-	case float64:
-		titleId = int(randomTitle.Id["i"].(float64))
-	}
+	randomTitle := animeModels.GetRandomByMembers()
+
 	//get random character by favorites
-	var characters parser.CharacterSlice
-	err = char.Find(bson.M{"_id": bson.M{"$in": randomTitle.Characters}}).All(&characters)
+	//titleChars := randomTitle.GetChars()
+	characters, err := randomTitle.GetRelatedCharacters(gormDB)
 	if err != nil {
 		return res, err
 	}
-	randomCharacters := GetRandomCharactersByFavorites(titleId, characters, CharCount, g.Difficulty)
-	return g.AddCharactersToRandomPos(randomCharacters, titleId), nil
+	randomCharacters := GetRandomCharactersByFavorites(randomTitle, CharModelSlice(characters), CharCount, g.Difficulty)
+	return g.AddCharactersToRandomPos(randomCharacters, randomTitle.Id), nil
 
 }
 

@@ -1,8 +1,11 @@
 package game
 
 import (
-	"gopkg.in/mgo.v2/bson"
-	"mal/parser"
+	"errors"
+	"fmt"
+	"github.com/jinzhu/gorm"
+	"malmodel"
+	"strconv"
 	"time"
 )
 
@@ -43,17 +46,24 @@ type GameScore struct {
 	Advices         []Advice
 }
 
-func (g *Game) GetCompletedGroups(completedChars []GameCharPosition) []int {
-	completedTitles := make([]int, 0)
+func (g *Game) GetCompletedGroups(completedChars []GameCharPosition) ([]int, error) {
+	completedTitles := make([]string, 0)
 	for _, char := range completedChars {
-		completedTitles = append(completedTitles, char.TitleId)
+		completedTitles = append(completedTitles, strconv.Itoa(char.TitleId))
 	}
 
-	anime := GetCollection("anime")
-	notEmpty := bson.M{"$not": bson.M{"$size": 0}}
 	var completedGroups []int
-	anime.Find(bson.M{"characters": notEmpty, "_id.i": bson.M{"$in": completedTitles}}).Distinct("group", &completedGroups)
-	return GetUniqueValues(completedGroups)
+	var query *gorm.DB
+	if len(completedGroups) > 0 {
+		query = gormDB.Table("anime_models").Where("jsonb_array_length(chars_json) > ? and id in (?)", 2, completedTitles).Pluck("group", &completedGroups)
+		err := GetGormError(query)
+		if err != nil {
+			return completedGroups, errors.New(fmt.Sprintf("error: get completed groups %v", err.Error()))
+		}
+		return GetUniqueValues(completedGroups), nil
+	}
+	return completedGroups, nil
+
 }
 
 func (g *Game) isCompleted() bool {
@@ -62,31 +72,30 @@ func (g *Game) isCompleted() bool {
 
 func (g *Game) GetCompletedTitles(completedChars []GameCharPosition, notInLine []GameCharPosition) ([]CompleteTitle, error) {
 	var res []CompleteTitle
-	charactersIds := make([]int, 0)
+	charactersIds := make([]string, 0)
 	for _, char := range append(completedChars, notInLine...) {
-		charactersIds = append(charactersIds, char.Id)
+		charactersIds = append(charactersIds, strconv.Itoa(char.Id))
 	}
 
-	char := GetCollection("char")
-	var charactersData parser.CharacterSlice
-	err := char.Find(bson.M{"_id": bson.M{"$in": charactersIds}}).All(&charactersData)
+	var charactersData CharModelSlice
+	query := gormDB.Where("id in (?)", charactersIds).Find(&charactersData)
+	err := GetGormError(query)
 	if err != nil {
-		return res, err
+		return res, errors.New(fmt.Sprintf("error: get characters %v", err.Error()))
 	}
 	charNames := make(map[int]string, 0)
 	for _, char := range charactersData {
 		charNames[char.Id] = char.Name
 	}
 
-	anime := GetCollection("anime")
-	exists := bson.M{"$exists": true}
 	completedTitlesMap := make(map[int]*CompleteTitle, 0)
 	for _, char := range completedChars {
 		if _, ok := completedTitlesMap[char.TitleId]; !ok {
-			var titleData AnimeGroupMembers
-			err := anime.Find(bson.M{"characters.0": exists, "_id.i": char.TitleId}).One(&titleData)
+			titleData := malmodel.AnimeModel{Id: char.TitleId}
+			query := gormDB.First(&titleData)
+			err := GetGormError(query)
 			if err != nil {
-				return res, err
+				return res, errors.New(fmt.Sprintf("error: get complete title %v", err.Error()))
 			}
 			newCompTitle := CompleteTitle{char.TitleId, titleData.Title, titleData.English, g.Turn, make([]CompletedChar, 0)}
 			completedTitlesMap[char.TitleId] = &newCompTitle
@@ -110,17 +119,23 @@ func (g *Game) GetCompletedTitles(completedChars []GameCharPosition, notInLine [
 }
 
 func (g *Game) UpdateGameScore(completedChars []GameCharPosition, notInLine []GameCharPosition) ([]CompleteTitle, error) {
-	var res []CompleteTitle
-	g.Score.CompletedGroups = append(g.Score.CompletedGroups, g.GetCompletedGroups(completedChars)...)
+	res := make([]CompleteTitle, 0)
+	if len(completedChars) != 0 {
 
-	titles, err := g.GetCompletedTitles(completedChars, notInLine)
-	if err != nil {
-		return res, err
+		completedGroups, err := g.GetCompletedGroups(completedChars)
+		if err != nil {
+			return res, err
+		}
+		g.Score.CompletedGroups = append(g.Score.CompletedGroups, completedGroups...)
+
+		res, err = g.GetCompletedTitles(completedChars, notInLine)
+		if err != nil {
+			return res, err
+		}
+		g.Score.CompletedTitles = append(g.Score.CompletedTitles, res...)
 	}
-	g.Score.CompletedTitles = append(g.Score.CompletedTitles, titles...)
-
 	g.Turn++
-	return titles, nil
+	return res, nil
 }
 
 func (g *Game) CompleteCountTotalScore() {

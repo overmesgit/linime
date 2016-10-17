@@ -5,11 +5,9 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"gopkg.in/mgo.v2"
 	"html/template"
 	"io"
 	"net/http"
-	"time"
 )
 
 type Message struct {
@@ -72,7 +70,10 @@ func serveTargetGame(gameUUID string, method string, action string, body io.Read
 			if err != nil {
 				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
 			}
-			game.Update()
+			err = game.Update()
+			if err != nil {
+				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
+			}
 			jsonResp, err := json.Marshal(resp)
 			if err != nil {
 				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
@@ -89,7 +90,10 @@ func serveTargetGame(gameUUID string, method string, action string, body io.Read
 			if err != nil {
 				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
 			}
-			game.Update()
+			err = game.Update()
+			if err != nil {
+				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
+			}
 			jsonResp, err := json.Marshal(changeImage)
 			if err != nil {
 				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
@@ -100,7 +104,10 @@ func serveTargetGame(gameUUID string, method string, action string, body io.Read
 			if err != nil {
 				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
 			}
-			game.Update()
+			err = game.Update()
+			if err != nil {
+				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
+			}
 			jsonResp, err := json.Marshal(advice)
 			if err != nil {
 				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
@@ -146,7 +153,7 @@ func serveGame(w http.ResponseWriter, r *http.Request) {
 			err = game.Save()
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
-				w.Write(Message{err.Error()}.AsJson())
+				w.Write(Message{fmt.Sprintf("error: save game %v", err.Error())}.AsJson())
 				return
 			}
 			body, err := game.AsJson()
@@ -160,39 +167,15 @@ func serveGame(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-var mongoSession *mgo.Session
-var mongoDB *mgo.Database
 var gormDB *gorm.DB
-var lastCheck time.Time
-
-func GetCollection(collection string) *mgo.Collection {
-	now := time.Now()
-	if now.After(lastCheck.Add(5 * time.Second)) {
-		err := mongoSession.Ping()
-		mongoSessionNext, err := mgo.DialWithTimeout("127.0.0.1", time.Second)
-		if err == nil && mongoSessionNext != nil {
-			mongoSession = mongoSessionNext
-		}
-		mongoDB = mongoSession.DB("mal")
-		lastCheck = now
-	}
-	return mongoDB.C(collection)
-}
 
 func StartServer(port string) {
 	var err error
-	mongoSession, err = mgo.Dial("127.0.0.1")
-	if err != nil {
-		panic(err)
-	}
-	defer mongoSession.Close()
-	//mongoSession.SetMode(mgo.Eventual, true)
-	mongoDB = mongoSession.DB("mal")
-
 	gormDB, err = gorm.Open("postgres", "host=127.0.0.1 port=5432 user=user dbname=user sslmode=disable password=user")
 	if err != nil {
 		panic("failed to connect database")
 	}
+	gormDB.LogMode(true)
 	defer gormDB.Close()
 
 	gormDB.AutoMigrate(&GameModel{})
