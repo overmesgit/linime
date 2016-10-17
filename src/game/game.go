@@ -1,8 +1,6 @@
 package game
 
 import (
-	"bytes"
-	"encoding/gob"
 	"encoding/json"
 	"fmt"
 	"github.com/jinzhu/gorm"
@@ -219,20 +217,13 @@ func (g *Game) AddCharactersToRandomPos(characters CharModelSlice, titleId int) 
 	return result
 }
 
-func (g *Game) Serialize() ([]byte, error) {
-	var buffer bytes.Buffer
-	enc := gob.NewEncoder(&buffer)
-	err := enc.Encode(g)
-	return buffer.Bytes(), err
-}
-
 func (g *Game) GetGameModel() (GameModel, error) {
 	var res GameModel
-	data, err := g.Serialize()
+	data, err := json.Marshal(g)
 	if err != nil {
 		return res, err
 	}
-	return GameModel{Id: g.Id, GobData: data}, nil
+	return GameModel{Id: g.Id, GameJson: string(data)}, nil
 }
 
 func GetGormError(db *gorm.DB) error {
@@ -245,16 +236,12 @@ func GetGormError(db *gorm.DB) error {
 
 func GetGame(uuid string) (*Game, error) {
 	game := NewGame()
-	var data []byte
-	model := GameModel{Id: uuid, GobData: data}
+	model := GameModel{Id: uuid}
 	err := GetGormError(gormDB.First(&model))
 	if err != nil {
 		return game, errors.New(fmt.Sprintf("error: get game %v", err.Error()))
 	}
-	var buffer bytes.Buffer
-	buffer.Write(model.GobData)
-	dec := gob.NewDecoder(&buffer)
-	err = dec.Decode(game)
+	err = json.Unmarshal([]byte(model.GameJson), &game)
 	if err != nil {
 		return game, err
 	}
