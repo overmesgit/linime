@@ -19,10 +19,9 @@ const (
 )
 
 type GameCharPositionSlice []GameCharPosition
-
 type GameCharPosition struct {
-	TitleId int `json:"-"`
-	Id      int `json:"-"`
+	TitleId int
+	Id      int
 	Img     string
 	Row     int
 	Col     int
@@ -37,20 +36,20 @@ type Game struct {
 	MaxTitleChar     int
 	Turn             int
 	Score            GameScore
-	positions        [][2]int
-	randomPos        []int
-	currentRandomPos int
 	Date             time.Time
 	EndDate          time.Time
 	Difficulty       int
 	UserName         string
 	UserItems        []int
+	positions        [][2]int
+	randomPos        []int
+	currentRandomPos int
 }
 
 type MoveResponse struct {
 	Path      [][2]int
 	Completed [][2]int
-	NewChars  []GameCharPosition
+	NewChars  []HiddenGameCharPosition
 	NextTurn  int
 	GameScore []CompleteTitle
 }
@@ -88,7 +87,8 @@ func (g *Game) GetAddByTurn() int {
 	return 2
 }
 
-func (g *Game) AddNewChars() ([]GameCharPosition, error) {
+func (g *Game) AddNewChars() (GameCharPositionSlice, error) {
+	logger.Println("add new character")
 	result := make([]GameCharPosition, 0)
 	addByTurn := g.GetAddByTurn()
 	for i := 0; i < addByTurn; i++ {
@@ -101,6 +101,7 @@ func (g *Game) AddNewChars() ([]GameCharPosition, error) {
 		// full - maximum set of chars from title
 		// required - not full set
 		full, required := g.getFullAndRequiredCount()
+		logger.Printf("full sets %v, required sets %v\n", full, required)
 		if (required - 2) >= full/2 {
 			newChar, err = g.addExistedChar(true)
 		} else {
@@ -123,6 +124,7 @@ func (g *Game) AddNewChars() ([]GameCharPosition, error) {
 }
 
 func (g *Game) RemoveChar(toDelete GameCharPosition) {
+	logger.Printf("remove character %v\n", toDelete)
 	for i := range g.Field {
 		if g.Field[i].Id == toDelete.Id {
 			g.Field = append(g.Field[:i], g.Field[i+1:]...)
@@ -131,9 +133,10 @@ func (g *Game) RemoveChar(toDelete GameCharPosition) {
 	}
 }
 
-func (g *Game) CheckCompleted() ([]GameCharPosition, []GameCharPosition) {
+func (g *Game) CheckCompleted() (GameCharPositionSlice, GameCharPositionSlice) {
+	logger.Println("find completed")
 	fieldsMap := make(map[int]map[int]GameCharPosition, g.Height)
-	for i := 0; i < g.Height; i++ {
+	for i := 0; i < g.Width; i++ {
 		fieldsMap[i] = make(map[int]GameCharPosition, 0)
 	}
 	for i := range g.Field {
@@ -142,7 +145,7 @@ func (g *Game) CheckCompleted() ([]GameCharPosition, []GameCharPosition) {
 
 	completedChar := make(map[int]GameCharPosition, 0)
 	completedTitles := make(map[int]bool, 0)
-	checkCompleted := func(completed []GameCharPosition) {
+	checkCompleted := func(completed GameCharPositionSlice) {
 		if len(completed) >= g.Line {
 			for c := range completed {
 				completedChar[completed[c].Id] = completed[c]
@@ -151,7 +154,7 @@ func (g *Game) CheckCompleted() ([]GameCharPosition, []GameCharPosition) {
 		}
 	}
 	for i := range g.Field {
-		prev := make([]GameCharPosition, 1)
+		prev := make(GameCharPositionSlice, 1)
 		prev[0] = g.Field[i]
 		checkCompleted(checkLeft(fieldsMap, g.Field[i], prev))
 		prev = prev[0:1]
@@ -161,12 +164,12 @@ func (g *Game) CheckCompleted() ([]GameCharPosition, []GameCharPosition) {
 		prev = prev[0:1]
 		checkCompleted(checkTopRight(fieldsMap, g.Field[i], prev))
 	}
-	completedSlice := make([]GameCharPosition, 0)
+	completedSlice := make(GameCharPositionSlice, 0)
 	for _, char := range completedChar {
 		completedSlice = append(completedSlice, char)
 	}
 
-	notLineSlice := make([]GameCharPosition, 0)
+	notLineSlice := make(GameCharPositionSlice, 0)
 	for _, v := range g.Field {
 		if _, ok := completedTitles[v.TitleId]; ok {
 			if _, ok := completedChar[v.Id]; !ok {
@@ -177,10 +180,12 @@ func (g *Game) CheckCompleted() ([]GameCharPosition, []GameCharPosition) {
 	for _, char := range append(completedSlice, notLineSlice...) {
 		g.RemoveChar(char)
 	}
+	logger.Printf("completed %v not in line %v\n", completedSlice, notLineSlice)
 	return completedSlice, notLineSlice
 }
 
 func (g *Game) MoveCharacter(char GameCharPosition, row, col int) ([][2]int, error) {
+	logger.Println("find path")
 	path := make([][2]int, 0)
 	for i := range g.Field {
 		currentChar := &g.Field[i]
@@ -203,6 +208,7 @@ func (g *Game) AddCharacterToRandomPos(char malmodel.CharacterModel, titleId int
 	randomRow, randomCol := g.GetRandomPositions()
 	randomImg := GetRandomImage(char)
 	newChar := GameCharPosition{titleId, char.Id, randomImg, randomRow, randomCol}
+	logger.Printf("add character %v", newChar)
 	g.Field = append(g.Field, newChar)
 	return newChar
 }
@@ -257,6 +263,7 @@ func (g *Game) Save() error {
 }
 
 func (g *Game) Update() error {
+	logger.Printf("update game %v\n", g.Id)
 	model, err := g.GetGameModel()
 	if err != nil {
 		return err
@@ -264,8 +271,21 @@ func (g *Game) Update() error {
 	return GetGormError(gormDB.Save(&model))
 }
 
+type HiddenGameCharPosition struct {
+	Img string
+	Row int
+	Col int
+}
+
+type HiddenGame struct {
+	Game
+	Field []HiddenGameCharPosition
+}
+
 func (g *Game) AsJson() ([]byte, error) {
-	return json.Marshal(g)
+	hg := HiddenGame{Game: *g, Field: g.Field.GetHidden()}
+	hg.UserItems = make([]int, 0)
+	return json.Marshal(hg)
 }
 
 func GetRandomImage(char malmodel.CharacterModel) string {
@@ -274,6 +294,7 @@ func GetRandomImage(char malmodel.CharacterModel) string {
 }
 
 func (g *Game) AddRandomCharacterByGroup(GroupId, CharCount int) ([]GameCharPosition, error) {
+	logger.Printf("add random character from group %v\n", GroupId)
 	var res []GameCharPosition
 
 	//get random anime from group by members
@@ -283,6 +304,7 @@ func (g *Game) AddRandomCharacterByGroup(GroupId, CharCount int) ([]GameCharPosi
 		return res, errors.New(fmt.Sprint(errs))
 	}
 	randomTitle := animeModels.GetRandomByMembers()
+	logger.Printf("selected title %v\n", randomTitle.Title)
 
 	//get random character by favorites
 	//titleChars := randomTitle.GetChars()
@@ -321,6 +343,7 @@ func (g *Game) AddUserScores() error {
 	if g.UserName == "" {
 		return nil
 	}
+	logger.Println("add user scores")
 	userList, err := malpar.GetUserScoresByName(g.UserName, 2)
 	if err != nil {
 		return err
@@ -364,4 +387,20 @@ func (chars GameCharPositionSlice) GetIds() []int {
 		existedCharacters = append(existedCharacters, char.Id)
 	}
 	return existedCharacters
+}
+
+func (chars GameCharPositionSlice) GetTitlesIds() []int {
+	titlesIds := make([]int, 0)
+	for _, char := range chars {
+		titlesIds = append(titlesIds, char.TitleId)
+	}
+	return titlesIds
+}
+
+func (chars GameCharPositionSlice) GetHidden() []HiddenGameCharPosition {
+	hiddenFields := make([]HiddenGameCharPosition, 0)
+	for _, field := range chars {
+		hiddenFields = append(hiddenFields, HiddenGameCharPosition{Img: field.Img, Row: field.Row, Col: field.Col})
+	}
+	return hiddenFields
 }

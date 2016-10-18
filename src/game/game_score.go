@@ -46,16 +46,11 @@ type GameScore struct {
 	Advices         []Advice
 }
 
-func (g *Game) GetCompletedGroups(completedChars []GameCharPosition) ([]int, error) {
-	completedTitles := make([]string, 0)
-	for _, char := range completedChars {
-		completedTitles = append(completedTitles, strconv.Itoa(char.TitleId))
-	}
-
+func (g *Game) GetCompletedGroups(completedChars GameCharPositionSlice) ([]int, error) {
 	var completedGroups []int
 	var query *gorm.DB
-	if len(completedGroups) > 0 {
-		query = gormDB.Table("anime_models").Where("jsonb_array_length(chars_json) > ? and id in (?)", 2, completedTitles).Pluck("group_id", &completedGroups)
+	if len(completedChars) > 0 {
+		query = gormDB.Table("anime_models").Where("jsonb_array_length(chars_json) > ? and id in (?)", 2, completedChars.GetTitlesIds()).Pluck("group_id", &completedGroups)
 		err := GetGormError(query)
 		if err != nil {
 			return completedGroups, errors.New(fmt.Sprintf("error: get completed groups %v", err.Error()))
@@ -119,10 +114,11 @@ func (g *Game) GetCompletedTitles(completedChars []GameCharPosition, notInLine [
 }
 
 func (g *Game) UpdateGameScore(completedChars []GameCharPosition, notInLine []GameCharPosition) ([]CompleteTitle, error) {
+	logger.Println("update game score")
 	res := make([]CompleteTitle, 0)
 	if len(completedChars) != 0 {
-
 		completedGroups, err := g.GetCompletedGroups(completedChars)
+		logger.Printf("completed groups %v\n", completedGroups)
 		if err != nil {
 			return res, err
 		}

@@ -47,6 +47,7 @@ func (g *Game) getTitleMap() map[int]GameCharPositionSlice {
 }
 
 func (g *Game) addExistedChar(requiredForLine bool) (GameCharPosition, error) {
+	logger.Printf("add existed title character, required for line %v\n", requiredForLine)
 	var res GameCharPosition
 
 	nextTitles := make([]int, 0)
@@ -56,12 +57,14 @@ func (g *Game) addExistedChar(requiredForLine bool) (GameCharPosition, error) {
 		nextTitles = g.GetMoreLineTitles()
 	}
 
+	logger.Printf("existed titles %v\n", nextTitles)
 	if len(nextTitles) > 0 {
 		nextTitleId := nextTitles[rand.Intn(len(nextTitles))]
 
 		selectedTitle := malmodel.AnimeModel{Id: nextTitleId}
 		query := gormDB.First(&selectedTitle)
 		if err := GetGormError(query); err != nil {
+			logger.Println(err.Error())
 			return res, errors.New(fmt.Sprintf("error: get title %v", err.Error()))
 		}
 
@@ -112,9 +115,10 @@ func (g *Game) GetUserGroups(filteredGroups []int) ([]int, error) {
 }
 
 func (g *Game) addNewGroupChar() (GameCharPosition, error) {
+	logger.Println("add new character")
 	var res GameCharPosition
 	var err error
-	currentTitles := g.Field.GetIds()
+	currentTitles := g.Field.GetTitlesIds()
 
 	var usedGroups []int
 	if len(currentTitles) > 0 {
@@ -145,8 +149,11 @@ func (g *Game) addNewGroupChar() (GameCharPosition, error) {
 			return res, errors.New(fmt.Sprintf("error: get new groups %v", err.Error()))
 		}
 	}
-
+	if len(notUsedGroups) == 0 {
+		return res, nil
+	}
 	uniquerGroups := GetUniqueValues(notUsedGroups)
+	logger.Printf("not used groups %v\n", uniquerGroups)
 	randomGroupId := uniquerGroups[rand.Intn(len(uniquerGroups))]
 	val, err := g.AddRandomCharacterByGroup(randomGroupId, 1)
 	if err != nil {

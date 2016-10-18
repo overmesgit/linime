@@ -7,6 +7,8 @@ import (
 )
 
 func CreateNewGame(gameParam CreateGameParam) (*Game, error) {
+	logger.Println("create new game")
+
 	game := NewGameWithParam(gameParam)
 	err := game.AddUserScores()
 	if err != nil {
@@ -118,6 +120,7 @@ func (g *Game) ChangeImage(character GameCharPosition) (ChangedImage, error) {
 }
 
 func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, error) {
+	logger.Printf("make turn from (%v,%v) to (%v,%v)\n", char.Row, char.Col, row, col)
 	var res MoveResponse
 	path, err := g.MoveCharacter(char, row, col)
 	if err != nil {
@@ -144,6 +147,6 @@ func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, erro
 		for _, char := range append(completed, notInLine...) {
 			completedIndexes = append(completedIndexes, [2]int{char.Row, char.Col})
 		}
-		return MoveResponse{path, completedIndexes, newChars, g.Turn, titleScoreUpdate}, nil
+		return MoveResponse{path, completedIndexes, newChars.GetHidden(), g.Turn, titleScoreUpdate}, nil
 	}
 }

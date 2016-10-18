@@ -7,7 +7,9 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"html/template"
 	"io"
+	"log"
 	"net/http"
+	"os"
 )
 
 type Message struct {
@@ -170,8 +172,11 @@ func serveGame(w http.ResponseWriter, r *http.Request) {
 }
 
 var gormDB *gorm.DB
+var logger *log.Logger
 
 func StartServer(port string) {
+	logger = log.New(os.Stdout, "logger: ", log.Lshortfile)
+
 	var err error
 	gormDB, err = gorm.Open("postgres", "host=127.0.0.1 port=5432 user=user dbname=user sslmode=disable password=user")
 	if err != nil {
@@ -182,7 +187,7 @@ func StartServer(port string) {
 
 	gormDB.AutoMigrate(&GameModel{})
 
-	fmt.Println("start")
+	logger.Println("start")
 
 	homeTemplate = template.Must(template.ParseFiles("templates/prod.html"))
 
@@ -195,5 +200,5 @@ func StartServer(port string) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("stop")
+	logger.Println("stop")
 }
