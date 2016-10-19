@@ -2,11 +2,11 @@ package game
 
 import (
 	"fmt"
-	"github.com/syndtr/goleveldb/leveldb/errors"
 	"malmodel"
 	"math"
 	"math/rand"
 	"sort"
+	"errors"
 )
 
 func GetUniqueValues(values []int) []int {
