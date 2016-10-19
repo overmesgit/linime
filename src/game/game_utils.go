@@ -172,20 +172,20 @@ func checkLeft(pos map[int]map[int]GameCharPosition, char GameCharPosition, prev
 	return prevResult
 }
 func checkLeftTop(pos map[int]map[int]GameCharPosition, char GameCharPosition, prevResult GameCharPositionSlice) GameCharPositionSlice {
-	if leftChar, ok := pos[char.Row-1][char.Col-1]; ok && leftChar.TitleId == char.TitleId {
-		return checkLeftTop(pos, leftChar, append(prevResult, leftChar))
+	if leftTopChar, ok := pos[char.Row-1][char.Col-1]; ok && leftTopChar.TitleId == char.TitleId {
+		return checkLeftTop(pos, leftTopChar, append(prevResult, leftTopChar))
 	}
 	return prevResult
 }
 func checkTop(pos map[int]map[int]GameCharPosition, char GameCharPosition, prevResult GameCharPositionSlice) GameCharPositionSlice {
-	if leftChar, ok := pos[char.Row-1][char.Col]; ok && leftChar.TitleId == char.TitleId {
-		return checkTop(pos, leftChar, append(prevResult, leftChar))
+	if topChar, ok := pos[char.Row-1][char.Col]; ok && topChar.TitleId == char.TitleId {
+		return checkTop(pos, topChar, append(prevResult, topChar))
 	}
 	return prevResult
 }
 func checkTopRight(pos map[int]map[int]GameCharPosition, char GameCharPosition, prevResult GameCharPositionSlice) GameCharPositionSlice {
-	if leftChar, ok := pos[char.Row-1][char.Col+1]; ok && leftChar.TitleId == char.TitleId {
-		return checkTopRight(pos, leftChar, append(prevResult, leftChar))
+	if topRightChar, ok := pos[char.Row-1][char.Col+1]; ok && topRightChar.TitleId == char.TitleId {
+		return checkTopRight(pos, topRightChar, append(prevResult, topRightChar))
 	}
 	return prevResult
 }
