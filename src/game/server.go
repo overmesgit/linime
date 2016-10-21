@@ -182,7 +182,6 @@ func StartServer(port string) {
 	if err != nil {
 		panic("failed to connect database")
 	}
-	gormDB.LogMode(true)
 	defer gormDB.Close()
 
 	gormDB.AutoMigrate(&GameModel{})
