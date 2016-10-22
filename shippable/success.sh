@@ -1,1 +1,1 @@
-scp -r -o StrictHostKeyChecking=no -i /tmp/ssh/lite * root@linime.animesos.net:/root/linime
+scp -r -o StrictHostKeyChecking=no -i /tmp/ssh/lite * root@linime.animesos.net:/root/build/linime
