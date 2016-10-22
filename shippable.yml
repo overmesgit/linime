@@ -16,7 +16,7 @@ build:
     - go get github.com/jinzhu/gorm
     - go get github.com/jinzhu/gorm/dialects/postgres
     - go get github.com/PuerkitoBio/goquery
-    - git clone https://github.com/overmesgit/malgopar
+    - git clone https://github.com/overmesgit/malgopar/tree/dev
     - ./shippable/build.sh
 
   post_ci:
