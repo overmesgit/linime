@@ -1,8 +1,8 @@
 package game
 
 import (
+	"errors"
 	"fmt"
-	"github.com/syndtr/goleveldb/leveldb/errors"
 	"malmodel"
 	"math"
 	"math/rand"
@@ -88,10 +88,10 @@ func (g *Game) addExistedChar(requiredForLine bool) (GameCharPosition, error) {
 }
 
 func (g *Game) GetUserGroups(filteredGroups []int) ([]int, error) {
+	logger.Println("get user groups")
 	res := make([]int, 0)
-	userLimitAdd := 0
 	userOffsetStep := 100 + 100*g.Difficulty*g.Difficulty
-	userLimit := userOffsetStep + userLimitAdd
+	userLimit := userOffsetStep
 	previousLength := 0
 	for len(res) == 0 && userLimit < len(g.UserItems)+userOffsetStep {
 		if userLimit > len(g.UserItems) {
@@ -102,14 +102,15 @@ func (g *Game) GetUserGroups(filteredGroups []int) ([]int, error) {
 		if len(filteredGroups) > 0 {
 			query = query.Where("group_id not in (?)", filteredGroups).Pluck("group_id", &res)
 		}
+		query = query.Pluck("group_id", &res)
 		if err := GetGormError(query); err != nil {
 			return res, errors.New(fmt.Sprintf("error: get new user groups %v", err.Error()))
 		}
 		if len(res) < userLimit/2 && len(res) != 0 && len(res) != previousLength {
 			previousLength = len(res)
 			res = res[:0]
-			userLimit += userOffsetStep
 		}
+		userLimit += userOffsetStep
 	}
 	return res, nil
 }
@@ -153,7 +154,7 @@ func (g *Game) addNewGroupChar() (GameCharPosition, error) {
 		return res, nil
 	}
 	uniquerGroups := GetUniqueValues(notUsedGroups)
-	logger.Printf("not used groups %v\n", uniquerGroups)
+	logger.Printf("not used groups %v\n", len(uniquerGroups))
 	randomGroupId := uniquerGroups[rand.Intn(len(uniquerGroups))]
 	val, err := g.AddRandomCharacterByGroup(randomGroupId, 1)
 	if err != nil {

@@ -174,11 +174,11 @@ func serveGame(w http.ResponseWriter, r *http.Request) {
 var gormDB *gorm.DB
 var logger *log.Logger
 
-func StartServer(port string) {
+func StartServer(port, pgSettings string) {
 	logger = log.New(os.Stdout, "logger: ", log.Lshortfile)
 
 	var err error
-	gormDB, err = gorm.Open("postgres", "host=127.0.0.1 port=5432 user=user dbname=user sslmode=disable password=user")
+	gormDB, err = gorm.Open("postgres", pgSettings)
 	if err != nil {
 		panic("failed to connect database")
 	}

@@ -2,12 +2,12 @@ package game
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"github.com/syndtr/goleveldb/leveldb/errors"
 	"malmodel"
-	"malpar"
+	"malparser"
 	"math/rand"
 	"sort"
 	"time"
@@ -317,7 +317,7 @@ func (g *Game) AddRandomCharacterByGroup(GroupId, CharCount int) ([]GameCharPosi
 
 }
 
-type AnimeTitleSlice []malpar.AnimeTitle
+type AnimeTitleSlice []malparser.AnimeTitle
 
 func (a AnimeTitleSlice) Len() int {
 	return len(a)
@@ -344,7 +344,7 @@ func (g *Game) AddUserScores() error {
 		return nil
 	}
 	logger.Println("add user scores")
-	userList, err := malpar.GetUserScoresByName(g.UserName, 2)
+	userList, err := malparser.GetUserScoresByName(g.UserName, 2)
 	if err != nil {
 		return err
 	}

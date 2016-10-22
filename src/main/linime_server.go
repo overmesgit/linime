@@ -6,5 +6,5 @@ import (
 )
 
 func main() {
-	game.StartServer(os.Args[1])
+	game.StartServer(os.Args[1], os.Args[2])
 }
