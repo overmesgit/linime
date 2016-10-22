@@ -20,6 +20,8 @@ var CHANGE_CHAR_DIFFICULTY = 'CHANGE_CHAR_DIFFICULTY';
 var CHANGE_CHAR_IMAGE = 'CHANGE_CHAR_IMAGE';
 var CHAR_IMAGE_CHANGED = 'CHAR_IMAGE_CHANGED';
 var GET_ADVICE = 'GET_ADVICE';
+var START_TUTORIAL = 'START_TUTORIAL';
+var END_TUTORIAL = 'END_TUTORIAL';
 
 var startTestGame = function startTestGame() {
     var _this = this;
@@ -104,6 +106,18 @@ var getAdvice = function getAdvice(gameId) {
 var toggleCreateGame = function toggleCreateGame() {
     return {
         type: TOGGLE_CREATE_GAME_MENU
+    };
+};
+
+var startTutorial = function startTutorial() {
+    return {
+        type: START_TUTORIAL
+    };
+};
+
+var endTutorial = function endTutorial() {
+    return {
+        type: END_TUTORIAL
     };
 };
 

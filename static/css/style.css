@@ -1,5 +1,6 @@
 body {
     background-image: url("/static/img/main_back.jpg");
+    margin: 0;
 }
 
 p {
@@ -7,7 +8,7 @@ p {
 }
 
 .content {
-    margin: auto;
+    margin: 10px auto auto;
     width: 1470px;
     display: inherit !important;
 }
@@ -315,6 +316,17 @@ img {
   -webkit-user-drag: none;
   user-drag: none;
   -webkit-touch-callout: none;
+}
+
+.fog-of-war {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: black;
+    opacity: 0.4;
 }
 
 

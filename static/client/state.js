@@ -23,27 +23,14 @@ const initialState = {
     fetchingGame: gameId,
     fetchingAdvice: false,
     myGames: myGames,
-    createGameStatus: {hidden: true}
+    createGameStatus: {hidden: true},
+    tutorialState: null
 };
 
-function viewState(state = initialState, action) {
+function userState(state, action) {
     switch (action.type) {
-        case TOGGLE_CREATE_GAME_MENU:
-            return {...state, createGameStatus: {...state.createGame, hidden: !state.createGameStatus.hidden}};
         case COMPLETE_GAME:
             return {...state, game: { ...state.game, Score: {...state.game.Score, TotalScore: 0}}};
-        case GET_GAME_REQUEST:
-            return {...state, game: {...state.game, creating: true}};
-        case ADD_MY_GAME:
-            state.myGames.unshift(action.payload);
-            return {...state};
-        case GET_GAME_SUCCESS:
-            action.payload.creating = false;
-            return {...state, game: action.payload, createGameStatus: {...state.createGame, hidden: true}};
-        case GET_GAME_ERROR:
-            return {...state, game: {...state.game, creating: false}};
-        case ERROR:
-            return {...state, error: action.payload};
         case GET_ADVICE:
             var images = {};
             for (var img of action.payload.Img) {
@@ -93,6 +80,36 @@ function viewState(state = initialState, action) {
                 return char
             });
             return {...state, game: {...state.game, Field: newField}};
+        default:
+            return state;
+
+
+    }
+}
+
+function viewState(state = initialState, action) {
+    switch (action.type) {
+        // Tutorial actions =====================
+        case START_TUTORIAL:
+            return {...state, tutorialState: 1};
+        case END_TUTORIAL:
+            return {...initialState};
+
+        // Game actions =========================
+        case TOGGLE_CREATE_GAME_MENU:
+            return {...state, createGameStatus: {...state.createGame, hidden: !state.createGameStatus.hidden}};
+        case GET_GAME_REQUEST:
+            return {...state, game: {...state.game, creating: true}};
+        case ADD_MY_GAME:
+            state.myGames.unshift(action.payload);
+            return {...state};
+        case GET_GAME_SUCCESS:
+            action.payload.creating = false;
+            return {...state, game: action.payload, createGameStatus: {...state.createGame, hidden: true}};
+        case GET_GAME_ERROR:
+            return {...state, game: {...state.game, creating: false}};
+        case ERROR:
+            return {...state, error: action.payload};
         case FADE_CHARACTER:
             var newField = state.game.Field.map((char) => {
                 if (char.Row == action.payload.row && char.Col == action.payload.col) {
@@ -119,7 +136,8 @@ function viewState(state = initialState, action) {
             action.payload.push.apply(state.game.Score.CompletedTitles, action.payload);
             return {...state, game: {...state.game}};
         default:
-            return state;
+            // User actions =====================
+            return userState(state, action);
     }
 }
 

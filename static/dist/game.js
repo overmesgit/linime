@@ -8,8 +8,6 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var ReactCSSTransitionGroup = React.ReactCSSTransitionGroup;
-
 var Character = function (_React$Component) {
     _inherits(Character, _React$Component);
 
@@ -133,6 +131,7 @@ var Game = function (_React$Component3) {
             var game = _props2.game;
             var selectChar = _props2.selectChar;
             var moveSelected = _props2.moveSelected;
+            var tutorialState = _props2.tutorialState;
 
             var fieldCell = [];
             for (var row = 0; row < game.Width; row++) {
@@ -150,7 +149,8 @@ var Game = function (_React$Component3) {
                 'div',
                 { id: 'game', className: 'window' },
                 fieldCell,
-                characters
+                characters,
+                tutorialState > 0 ? React.createElement(Tutorial, { state: tutorialState }) : ""
             );
         }
     }]);

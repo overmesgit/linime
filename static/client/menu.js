@@ -14,7 +14,7 @@ class Menu extends React.Component {
     }
 
     render() {
-        const {myGames, getGame, game, createGameStatus, toggleCreateGame, changeImage, getAdvice} = this.props;
+        const {myGames, getGame, game, createGameStatus, toggleCreateGame, changeImage, getAdvice, startTutorial} = this.props;
 
         var gamesNodes = myGames.map((gameId, i) => {
             return <p key={i} className="my-game btn" onClick={getGame.bind(this, gameId)}>{gameId}</p>
@@ -32,6 +32,7 @@ class Menu extends React.Component {
                 <h1>Anime Lines</h1>
                 <h3>Line them all!</h3>
                 <div className="game-control">
+                    <h2 className="menu-content-button btn" onClick={startTutorial}>Tutorial</h2>
                     <h2 className="menu-content-button btn" onClick={toggleCreateGame}>New game</h2>
                     <div className={"difficulty" + (createGameStatus.hidden ? " difficulty-hidden": "")}>
                         <p>Difficulty:</p>

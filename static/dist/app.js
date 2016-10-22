@@ -57,16 +57,6 @@ var AppClass = function (_React$Component2) {
             }
         }
     }, {
-        key: "componentDidMount",
-        value: function componentDidMount() {
-            var game = this.props.app.game;
-            var startTestGame = this.props.appActions.startTestGame;
-
-            if (!game.Id && gameId == '') {
-                startTestGame();
-            }
-        }
-    }, {
         key: "componentDidUpdate",
         value: function componentDidUpdate() {
             var game = this.props.app.game;
@@ -86,6 +76,7 @@ var AppClass = function (_React$Component2) {
             var error = _props$app.error;
             var myGames = _props$app.myGames;
             var createGameStatus = _props$app.createGameStatus;
+            var tutorialState = _props$app.tutorialState;
             var _props$appActions = this.props.appActions;
             var createGame = _props$appActions.createGame;
             var completeGame = _props$appActions.completeGame;
@@ -95,15 +86,16 @@ var AppClass = function (_React$Component2) {
             var toggleCreateGame = _props$appActions.toggleCreateGame;
             var changeImage = _props$appActions.changeImage;
             var getAdvice = _props$appActions.getAdvice;
-            var startTestGame = _props$appActions.startTestGame;
+            var startTutorial = _props$appActions.startTutorial;
 
 
             return React.createElement(
                 "div",
                 { className: "content fa" },
                 React.createElement(Menu, { createGame: createGame, completeGame: completeGame, getGame: getGame, game: game, myGames: myGames,
-                    toggleCreateGame: toggleCreateGame, createGameStatus: createGameStatus, changeImage: changeImage, getAdvice: getAdvice }),
-                React.createElement(Game, { game: game, selectChar: selectChar, moveSelected: moveSelected }),
+                    toggleCreateGame: toggleCreateGame, createGameStatus: createGameStatus, changeImage: changeImage, getAdvice: getAdvice,
+                    startTutorial: startTutorial }),
+                React.createElement(Game, { game: game, selectChar: selectChar, moveSelected: moveSelected, tutorialState: tutorialState }),
                 React.createElement(GameScore, { completedTitles: game.Score.CompletedTitles, currentTurn: game.Turn, game: game }),
                 error != "" ? React.createElement(Error, { error: error }) : ""
             );
@@ -122,7 +114,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return {
         appActions: Redux.bindActionCreators({ createGame: createGame, completeGame: completeGame, getGame: getGame, selectChar: selectChar,
-            moveSelected: moveSelected, toggleCreateGame: toggleCreateGame, changeImage: changeImage, getAdvice: getAdvice, startTestGame: startTestGame }, dispatch)
+            moveSelected: moveSelected, toggleCreateGame: toggleCreateGame, changeImage: changeImage, getAdvice: getAdvice, startTestGame: startTestGame, startTutorial: startTutorial }, dispatch)
     };
 }
 

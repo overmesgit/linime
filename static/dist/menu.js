@@ -47,6 +47,7 @@ var Menu = function (_React$Component) {
             var toggleCreateGame = _props.toggleCreateGame;
             var changeImage = _props.changeImage;
             var getAdvice = _props.getAdvice;
+            var startTutorial = _props.startTutorial;
 
 
             var gamesNodes = myGames.map(function (gameId, i) {
@@ -89,6 +90,11 @@ var Menu = function (_React$Component) {
                     React.createElement(
                         "div",
                         { className: "game-control" },
+                        React.createElement(
+                            "h2",
+                            { className: "menu-content-button btn", onClick: startTutorial },
+                            "Tutorial"
+                        ),
                         React.createElement(
                             "h2",
                             { className: "menu-content-button btn", onClick: toggleCreateGame },

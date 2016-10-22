@@ -29,30 +29,14 @@ var initialState = {
     fetchingGame: gameId,
     fetchingAdvice: false,
     myGames: myGames,
-    createGameStatus: { hidden: true }
+    createGameStatus: { hidden: true },
+    tutorialState: null
 };
 
-function viewState() {
-    var state = arguments.length <= 0 || arguments[0] === undefined ? initialState : arguments[0];
-    var action = arguments[1];
-
+function userState(state, action) {
     switch (action.type) {
-        case TOGGLE_CREATE_GAME_MENU:
-            return _extends({}, state, { createGameStatus: _extends({}, state.createGame, { hidden: !state.createGameStatus.hidden }) });
         case COMPLETE_GAME:
             return _extends({}, state, { game: _extends({}, state.game, { Score: _extends({}, state.game.Score, { TotalScore: 0 }) }) });
-        case GET_GAME_REQUEST:
-            return _extends({}, state, { game: _extends({}, state.game, { creating: true }) });
-        case ADD_MY_GAME:
-            state.myGames.unshift(action.payload);
-            return _extends({}, state);
-        case GET_GAME_SUCCESS:
-            action.payload.creating = false;
-            return _extends({}, state, { game: action.payload, createGameStatus: _extends({}, state.createGame, { hidden: true }) });
-        case GET_GAME_ERROR:
-            return _extends({}, state, { game: _extends({}, state.game, { creating: false }) });
-        case ERROR:
-            return _extends({}, state, { error: action.payload });
         case GET_ADVICE:
             var images = {};
             var _iteratorNormalCompletion = true;
@@ -125,6 +109,38 @@ function viewState() {
                 return char;
             });
             return _extends({}, state, { game: _extends({}, state.game, { Field: newField }) });
+        default:
+            return state;
+
+    }
+}
+
+function viewState() {
+    var state = arguments.length <= 0 || arguments[0] === undefined ? initialState : arguments[0];
+    var action = arguments[1];
+
+    switch (action.type) {
+        // Tutorial actions =====================
+        case START_TUTORIAL:
+            return _extends({}, state, { tutorialState: 1 });
+        case END_TUTORIAL:
+            return _extends({}, initialState);
+
+        // Game actions =========================
+        case TOGGLE_CREATE_GAME_MENU:
+            return _extends({}, state, { createGameStatus: _extends({}, state.createGame, { hidden: !state.createGameStatus.hidden }) });
+        case GET_GAME_REQUEST:
+            return _extends({}, state, { game: _extends({}, state.game, { creating: true }) });
+        case ADD_MY_GAME:
+            state.myGames.unshift(action.payload);
+            return _extends({}, state);
+        case GET_GAME_SUCCESS:
+            action.payload.creating = false;
+            return _extends({}, state, { game: action.payload, createGameStatus: _extends({}, state.createGame, { hidden: true }) });
+        case GET_GAME_ERROR:
+            return _extends({}, state, { game: _extends({}, state.game, { creating: false }) });
+        case ERROR:
+            return _extends({}, state, { error: action.payload });
         case FADE_CHARACTER:
             var newField = state.game.Field.map(function (char) {
                 if (char.Row == action.payload.row && char.Col == action.payload.col) {
@@ -151,7 +167,8 @@ function viewState() {
             action.payload.push.apply(state.game.Score.CompletedTitles, action.payload);
             return _extends({}, state, { game: _extends({}, state.game) });
         default:
-            return state;
+            // User actions =====================
+            return userState(state, action);
     }
 }
 

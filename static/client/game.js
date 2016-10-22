@@ -1,5 +1,3 @@
-var ReactCSSTransitionGroup = React.ReactCSSTransitionGroup;
-
 class Character extends React.Component {
     selectChar() {
         this.props.selectChar(this.props.char);
@@ -64,7 +62,7 @@ class FieldCell extends React.Component {
 
 class Game extends React.Component {
     render() {
-        const {game, selectChar, moveSelected} = this.props;
+        const {game, selectChar, moveSelected, tutorialState} = this.props;
         var fieldCell = [];
         for (var row = 0; row < game.Width; row++) {
             for (var col = 0; col < game.Height; col++) {
@@ -81,6 +79,7 @@ class Game extends React.Component {
         return <div id="game" className="window">
                 {fieldCell}
                 {characters}
+                {tutorialState > 0 ? <Tutorial state={tutorialState} />: ""}
             </div>
     }
 }

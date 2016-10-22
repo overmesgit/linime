@@ -22,14 +22,6 @@ class AppClass extends React.Component {
         }
     }
 
-    componentDidMount() {
-        const {game} = this.props.app;
-        const {startTestGame} = this.props.appActions;
-        if (!game.Id && gameId == '') {
-            startTestGame();
-        }
-    }
-
     componentDidUpdate() {
         const {game} = this.props.app;
         const {getAdvice} = this.props.appActions;
@@ -39,13 +31,15 @@ class AppClass extends React.Component {
     }
 
     render() {
-        const {game, error, myGames, createGameStatus} = this.props.app;
-        const {createGame, completeGame, selectChar, moveSelected, getGame, toggleCreateGame, changeImage, getAdvice, startTestGame} = this.props.appActions;
+        const {game, error, myGames, createGameStatus, tutorialState} = this.props.app;
+        const {createGame, completeGame, selectChar, moveSelected, getGame, toggleCreateGame, changeImage, getAdvice, startTutorial} = this.props.appActions;
 
         return <div className="content fa">
+
             <Menu createGame={createGame} completeGame={completeGame} getGame={getGame} game={game} myGames={myGames}
-            toggleCreateGame={toggleCreateGame} createGameStatus={createGameStatus} changeImage={changeImage} getAdvice={getAdvice}/>
-            <Game game={game} selectChar={selectChar} moveSelected={moveSelected} />
+            toggleCreateGame={toggleCreateGame} createGameStatus={createGameStatus} changeImage={changeImage} getAdvice={getAdvice}
+            startTutorial={startTutorial}/>
+            <Game game={game} selectChar={selectChar} moveSelected={moveSelected} tutorialState={tutorialState}/>
             <GameScore completedTitles={game.Score.CompletedTitles} currentTurn={game.Turn} game={game} />
             {error != "" ? <Error error={error} />: ""}
         </div>
@@ -61,7 +55,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return {
         appActions: Redux.bindActionCreators({createGame, completeGame, getGame, selectChar,
-            moveSelected, toggleCreateGame, changeImage, getAdvice, startTestGame}, dispatch)
+            moveSelected, toggleCreateGame, changeImage, getAdvice, startTestGame, startTutorial}, dispatch)
     }
 }
 
