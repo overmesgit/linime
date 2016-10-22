@@ -1,0 +1,91 @@
+#game {
+    position: relative;
+    width: 810px;
+    height: 900px;
+    text-align: center;
+}
+.leftCol.fieldCell {
+    width: 88px;
+    border-left: 2px hidden #bababa;
+}
+.rightCol.fieldCell {
+    width: 88px;
+    border-right: 2px hidden #bababa;
+}
+.topRow.fieldCell {
+    height: 98px;
+    border-top: 2px hidden #bababa;
+}
+.bottomRow.fieldCell {
+    height: 98px;
+    border-bottom: 2px hidden #bababa;
+}
+.char-cell {
+    width: 90px;
+    height: 100px;
+}
+.char {
+    max-width: 90px;
+    max-height: 92px;
+    margin: 4px auto auto;
+}
+.fieldCell {
+    width: 86px;
+    height: 96px;
+    float: left;
+    border: 2px solid #bababa;
+}
+.row0 {
+    top: 0
+}
+.row1 {
+    top: 100px;
+}
+.row2 {
+    top: 200px;
+}
+.row3 {
+    top: 300px;
+}
+.row4 {
+    top: 400px;
+}
+.row5 {
+    top: 500px;
+}
+.row6 {
+    top: 600px;
+}
+.row7 {
+    top: 700px;
+}
+.row8 {
+    top: 800px;
+}
+.col0 {
+    left: 0
+}
+.col1 {
+    left: 90px;
+}
+.col2 {
+    left: 180px;
+}
+.col3 {
+    left: 270px;
+}
+.col4 {
+    left: 360px;
+}
+.col5 {
+    left: 450px;
+}
+.col6 {
+    left: 540px;
+}
+.col7 {
+    left: 630px;
+}
+.col8 {
+    left: 720px;
+}
