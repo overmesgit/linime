@@ -126,7 +126,14 @@ function viewState() {
         case END_TUTORIAL:
             return _extends({}, initialState);
         case NEXT_TUTORIAL:
-            return _extends({}, state, { tutorialState: action.payload });
+            if (!action.payload.state) {
+                return _extends({}, initialState);
+            }
+            if (action.payload.game) {
+                return _extends({}, state, { tutorialState: action.payload.state, game: action.payload.game });
+            } else {
+                return _extends({}, state, { tutorialState: action.payload.state });
+            }
 
         // Game actions =========================
         case TOGGLE_CREATE_GAME_MENU:

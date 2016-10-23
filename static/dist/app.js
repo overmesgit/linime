@@ -89,6 +89,7 @@ var AppClass = function (_React$Component2) {
             var startTutorial = _props$appActions.startTutorial;
             var endTutorial = _props$appActions.endTutorial;
             var nextTutorial = _props$appActions.nextTutorial;
+            var moveSelectedTutorial = _props$appActions.moveSelectedTutorial;
 
 
             return React.createElement(
@@ -98,7 +99,7 @@ var AppClass = function (_React$Component2) {
                     toggleCreateGame: toggleCreateGame, createGameStatus: createGameStatus, changeImage: changeImage, getAdvice: getAdvice,
                     startTutorial: startTutorial }),
                 React.createElement(Game, { game: game, selectChar: selectChar, moveSelected: moveSelected, tutorialState: tutorialState,
-                    endTutorial: endTutorial, nextTutorial: nextTutorial }),
+                    endTutorial: endTutorial, nextTutorial: nextTutorial, moveSelectedTutorial: moveSelectedTutorial }),
                 React.createElement(GameScore, { completedTitles: game.Score.CompletedTitles, currentTurn: game.Turn, game: game }),
                 error != "" ? React.createElement(Error, { error: error }) : ""
             );
@@ -118,7 +119,7 @@ function mapDispatchToProps(dispatch) {
     return {
         appActions: Redux.bindActionCreators({ createGame: createGame, completeGame: completeGame, getGame: getGame, selectChar: selectChar,
             moveSelected: moveSelected, toggleCreateGame: toggleCreateGame, changeImage: changeImage, getAdvice: getAdvice, startTestGame: startTestGame, startTutorial: startTutorial,
-            endTutorial: endTutorial, nextTutorial: nextTutorial }, dispatch)
+            endTutorial: endTutorial, nextTutorial: nextTutorial, moveSelectedTutorial: moveSelectedTutorial }, dispatch)
     };
 }
 

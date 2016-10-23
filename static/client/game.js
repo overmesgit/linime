@@ -37,7 +37,14 @@ class FieldCell extends React.Component {
             }
         });
         if (char) {
-            this.props.moveSelected(this.props.game.Id, char, this.props.row, this.props.col);
+            if (this.props.tutorialState) {
+                var response = initialTutorialMove[this.props.tutorialState];
+                if (response.Path[0][0] == this.props.row && response.Path[0][1] == this.props.col) {
+                    this.props.moveSelectedTutorial(this.props.game.Id, char, this.props.row, this.props.col, response);
+                }
+            } else {
+                this.props.moveSelected(this.props.game.Id, char, this.props.row, this.props.col);
+            }
         }
     }
 
@@ -62,12 +69,13 @@ class FieldCell extends React.Component {
 
 class Game extends React.Component {
     render() {
-        const {game, selectChar, moveSelected, tutorialState, endTutorial, nextTutorial} = this.props;
+        const {game, selectChar, moveSelected, tutorialState, endTutorial, nextTutorial, moveSelectedTutorial} = this.props;
         var fieldCell = [];
         for (var row = 0; row < game.Width; row++) {
             for (var col = 0; col < game.Height; col++) {
                 fieldCell.push(<FieldCell key={'' + row + col} row={row} col={col}
-                                          game={game} moveSelected={moveSelected}>
+                                          game={game} moveSelected={moveSelected}
+                                          tutorialState={tutorialState} moveSelectedTutorial={moveSelectedTutorial}>
                 </FieldCell>)
             }
         }
@@ -77,7 +85,7 @@ class Game extends React.Component {
         });
 
         return <div id="game" className="window">
-                <Tutorial state={tutorialState} endTutorial={endTutorial} nextTutorial={nextTutorial} />
+                <Tutorial state={tutorialState} endTutorial={endTutorial} nextTutorial={nextTutorial} game={game} />
                 {fieldCell}
                 {characters}
             </div>

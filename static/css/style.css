@@ -55,11 +55,6 @@ p {
     height: 30px;
     text-align: center;
     margin: 5px 5px 0 5px;
-    user-select: none;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
 }
 
 .my-game {
@@ -87,6 +82,11 @@ p {
 .btn {
     cursor: pointer;
     background-color: #7aa6cf;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .btn:hover {
@@ -330,7 +330,7 @@ img {
 }
 
 #tutorial {
-    width: 500px;
+    width: 600px;
     height: 150px;
     padding: 20px;
     border: 3px solid #bababa;
@@ -342,7 +342,7 @@ img {
     border-radius: 20px;
     z-index: 2000;
 
-    margin: -123px 0 0 -273px;
+    margin: -123px 0 0 -323px;
     text-align: left;
 }
 
@@ -374,6 +374,11 @@ img {
 
 .tutorial-end {
     right: 80px;
+}
+
+.tutorial-selected {
+    z-index: 2000;
+    background-color: #2dce2d;
 }
 
 

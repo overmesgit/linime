@@ -84,7 +84,14 @@ var FieldCell = function (_React$Component2) {
                 }
             });
             if (char) {
-                this.props.moveSelected(this.props.game.Id, char, this.props.row, this.props.col);
+                if (this.props.tutorialState) {
+                    var response = initialTutorialMove[this.props.tutorialState];
+                    if (response.Path[0][0] == this.props.row && response.Path[0][1] == this.props.col) {
+                        this.props.moveSelectedTutorial(this.props.game.Id, char, this.props.row, this.props.col, response);
+                    }
+                } else {
+                    this.props.moveSelected(this.props.game.Id, char, this.props.row, this.props.col);
+                }
             }
         }
     }, {
@@ -134,12 +141,14 @@ var Game = function (_React$Component3) {
             var tutorialState = _props2.tutorialState;
             var endTutorial = _props2.endTutorial;
             var nextTutorial = _props2.nextTutorial;
+            var moveSelectedTutorial = _props2.moveSelectedTutorial;
 
             var fieldCell = [];
             for (var row = 0; row < game.Width; row++) {
                 for (var col = 0; col < game.Height; col++) {
                     fieldCell.push(React.createElement(FieldCell, { key: '' + row + col, row: row, col: col,
-                        game: game, moveSelected: moveSelected }));
+                        game: game, moveSelected: moveSelected,
+                        tutorialState: tutorialState, moveSelectedTutorial: moveSelectedTutorial }));
                 }
             }
             var characters = game.Field.map(function (charData, i) {
@@ -150,7 +159,7 @@ var Game = function (_React$Component3) {
             return React.createElement(
                 'div',
                 { id: 'game', className: 'window' },
-                React.createElement(Tutorial, { state: tutorialState, endTutorial: endTutorial, nextTutorial: nextTutorial }),
+                React.createElement(Tutorial, { state: tutorialState, endTutorial: endTutorial, nextTutorial: nextTutorial, game: game }),
                 fieldCell,
                 characters
             );

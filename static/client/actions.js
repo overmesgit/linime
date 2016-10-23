@@ -219,15 +219,17 @@ var removeAndAddNewChars = (dispatch, data) => {
 var moveCallbackFactory = (dispatch, char) => {
     return (data) => {
         var path = data.Path;
+        var pathIndex = data.Path.length;
         var callBack = () => {
-            var current = path.pop();
+            pathIndex--;
+            var current = path[pathIndex];
             var row = current[0];
             var col = current[1];
             dispatch({
                 type: MOVE_CHARACTER,
                 payload: {char, row, col}
             });
-            if (path.length > 0) {
+            if (pathIndex) {
                 char.Row = row;
                 char.Col = col;
                 setTimeout(callBack, 100);
@@ -237,6 +239,10 @@ var moveCallbackFactory = (dispatch, char) => {
         };
         callBack();
     }
+};
+
+var moveSelectedTutorial = function (gameId, char, Row, Col, response) {
+    return (dispatch) => moveCallbackFactory(dispatch, char)(response);
 };
 
 var moveLock = false;

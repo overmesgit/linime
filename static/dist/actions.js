@@ -218,15 +218,17 @@ var removeAndAddNewChars = function removeAndAddNewChars(dispatch, data) {
 var moveCallbackFactory = function moveCallbackFactory(dispatch, char) {
     return function (data) {
         var path = data.Path;
+        var pathIndex = data.Path.length;
         var callBack = function callBack() {
-            var current = path.pop();
+            pathIndex--;
+            var current = path[pathIndex];
             var row = current[0];
             var col = current[1];
             dispatch({
                 type: MOVE_CHARACTER,
                 payload: { char: char, row: row, col: col }
             });
-            if (path.length > 0) {
+            if (pathIndex) {
                 char.Row = row;
                 char.Col = col;
                 setTimeout(callBack, 100);
@@ -235,6 +237,12 @@ var moveCallbackFactory = function moveCallbackFactory(dispatch, char) {
             }
         };
         callBack();
+    };
+};
+
+var moveSelectedTutorial = function moveSelectedTutorial(gameId, char, Row, Col, response) {
+    return function (dispatch) {
+        return moveCallbackFactory(dispatch, char)(response);
     };
 };
 
