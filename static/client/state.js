@@ -17,7 +17,7 @@ if(supports_html5_storage()) {
 }
 
 const initialState = {
-    game: {Field: [], Turn: 0, Difficulty: 0, UserName: '', creating: false,
+    game: {Field: [], Turn: 0, Difficulty: 0, UserName: '', creating: false, Height: 9, Width: 9,
         Score: {CompletedTitles: [], TotalScore: 0, ChangeImgs: [], Advices: []}},
     error: "",
     fetchingGame: gameId,
@@ -91,9 +91,11 @@ function viewState(state = initialState, action) {
     switch (action.type) {
         // Tutorial actions =====================
         case START_TUTORIAL:
-            return {...state, tutorialState: 1};
+            return {...initialState, tutorialState: 1};
         case END_TUTORIAL:
             return {...initialState};
+        case NEXT_TUTORIAL:
+            return {...state, tutorialState: action.payload};
 
         // Game actions =========================
         case TOGGLE_CREATE_GAME_MENU:

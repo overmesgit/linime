@@ -110,7 +110,7 @@ var Menu = function (_React$Component) {
                             ),
                             React.createElement(
                                 "select",
-                                { className: "select-style", ref: "diff" },
+                                { className: "select-style", ref: "diff", defaultValue: "1" },
                                 React.createElement(
                                     "option",
                                     { value: "0" },
@@ -118,7 +118,7 @@ var Menu = function (_React$Component) {
                                 ),
                                 React.createElement(
                                     "option",
-                                    { value: "1", selected: true },
+                                    { value: "1" },
                                     "Easy"
                                 ),
                                 React.createElement(

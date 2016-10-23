@@ -36,9 +36,9 @@ class Menu extends React.Component {
                     <h2 className="menu-content-button btn" onClick={toggleCreateGame}>New game</h2>
                     <div className={"difficulty" + (createGameStatus.hidden ? " difficulty-hidden": "")}>
                         <p>Difficulty:</p>
-                        <select className="select-style" ref="diff" >
+                        <select className="select-style" ref="diff" defaultValue={"1"}>
                             <option value="0">For normal people</option>
-                            <option value="1" selected>Easy</option>
+                            <option value="1">Easy</option>
                             <option value="2">Normal</option>
                             <option value="3">Hard</option>
                             <option value="4">Flappy bird</option>

@@ -87,6 +87,8 @@ var AppClass = function (_React$Component2) {
             var changeImage = _props$appActions.changeImage;
             var getAdvice = _props$appActions.getAdvice;
             var startTutorial = _props$appActions.startTutorial;
+            var endTutorial = _props$appActions.endTutorial;
+            var nextTutorial = _props$appActions.nextTutorial;
 
 
             return React.createElement(
@@ -95,7 +97,8 @@ var AppClass = function (_React$Component2) {
                 React.createElement(Menu, { createGame: createGame, completeGame: completeGame, getGame: getGame, game: game, myGames: myGames,
                     toggleCreateGame: toggleCreateGame, createGameStatus: createGameStatus, changeImage: changeImage, getAdvice: getAdvice,
                     startTutorial: startTutorial }),
-                React.createElement(Game, { game: game, selectChar: selectChar, moveSelected: moveSelected, tutorialState: tutorialState }),
+                React.createElement(Game, { game: game, selectChar: selectChar, moveSelected: moveSelected, tutorialState: tutorialState,
+                    endTutorial: endTutorial, nextTutorial: nextTutorial }),
                 React.createElement(GameScore, { completedTitles: game.Score.CompletedTitles, currentTurn: game.Turn, game: game }),
                 error != "" ? React.createElement(Error, { error: error }) : ""
             );
@@ -114,7 +117,8 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return {
         appActions: Redux.bindActionCreators({ createGame: createGame, completeGame: completeGame, getGame: getGame, selectChar: selectChar,
-            moveSelected: moveSelected, toggleCreateGame: toggleCreateGame, changeImage: changeImage, getAdvice: getAdvice, startTestGame: startTestGame, startTutorial: startTutorial }, dispatch)
+            moveSelected: moveSelected, toggleCreateGame: toggleCreateGame, changeImage: changeImage, getAdvice: getAdvice, startTestGame: startTestGame, startTutorial: startTutorial,
+            endTutorial: endTutorial, nextTutorial: nextTutorial }, dispatch)
     };
 }
 

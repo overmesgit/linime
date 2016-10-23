@@ -23,7 +23,7 @@ if (supports_html5_storage()) {
 }
 
 var initialState = {
-    game: { Field: [], Turn: 0, Difficulty: 0, UserName: '', creating: false,
+    game: { Field: [], Turn: 0, Difficulty: 0, UserName: '', creating: false, Height: 9, Width: 9,
         Score: { CompletedTitles: [], TotalScore: 0, ChangeImgs: [], Advices: [] } },
     error: "",
     fetchingGame: gameId,
@@ -122,9 +122,11 @@ function viewState() {
     switch (action.type) {
         // Tutorial actions =====================
         case START_TUTORIAL:
-            return _extends({}, state, { tutorialState: 1 });
+            return _extends({}, initialState, { tutorialState: 1 });
         case END_TUTORIAL:
             return _extends({}, initialState);
+        case NEXT_TUTORIAL:
+            return _extends({}, state, { tutorialState: action.payload });
 
         // Game actions =========================
         case TOGGLE_CREATE_GAME_MENU:

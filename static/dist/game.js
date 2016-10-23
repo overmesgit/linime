@@ -132,6 +132,8 @@ var Game = function (_React$Component3) {
             var selectChar = _props2.selectChar;
             var moveSelected = _props2.moveSelected;
             var tutorialState = _props2.tutorialState;
+            var endTutorial = _props2.endTutorial;
+            var nextTutorial = _props2.nextTutorial;
 
             var fieldCell = [];
             for (var row = 0; row < game.Width; row++) {
@@ -148,9 +150,9 @@ var Game = function (_React$Component3) {
             return React.createElement(
                 'div',
                 { id: 'game', className: 'window' },
+                React.createElement(Tutorial, { state: tutorialState, endTutorial: endTutorial, nextTutorial: nextTutorial }),
                 fieldCell,
-                characters,
-                tutorialState > 0 ? React.createElement(Tutorial, { state: tutorialState }) : ""
+                characters
             );
         }
     }]);

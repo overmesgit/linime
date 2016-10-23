@@ -62,7 +62,7 @@ class FieldCell extends React.Component {
 
 class Game extends React.Component {
     render() {
-        const {game, selectChar, moveSelected, tutorialState} = this.props;
+        const {game, selectChar, moveSelected, tutorialState, endTutorial, nextTutorial} = this.props;
         var fieldCell = [];
         for (var row = 0; row < game.Width; row++) {
             for (var col = 0; col < game.Height; col++) {
@@ -77,9 +77,9 @@ class Game extends React.Component {
         });
 
         return <div id="game" className="window">
+                <Tutorial state={tutorialState} endTutorial={endTutorial} nextTutorial={nextTutorial} />
                 {fieldCell}
                 {characters}
-                {tutorialState > 0 ? <Tutorial state={tutorialState} />: ""}
             </div>
     }
 }

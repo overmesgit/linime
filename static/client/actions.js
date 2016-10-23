@@ -20,6 +20,7 @@ var CHAR_IMAGE_CHANGED = 'CHAR_IMAGE_CHANGED';
 var GET_ADVICE = 'GET_ADVICE';
 var START_TUTORIAL = 'START_TUTORIAL';
 var END_TUTORIAL = 'END_TUTORIAL';
+var NEXT_TUTORIAL = 'NEXT_TUTORIAL';
 
 var startTestGame = function () {
     return (dispatch) => {
@@ -122,6 +123,13 @@ var startTutorial = function () {
 var endTutorial = function () {
     return {
         type: END_TUTORIAL
+    }
+};
+
+var nextTutorial = function (nextState) {
+    return {
+        type: NEXT_TUTORIAL,
+        payload: nextState
     }
 };
 

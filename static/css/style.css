@@ -329,5 +329,52 @@ img {
     opacity: 0.4;
 }
 
+#tutorial {
+    width: 500px;
+    height: 150px;
+    padding: 20px;
+    border: 3px solid #bababa;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    background-image: url("/static/img/menu_back.jpg");
+    border-radius: 20px;
+    z-index: 2000;
+
+    margin: -123px 0 0 -273px;
+    text-align: left;
+}
+
+.tutorial-img {
+    float: left;
+    width: 100px;
+    border-radius: 20px;
+    border: 2px solid #bababa;
+}
+
+.tutorial-msg {
+    margin-left: 120px;
+    font-size: 18px;
+}
+
+.tutorial-btn {
+    position: absolute;
+    width: 50px;
+    height: 20px;
+    bottom: 20px;
+    text-align: center;
+    border-radius: 5px;
+    font-size: 18px;
+}
+
+.tutorial-next {
+    right: 20px;
+}
+
+.tutorial-end {
+    right: 80px;
+}
+
 
 
