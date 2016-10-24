@@ -118,7 +118,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return {
         appActions: Redux.bindActionCreators({ createGame: createGame, completeGame: completeGame, getGame: getGame, selectChar: selectChar,
-            moveSelected: moveSelected, toggleCreateGame: toggleCreateGame, changeImage: changeImage, getAdvice: getAdvice, startTestGame: startTestGame, startTutorial: startTutorial,
+            moveSelected: moveSelected, toggleCreateGame: toggleCreateGame, changeImage: changeImage, getAdvice: getAdvice, startTutorial: startTutorial,
             endTutorial: endTutorial, nextTutorial: nextTutorial, moveSelectedTutorial: moveSelectedTutorial }, dispatch)
     };
 }
