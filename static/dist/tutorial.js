@@ -12,7 +12,7 @@ var initialTutorialMove = {
     7: { "Path": [[0, 6], [0, 5], [0, 4], [0, 3], [1, 3], [2, 3], [2, 2], [2, 1]],
         "Completed": [[2, 4], [1, 5], [0, 6]],
         "NewChars": [], "NextTurn": 2,
-        "GameScore": [{ "Id": 17265, "Title": "Log Horizon", "English": "Log Horizon", "Turn": 5, "Characters": [{ "Id": 81371, "Name": "Naotsugu", "Img": "http://cdn.myanimelist.net/images/characters/11/200455.jpg", "Score": 1 }, { "Id": 81369, "Name": "Akatsuki", "Img": "http://cdn.myanimelist.net/images/characters/12/292611.jpg", "Score": 2 }, { "Id": 81367, "Name": "Shiroe", "Img": "http://cdn.myanimelist.net/images/characters/10/240997.jpg",
+        "GameScore": [{ "Id": 17265, "Title": "Log Horizon", "English": "Log Horizon", "Turn": 2, "Characters": [{ "Id": 81371, "Name": "Naotsugu", "Img": "http://cdn.myanimelist.net/images/characters/11/200455.jpg", "Score": 1 }, { "Id": 81369, "Name": "Akatsuki", "Img": "http://cdn.myanimelist.net/images/characters/12/292611.jpg", "Score": 2 }, { "Id": 81367, "Name": "Shiroe", "Img": "http://cdn.myanimelist.net/images/characters/10/240997.jpg",
                 "Score": 3 }] }] }
 };
 
@@ -139,17 +139,17 @@ var tutorialStates = {
             React.createElement(
                 "p",
                 null,
-                "Ничего без меня сделать не можешь."
+                "You can't do anything without me, do you?"
             ),
             React.createElement(
                 "p",
                 null,
-                "Так уж и быть помогу тебе."
+                "It can't be helped, I'll assist you."
             ),
             React.createElement(
                 "p",
                 null,
-                "Только не думай, что я делаю это ради тебя."
+                "I didn't do it for YOU or anything!"
             )
         ), next: { state: 2 }
     },
@@ -160,12 +160,12 @@ var tutorialStates = {
             React.createElement(
                 "p",
                 null,
-                "Многие персонажи потерялись в мире фансервиса."
+                "A lot of characters got lost in the Fanservice World."
             ),
             React.createElement(
                 "p",
                 null,
-                "Чтобы помочь им найти путь домой, необходимо собрать их силы вместе."
+                "To help them find the way home, you should bring together their powers."
             )
         ), next: { state: 3 }
     },
@@ -176,12 +176,12 @@ var tutorialStates = {
             React.createElement(
                 "p",
                 null,
-                "Только те персонажи, которые знают друг друга становятся сильнее вместе."
+                "But only characters knowing each other can get stronger together."
             ),
             React.createElement(
                 "p",
                 null,
-                "Для этого нужно выстроить персонажей из одного аниме в вертикальную, горизонтальную или диагональную линию."
+                "For that you have to line up characters from same anime in vertical, horizontal or diagonal line."
             )
         ), next: { state: 4 }
     },
@@ -192,17 +192,17 @@ var tutorialStates = {
             React.createElement(
                 "p",
                 null,
-                "Когда в линию собираются 3 или более персонажей, то они отправляются домой, захватив всех своих знакомых."
+                "When there are 3 or more characters in a line, they go home taking along all their friends."
             ),
             React.createElement(
                 "p",
                 null,
-                "Для мотивации я буду за это давать тебе очки."
+                "I'll give you points for this just for motivation."
             ),
             React.createElement(
                 "p",
                 null,
-                "Давай попробуем на примере."
+                "Let's try by the example."
             )
         ), next: { state: 5, game: initialTutorial }
     },
@@ -213,12 +213,12 @@ var tutorialStates = {
             React.createElement(
                 "p",
                 null,
-                "Здесь у нас ребята из Log Horizon."
+                "Look, here is buddies from Log Horizon."
             ),
             React.createElement(
                 "p",
                 null,
-                "Давай поможем им."
+                "Let's help them."
             )
         ), next: { state: 6 }
     },
@@ -229,7 +229,7 @@ var tutorialStates = {
             React.createElement(
                 "p",
                 null,
-                "Выбери Shiroe кликнув по нему."
+                "Choose Shiroe by clicking him."
             )
         ), next: { state: 7 }, selected: ['.row2.col0'], hiddenNext: true, nextCondition: { 7: charSelected20 }
     },
@@ -240,7 +240,7 @@ var tutorialStates = {
             React.createElement(
                 "p",
                 null,
-                "Теперь перемести его к остальным, кликнув по зеленой клетке."
+                "Now move him to others by clicking on green cell."
             )
         ), next: { state: 8 }, selected: ['.fieldCell:eq(6)', '#game'], hiddenNext: true, nextCondition: { 8: charDisapear24, 20: charNotSelected20 }
     },
@@ -251,7 +251,7 @@ var tutorialStates = {
             React.createElement(
                 "p",
                 null,
-                "Отлично. Герои отправились домой!"
+                "Perfect! Our heroes went home."
             )
         ), next: { state: 9 }
     },
@@ -262,12 +262,12 @@ var tutorialStates = {
             React.createElement(
                 "p",
                 null,
-                "Ты справился с обучающим курсом."
+                "You coped with the training course."
             ),
             React.createElement(
                 "p",
                 null,
-                "По другому и не могло быть, ведь тебя учила я."
+                "It couldn't be otherwise since you were trained by me!"
             )
         ), next: { state: 10 }
     },
@@ -278,7 +278,7 @@ var tutorialStates = {
             React.createElement(
                 "p",
                 null,
-                "Хоть я и считаю нашего разработчика бесполезным, если найдешь ошибку напиши ему overmes@gmail.com"
+                "Though I think our developer is useless if you find an error, write him - overmes@gmail.com"
             )
         ), next: { state: 11 }
     },
@@ -289,7 +289,7 @@ var tutorialStates = {
             React.createElement(
                 "p",
                 null,
-                "Мы ведь еще увидимся?"
+                "We will see each other again, don't we?"
             )
         ), next: { state: 0 }
     },
@@ -300,12 +300,12 @@ var tutorialStates = {
             React.createElement(
                 "p",
                 null,
-                "Аааа! Что ты делаешь? Выбери обратно Shiroe!"
+                "B-baka! What are you doing?! Choose Shiroe back!"
             ),
             React.createElement(
                 "p",
                 null,
-                "Бюджета не хватило на полную обучалку."
+                "Budget lacks for a full explanation."
             )
         ), next: { state: 7 }, selected: ['.row2.col0'], hiddenNext: true, nextCondition: { 7: charSelected20 }
     }

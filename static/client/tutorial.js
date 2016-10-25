@@ -2,7 +2,7 @@ var initialTutorialMove = {
     7: {"Path":[[0,6],[0,5],[0,4],[0,3],[1,3],[2,3],[2,2],[2,1]],
         "Completed":[[2,4],[1,5],[0,6]],
         "NewChars":[],"NextTurn":2,
-        "GameScore":[{"Id":17265,"Title":"Log Horizon","English":"Log Horizon","Turn":5,"Characters":[{"Id":81371,"Name":"Naotsugu","Img":"http://cdn.myanimelist.net/images/characters/11/200455.jpg","Score":1},{"Id":81369,"Name":"Akatsuki","Img":"http://cdn.myanimelist.net/images/characters/12/292611.jpg","Score":2},{"Id":81367,"Name":"Shiroe","Img":"http://cdn.myanimelist.net/images/characters/10/240997.jpg",
+        "GameScore":[{"Id":17265,"Title":"Log Horizon","English":"Log Horizon","Turn":2,"Characters":[{"Id":81371,"Name":"Naotsugu","Img":"http://cdn.myanimelist.net/images/characters/11/200455.jpg","Score":1},{"Id":81369,"Name":"Akatsuki","Img":"http://cdn.myanimelist.net/images/characters/12/292611.jpg","Score":2},{"Id":81367,"Name":"Shiroe","Img":"http://cdn.myanimelist.net/images/characters/10/240997.jpg",
      "Score":3}]}]}
 };
 
@@ -65,72 +65,71 @@ var charDisapear24 = function (game) {
 var tutorialStates = {
     1: {
         emotion: "/static/img/emo/tsundere.png", message: <div className="tutorial-msg">
-            <p>Ничего без меня сделать не можешь.</p>
-            <p>Так уж и быть помогу тебе.</p>
-            <p>Только не думай, что я делаю это ради тебя.</p>
+            <p>You can't do anything without me, do you?</p>
+            <p>It can't be helped, I'll assist you.</p>
+            <p>I didn't do it for YOU or anything!</p>
         </div>, next: {state: 2}
     },
     2: {
         emotion: "/static/img/emo/tsundere.png", message: <div className="tutorial-msg">
-            <p>Многие персонажи потерялись в мире фансервиса.</p>
-            <p>Чтобы помочь им найти путь домой, необходимо собрать их силы вместе.</p>
+            <p>A lot of characters got lost in the Fanservice World.</p>
+            <p>To help them find the way home, you should bring together their powers.</p>
         </div>, next: {state: 3}
     },
     3: {
         emotion: "/static/img/emo/tsundere.png", message: <div className="tutorial-msg">
-            <p>Только те персонажи, которые знают друг друга становятся сильнее вместе.</p>
-            <p>Для этого нужно выстроить персонажей из одного аниме в вертикальную, горизонтальную или
-                диагональную линию.</p>
+            <p>But only characters knowing each other can get stronger together.</p>
+            <p>For that you have to line up characters from same anime in vertical, horizontal or diagonal line.</p>
         </div>, next: {state: 4}
     },
     4: {
         emotion: "/static/img/emo/tsundere.png", message: <div className="tutorial-msg">
-            <p>Когда в линию собираются 3 или более персонажей, то они отправляются домой, захватив всех своих знакомых.</p>
-            <p>Для мотивации я буду за это давать тебе очки.</p>
-            <p>Давай попробуем на примере.</p>
+            <p>When there are 3 or more characters in a line, they go home taking along all their friends.</p>
+            <p>I'll give you points for this just for motivation.</p>
+            <p>Let's try by the example.</p>
         </div>, next: {state: 5, game: initialTutorial}
     },
     5: {
         emotion: "/static/img/emo/normal.png", message: <div className="tutorial-msg">
-            <p>Здесь у нас ребята из Log Horizon.</p>
-            <p>Давай поможем им.</p>
+            <p>Look, here is buddies from Log Horizon.</p>
+            <p>Let's help them.</p>
         </div>, next: {state: 6}
     },
     6: {
         emotion: "/static/img/emo/normal.png", message: <div className="tutorial-msg">
-            <p>Выбери Shiroe кликнув по нему.</p>
+            <p>Choose Shiroe by clicking him.</p>
         </div>, next: {state: 7}, selected: ['.row2.col0'], hiddenNext: true, nextCondition: {7: charSelected20}
     },
     7: {
         emotion: "/static/img/emo/normal.png", message: <div className="tutorial-msg">
-            <p>Теперь перемести его к остальным, кликнув по зеленой клетке.</p>
+            <p>Now move him to others by clicking on green cell.</p>
         </div>, next: {state: 8}, selected: ['.fieldCell:eq(6)', '#game'], hiddenNext: true, nextCondition: {8: charDisapear24, 20: charNotSelected20}
     },
     8: {
         emotion: "/static/img/emo/success.png", message: <div className="tutorial-msg">
-            <p>Отлично. Герои отправились домой!</p>
+            <p>Perfect! Our heroes went home.</p>
         </div>, next: {state: 9}
     },
     9: {
         emotion: "/static/img/emo/sure.png", message: <div className="tutorial-msg">
-            <p>Ты справился с обучающим курсом.</p>
-            <p>По другому и не могло быть, ведь тебя учила я.</p>
+            <p>You coped with the training course.</p>
+            <p>It couldn't be otherwise since you were trained by me!</p>
         </div>, next: {state: 10}
     },
     10: {
         emotion: "/static/img/emo/sure.png", message: <div className="tutorial-msg">
-            <p>Хоть я и считаю нашего разработчика бесполезным, если найдешь ошибку напиши ему overmes@gmail.com</p>
+            <p>Though I think our developer is useless if you find an error, write him - overmes@gmail.com</p>
         </div>, next: {state: 11}
     },
     11: {
         emotion: "/static/img/emo/waityou.png", message: <div className="tutorial-msg">
-            <p>Мы ведь еще увидимся?</p>
+            <p>We will see each other again, don't we?</p>
         </div>, next: {state: 0}
     },
     20: {
         emotion: "/static/img/emo/panic.png", message: <div className="tutorial-msg">
-            <p>Аааа! Что ты делаешь? Выбери обратно Shiroe!</p>
-            <p>Бюджета не хватило на полную обучалку.</p>
+            <p>B-baka! What are you doing?! Choose Shiroe back!</p>
+            <p>Budget lacks for a full explanation.</p>
         </div>, next: {state: 7}, selected: ['.row2.col0'], hiddenNext: true, nextCondition: {7: charSelected20}
     },
 
