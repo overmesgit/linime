@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	MAX_FROM_ONE_TITLE    = 5
+	MAX_FROM_ONE_TITLE    = 6
 	NOT_ENDED_GAME_SCORES = -1000
 )
 
@@ -293,28 +293,31 @@ func GetRandomImage(char malmodel.CharacterModel) string {
 	return images[rand.Intn(len(images))]
 }
 
-func (g *Game) AddRandomCharacterByGroup(GroupId, CharCount int) ([]GameCharPosition, error) {
+func (g *Game) AddRandomCharacterByTitle(title malmodel.AnimeModel) (GameCharPosition, error) {
+	logger.Printf("add character from title %v\n", title.Title)
+	var res GameCharPosition
+
+	//get random character by favorites
+	characters, mainCharsMap, err := title.GetRelatedCharacters(gormDB)
+	if err != nil {
+		return res, err
+	}
+	randomCharacters := CharModelSlice(characters).GetRandomByFavorites(mainCharsMap, 1, g.Difficulty)
+	return g.AddCharactersToRandomPos(randomCharacters, title.Id)[0], nil
+}
+
+func (g *Game) AddRandomCharacterByGroup(GroupId int) (GameCharPosition, error) {
 	logger.Printf("add random character from group %v\n", GroupId)
-	var res []GameCharPosition
+	var res GameCharPosition
 
 	//get random anime from group by members
 	var animeModels AnimeModelSlice
-	query := gormDB.Where("jsonb_array_length(chars_json) > ? AND group_id = ?", 2, GroupId).Find(&animeModels)
+	query := gormDB.Where("jsonb_array_length(chars_json) > ? AND group_id = ? AND status = ?", 2, GroupId, malparser.FINISHED_AIRING_STATUS).Find(&animeModels)
 	if errs := query.GetErrors(); len(errs) > 0 {
 		return res, errors.New(fmt.Sprint(errs))
 	}
 	randomTitle := animeModels.GetRandomByMembers()
-	logger.Printf("selected title %v\n", randomTitle.Title)
-
-	//get random character by favorites
-	//titleChars := randomTitle.GetChars()
-	characters, mainCharsMap, err := randomTitle.GetRelatedCharacters(gormDB)
-	if err != nil {
-		return res, err
-	}
-	randomCharacters := CharModelSlice(characters).GetRandomByFavorites(mainCharsMap, CharCount, g.Difficulty)
-	return g.AddCharactersToRandomPos(randomCharacters, randomTitle.Id), nil
-
+	return g.AddRandomCharacterByTitle(randomTitle)
 }
 
 type AnimeTitleSlice []malparser.AnimeTitle
@@ -352,7 +355,7 @@ func (g *Game) AddUserScores() error {
 	sort.Sort(sort.Reverse(userListSlice))
 	for _, item := range userListSlice {
 		// 1 watching, 2 completed, 3 on hold, 4 drop
-		if item.Status > 0 && item.Status <= 3 {
+		if item.Status == 2 {
 			g.UserItems = append(g.UserItems, int(item.Id))
 		}
 	}

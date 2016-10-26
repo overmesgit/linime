@@ -184,6 +184,8 @@ func StartServer(port, pgSettings string) {
 	}
 	defer gormDB.Close()
 
+	//gormDB = gormDB.Debug()
+
 	gormDB.AutoMigrate(&GameModel{})
 
 	logger.Println("start")

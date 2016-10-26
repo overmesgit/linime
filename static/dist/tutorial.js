@@ -139,17 +139,17 @@ var tutorialStates = {
             React.createElement(
                 "p",
                 null,
-                "You can't do anything without me, do you?"
+                "You can't do anything without me, can you?"
             ),
             React.createElement(
                 "p",
                 null,
-                "It can't be helped, I'll assist you."
+                "It can't be helped; I'll assist you."
             ),
             React.createElement(
                 "p",
                 null,
-                "I didn't do it for YOU or anything!"
+                "I'm not doing it for YOU or anything!"
             )
         ), next: { state: 2 }
     },
@@ -165,7 +165,7 @@ var tutorialStates = {
             React.createElement(
                 "p",
                 null,
-                "To help them find the way home, you should bring together their powers."
+                "To help them find the way home, you should bring their powers together."
             )
         ), next: { state: 3 }
     },
@@ -176,12 +176,12 @@ var tutorialStates = {
             React.createElement(
                 "p",
                 null,
-                "But only characters knowing each other can get stronger together."
+                "However, only characters who know each other can get stronger together."
             ),
             React.createElement(
                 "p",
                 null,
-                "For that you have to line up characters from same anime in vertical, horizontal or diagonal line."
+                "For that, you have to line up at least 3 of them together in one straight line. (Diagonal line is fine as well)"
             )
         ), next: { state: 4 }
     },
@@ -192,17 +192,17 @@ var tutorialStates = {
             React.createElement(
                 "p",
                 null,
-                "When there are 3 or more characters in a line, they go home taking along all their friends."
+                "When there are 3 or more characters lined up, they get to go home together with all of their friends."
             ),
             React.createElement(
                 "p",
                 null,
-                "I'll give you points for this just for motivation."
+                "I'll give you points for this."
             ),
             React.createElement(
                 "p",
                 null,
-                "Let's try by the example."
+                "Let's try this example."
             )
         ), next: { state: 5, game: initialTutorial }
     },
@@ -213,7 +213,7 @@ var tutorialStates = {
             React.createElement(
                 "p",
                 null,
-                "Look, here is buddies from Log Horizon."
+                "Look, here are your buddies from Log Horizon."
             ),
             React.createElement(
                 "p",
@@ -229,7 +229,7 @@ var tutorialStates = {
             React.createElement(
                 "p",
                 null,
-                "Choose Shiroe by clicking him."
+                "Choose Shiroe by clicking on him."
             )
         ), next: { state: 7 }, selected: ['.row2.col0'], hiddenNext: true, nextCondition: { 7: charSelected20 }
     },
@@ -240,7 +240,7 @@ var tutorialStates = {
             React.createElement(
                 "p",
                 null,
-                "Now move him to others by clicking on green cell."
+                "Now, click on the green cell to move him onto it."
             )
         ), next: { state: 8 }, selected: ['.fieldCell:eq(6)', '#game'], hiddenNext: true, nextCondition: { 8: charDisapear24, 20: charNotSelected20 }
     },
@@ -251,7 +251,7 @@ var tutorialStates = {
             React.createElement(
                 "p",
                 null,
-                "Perfect! Our heroes went home."
+                "Perfect! Our heroes can now go home."
             )
         ), next: { state: 9 }
     },
@@ -262,7 +262,7 @@ var tutorialStates = {
             React.createElement(
                 "p",
                 null,
-                "You coped with the training course."
+                "You managed to cope with the training course."
             ),
             React.createElement(
                 "p",
@@ -278,7 +278,7 @@ var tutorialStates = {
             React.createElement(
                 "p",
                 null,
-                "Though I think our developer is useless if you find an error, write him - overmes@gmail.com"
+                "I still think our developer is useless though. If you find an error, do contact him at overmes@gmail.com"
             )
         ), next: { state: 11 }
     },
@@ -289,7 +289,7 @@ var tutorialStates = {
             React.createElement(
                 "p",
                 null,
-                "We will see each other again, don't we?"
+                "We will see each other again, won't we?"
             )
         ), next: { state: 0 }
     },

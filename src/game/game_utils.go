@@ -87,8 +87,8 @@ func (g *Game) addExistedChar(requiredForLine bool) (GameCharPosition, error) {
 	return g.addNewGroupChar()
 }
 
-func (g *Game) GetUserGroups(filteredGroups []int) ([]int, error) {
-	logger.Println("get user groups")
+func (g *Game) GetUserTitles(filteredGroups []int) ([]int, error) {
+	logger.Println("get user titles")
 	res := make([]int, 0)
 	userOffsetStep := 100 + 100*g.Difficulty*g.Difficulty
 	userLimit := userOffsetStep
@@ -100,13 +100,14 @@ func (g *Game) GetUserGroups(filteredGroups []int) ([]int, error) {
 		where := "jsonb_array_length(chars_json) > ? and id in (?)"
 		query := gormDB.Table("anime_models").Where(where, 2, g.UserItems[:userLimit])
 		if len(filteredGroups) > 0 {
-			query = query.Where("group_id not in (?)", filteredGroups).Pluck("group_id", &res)
+			query = query.Where("group_id not in (?)", filteredGroups).Pluck("id", &res)
+		} else {
+			query = query.Pluck("id", &res)
 		}
-		query = query.Pluck("group_id", &res)
 		if err := GetGormError(query); err != nil {
 			return res, errors.New(fmt.Sprintf("error: get new user groups %v", err.Error()))
 		}
-		if len(res) < userLimit/2 && len(res) != 0 && len(res) != previousLength {
+		if len(res) < userLimit/2 && len(res) != 0 && len(res) != previousLength && userLimit < len(g.UserItems) {
 			previousLength = len(res)
 			res = res[:0]
 		}
@@ -132,9 +133,18 @@ func (g *Game) addNewGroupChar() (GameCharPosition, error) {
 	usedGroups = append(usedGroups, g.Score.CompletedGroups...)
 	var notUsedGroups []int
 	if len(g.UserItems) > 0 {
-		notUsedGroups, err = g.GetUserGroups(usedGroups)
+		notUsedTitles, err := g.GetUserTitles(usedGroups)
 		if err != nil {
 			return res, err
+		}
+		if len(notUsedTitles) > 0 {
+			randomTitleId := notUsedTitles[rand.Intn(len(notUsedTitles)+1)]
+			title := malmodel.AnimeModel{Id: randomTitleId}
+			query := gormDB.First(&title)
+			if err = GetGormError(query); err != nil {
+				return res, errors.New(fmt.Sprintf("error: get user title %v", err.Error()))
+			}
+			return g.AddRandomCharacterByTitle(title)
 		}
 	}
 
@@ -156,14 +166,11 @@ func (g *Game) addNewGroupChar() (GameCharPosition, error) {
 	uniquerGroups := GetUniqueValues(notUsedGroups)
 	logger.Printf("not used groups %v\n", len(uniquerGroups))
 	randomGroupId := uniquerGroups[rand.Intn(len(uniquerGroups))]
-	val, err := g.AddRandomCharacterByGroup(randomGroupId, 1)
+	val, err := g.AddRandomCharacterByGroup(randomGroupId)
 	if err != nil {
 		return res, err
 	}
-	if len(val) == 0 {
-		return res, errors.New("Get character by group error")
-	}
-	return val[0], nil
+	return val, nil
 }
 
 func checkLeft(pos map[int]map[int]GameCharPosition, char GameCharPosition, prevResult GameCharPositionSlice) GameCharPositionSlice {

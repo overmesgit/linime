@@ -65,65 +65,65 @@ var charDisapear24 = function (game) {
 var tutorialStates = {
     1: {
         emotion: "/static/img/emo/tsundere.png", message: <div className="tutorial-msg">
-            <p>You can't do anything without me, do you?</p>
-            <p>It can't be helped, I'll assist you.</p>
-            <p>I didn't do it for YOU or anything!</p>
+            <p>You can't do anything without me, can you?</p>
+            <p>It can't be helped; I'll assist you.</p>
+            <p>I'm not doing it for YOU or anything!</p>
         </div>, next: {state: 2}
     },
     2: {
         emotion: "/static/img/emo/tsundere.png", message: <div className="tutorial-msg">
             <p>A lot of characters got lost in the Fanservice World.</p>
-            <p>To help them find the way home, you should bring together their powers.</p>
+            <p>To help them find the way home, you should bring their powers together.</p>
         </div>, next: {state: 3}
     },
     3: {
         emotion: "/static/img/emo/tsundere.png", message: <div className="tutorial-msg">
-            <p>But only characters knowing each other can get stronger together.</p>
-            <p>For that you have to line up characters from same anime in vertical, horizontal or diagonal line.</p>
+            <p>However, only characters who know each other can get stronger together.</p>
+            <p>For that, you have to line up at least 3 of them together in one straight line. (Diagonal line is fine as well)</p>
         </div>, next: {state: 4}
     },
     4: {
         emotion: "/static/img/emo/tsundere.png", message: <div className="tutorial-msg">
-            <p>When there are 3 or more characters in a line, they go home taking along all their friends.</p>
-            <p>I'll give you points for this just for motivation.</p>
-            <p>Let's try by the example.</p>
+            <p>When there are 3 or more characters lined up, they get to go home together with all of their friends.</p>
+            <p>I'll give you points for this.</p>
+            <p>Let's try this example.</p>
         </div>, next: {state: 5, game: initialTutorial}
     },
     5: {
         emotion: "/static/img/emo/normal.png", message: <div className="tutorial-msg">
-            <p>Look, here is buddies from Log Horizon.</p>
+            <p>Look, here are your buddies from Log Horizon.</p>
             <p>Let's help them.</p>
         </div>, next: {state: 6}
     },
     6: {
         emotion: "/static/img/emo/normal.png", message: <div className="tutorial-msg">
-            <p>Choose Shiroe by clicking him.</p>
+            <p>Choose Shiroe by clicking on him.</p>
         </div>, next: {state: 7}, selected: ['.row2.col0'], hiddenNext: true, nextCondition: {7: charSelected20}
     },
     7: {
         emotion: "/static/img/emo/normal.png", message: <div className="tutorial-msg">
-            <p>Now move him to others by clicking on green cell.</p>
+            <p>Now, click on the green cell to move him onto it.</p>
         </div>, next: {state: 8}, selected: ['.fieldCell:eq(6)', '#game'], hiddenNext: true, nextCondition: {8: charDisapear24, 20: charNotSelected20}
     },
     8: {
         emotion: "/static/img/emo/success.png", message: <div className="tutorial-msg">
-            <p>Perfect! Our heroes went home.</p>
+            <p>Perfect! Our heroes can now go home.</p>
         </div>, next: {state: 9}
     },
     9: {
         emotion: "/static/img/emo/sure.png", message: <div className="tutorial-msg">
-            <p>You coped with the training course.</p>
+            <p>You managed to cope with the training course.</p>
             <p>It couldn't be otherwise since you were trained by me!</p>
         </div>, next: {state: 10}
     },
     10: {
         emotion: "/static/img/emo/sure.png", message: <div className="tutorial-msg">
-            <p>Though I think our developer is useless if you find an error, write him - overmes@gmail.com</p>
+            <p>I still think our developer is useless though. If you find an error, do contact him at overmes@gmail.com</p>
         </div>, next: {state: 11}
     },
     11: {
         emotion: "/static/img/emo/waityou.png", message: <div className="tutorial-msg">
-            <p>We will see each other again, don't we?</p>
+            <p>We will see each other again, won't we?</p>
         </div>, next: {state: 0}
     },
     20: {
