@@ -214,7 +214,7 @@ func StartServer(port, pgSettings string) {
 
 	logger.Println("start")
 
-	homeTemplate = template.Must(template.ParseFiles("templates/home.html"))
+	homeTemplate = template.Must(template.ParseFiles("templates/prod.html"))
 
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
