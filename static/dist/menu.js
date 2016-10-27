@@ -48,6 +48,9 @@ var Menu = function (_React$Component) {
             var changeImage = _props.changeImage;
             var getAdvice = _props.getAdvice;
             var startTutorial = _props.startTutorial;
+            var showTopGames = _props.showTopGames;
+            var closeTopGames = _props.closeTopGames;
+            var showTop = _props.showTop;
 
 
             var gamesNodes = myGames.map(function (gameId, i) {
@@ -70,6 +73,21 @@ var Menu = function (_React$Component) {
             var selectedChar = game.Field.filter(function (field) {
                 return field.selected;
             });
+
+            var topNode = "";
+            if (showTop) {
+                topNode = React.createElement(
+                    "h2",
+                    { className: "menu-content-button btn", onClick: closeTopGames },
+                    "Close"
+                );
+            } else {
+                topNode = React.createElement(
+                    "h2",
+                    { className: "menu-content-button btn", onClick: showTopGames },
+                    "Top games"
+                );
+            }
 
             return React.createElement(
                 "div",
@@ -95,6 +113,7 @@ var Menu = function (_React$Component) {
                             { className: "menu-content-button btn", onClick: startTutorial },
                             "Tutorial"
                         ),
+                        topNode,
                         React.createElement(
                             "h2",
                             { className: "menu-content-button btn", onClick: toggleCreateGame },

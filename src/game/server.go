@@ -178,6 +178,23 @@ func serveGame(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func serveTop(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	topGames, err := GetTopGames()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(Message{err.Error()}.AsJson())
+		return
+	}
+	jsonResp, err := json.Marshal(topGames)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(Message{err.Error()}.AsJson())
+		return
+	}
+	w.Write(jsonResp)
+}
+
 var gormDB *gorm.DB
 var logger *log.Logger
 
@@ -197,11 +214,12 @@ func StartServer(port, pgSettings string) {
 
 	logger.Println("start")
 
-	homeTemplate = template.Must(template.ParseFiles("templates/prod.html"))
+	homeTemplate = template.Must(template.ParseFiles("templates/home.html"))
 
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/game", serveGame)
+	http.HandleFunc("/top", serveTop)
 	http.HandleFunc("/", serveHome)
 
 	err = http.ListenAndServe(":"+port, nil)

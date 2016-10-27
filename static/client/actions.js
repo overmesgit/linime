@@ -21,6 +21,8 @@ var GET_ADVICE = 'GET_ADVICE';
 var START_TUTORIAL = 'START_TUTORIAL';
 var END_TUTORIAL = 'END_TUTORIAL';
 var NEXT_TUTORIAL = 'NEXT_TUTORIAL';
+var TOP_GAMES = 'TOP_GAMES';
+var CLOSE_TOP_GAMES = 'CLOSE_TOP_GAMES';
 
 
 var fetchingAdvice = false;
@@ -99,6 +101,33 @@ var completeGame = function (gameId) {
             dispatch({
                 type: ERROR,
                 payload: 'Complete game error: ' + (xhr.responseJSON ? xhr.responseJSON['Message'] : '')
+            });
+            removeErrorAfter(5000, dispatch);
+        });
+    }
+};
+
+var closeTopGames = function () {
+    return {
+        type: CLOSE_TOP_GAMES
+    }
+};
+
+var showTopGames = function () {
+    return (dispatch) => {
+        $.ajax({
+            method: "GET",
+            url: '/top',
+            contentType: 'application/json'
+        }).done((data) => {
+            dispatch({
+                type: TOP_GAMES,
+                payload: data
+            });
+        }).fail((xhr) => {
+            dispatch({
+                type: ERROR,
+                payload: 'Get top error: ' + (xhr.responseJSON ? xhr.responseJSON['Message'] : '')
             });
             removeErrorAfter(5000, dispatch);
         });

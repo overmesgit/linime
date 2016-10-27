@@ -322,6 +322,13 @@ var Tutorial = function (_React$Component) {
     }
 
     _createClass(Tutorial, [{
+        key: "componentDidMount",
+        value: function componentDidMount() {
+            if (this.props.state) {
+                $('body').before('<div class="fog-of-war"></div>');
+            }
+        }
+    }, {
         key: "componentWillReceiveProps",
         value: function componentWillReceiveProps(nextProps) {
             var state = nextProps.state;

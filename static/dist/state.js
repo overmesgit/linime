@@ -30,11 +30,17 @@ var initialState = {
     fetchingAdvice: false,
     myGames: myGames,
     createGameStatus: { hidden: true },
-    tutorialState: null
+    tutorialState: null,
+    showTop: false,
+    topGames: []
 };
 
 function userState(state, action) {
     switch (action.type) {
+        case CLOSE_TOP_GAMES:
+            return _extends({}, state, { showTop: false });
+        case TOP_GAMES:
+            return _extends({}, state, { showTop: true, topGames: action.payload });
         case COMPLETE_GAME:
             action.payload.push.apply(state.game.Score.CompletedTitles, action.payload);
             return _extends({}, state, { game: _extends({}, state.game, { Score: _extends({}, state.game.Score, { TotalScore: 0 }) }) });
@@ -146,7 +152,7 @@ function viewState() {
             return _extends({}, state);
         case GET_GAME_SUCCESS:
             action.payload.creating = false;
-            return _extends({}, state, { game: action.payload, createGameStatus: _extends({}, state.createGame, { hidden: true }) });
+            return _extends({}, state, { game: action.payload, showTop: false, createGameStatus: _extends({}, state.createGame, { hidden: true }) });
         case GET_GAME_ERROR:
             return _extends({}, state, { game: _extends({}, state.game, { creating: false }) });
         case ERROR:

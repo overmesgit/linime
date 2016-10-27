@@ -122,8 +122,79 @@ var FieldCell = function (_React$Component2) {
     return FieldCell;
 }(React.Component);
 
-var Game = function (_React$Component3) {
-    _inherits(Game, _React$Component3);
+var TopGames = function (_React$Component3) {
+    _inherits(TopGames, _React$Component3);
+
+    function TopGames() {
+        _classCallCheck(this, TopGames);
+
+        return _possibleConstructorReturn(this, Object.getPrototypeOf(TopGames).apply(this, arguments));
+    }
+
+    _createClass(TopGames, [{
+        key: 'render',
+        value: function render() {
+            var _this4 = this;
+
+            var _props2 = this.props;
+            var topGames = _props2.topGames;
+            var getGame = _props2.getGame;
+
+
+            var nodes = topGames.map(function (diffNode, i) {
+                var subGames = diffNode.map(function (game, j) {
+                    var endDate = new Date(game.EndDate).toLocaleString();
+                    var gameTime = Math.round((new Date(game.EndDate) - new Date(game.Date)) / 1000 / 60);
+                    return React.createElement(
+                        'p',
+                        { key: 'top' + 'i' + i + 'j' + j, className: 'top-game my-game btn', onClick: getGame.bind(_this4, game.Id) },
+                        game.UserName ? game.UserName : "",
+                        ' Score: ',
+                        game.Score,
+                        ' Game: ',
+                        game.Id,
+                        ' Date: ',
+                        endDate,
+                        ' Game time: ',
+                        gameTime,
+                        ' min'
+                    );
+                });
+                if (diffNode.length) {
+                    return React.createElement(
+                        'div',
+                        { className: 'top-diff', key: 'topdiff' + 'i' + i },
+                        React.createElement(
+                            'p',
+                            { className: 'top-diff-str' },
+                            'Difficulty: ',
+                            i + 1
+                        ),
+                        subGames
+                    );
+                } else {
+                    return "";
+                }
+            });
+
+            return React.createElement(
+                'div',
+                { id: 'topGames' },
+                React.createElement(
+                    'h1',
+                    null,
+                    'Top games:'
+                ),
+                nodes
+            );
+        }
+    }]);
+
+    return TopGames;
+}(React.Component);
+
+var Game = function (_React$Component4) {
+    _inherits(Game, _React$Component4);
 
     function Game() {
         _classCallCheck(this, Game);
@@ -134,14 +205,17 @@ var Game = function (_React$Component3) {
     _createClass(Game, [{
         key: 'render',
         value: function render() {
-            var _props2 = this.props;
-            var game = _props2.game;
-            var selectChar = _props2.selectChar;
-            var moveSelected = _props2.moveSelected;
-            var tutorialState = _props2.tutorialState;
-            var endTutorial = _props2.endTutorial;
-            var nextTutorial = _props2.nextTutorial;
-            var moveSelectedTutorial = _props2.moveSelectedTutorial;
+            var _props3 = this.props;
+            var game = _props3.game;
+            var selectChar = _props3.selectChar;
+            var moveSelected = _props3.moveSelected;
+            var tutorialState = _props3.tutorialState;
+            var endTutorial = _props3.endTutorial;
+            var nextTutorial = _props3.nextTutorial;
+            var moveSelectedTutorial = _props3.moveSelectedTutorial;
+            var showTop = _props3.showTop;
+            var topGames = _props3.topGames;
+            var getGame = _props3.getGame;
 
             var fieldCell = [];
             for (var row = 0; row < game.Width; row++) {
@@ -155,14 +229,21 @@ var Game = function (_React$Component3) {
                 return React.createElement(Character, { key: charData.Img.slice(-8, -4) + charData.Col + charData.Row, char: charData,
                     selectChar: selectChar, gameTurn: game.Turn });
             });
-
-            return React.createElement(
-                'div',
-                { id: 'game', className: 'window' },
-                React.createElement(Tutorial, { state: tutorialState, endTutorial: endTutorial, nextTutorial: nextTutorial, game: game }),
-                fieldCell,
-                characters
-            );
+            if (showTop) {
+                return React.createElement(
+                    'div',
+                    { id: 'game', className: 'window' },
+                    React.createElement(TopGames, { topGames: topGames, getGame: getGame })
+                );
+            } else {
+                return React.createElement(
+                    'div',
+                    { id: 'game', className: 'window' },
+                    React.createElement(Tutorial, { state: tutorialState, endTutorial: endTutorial, nextTutorial: nextTutorial, game: game }),
+                    fieldCell,
+                    characters
+                );
+            }
         }
     }]);
 

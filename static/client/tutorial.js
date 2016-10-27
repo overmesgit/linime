@@ -137,6 +137,11 @@ var tutorialStates = {
 };
 
 class Tutorial extends React.Component {
+    componentDidMount() {
+        if (this.props.state) {
+            $('body').before('<div class="fog-of-war"></div>')
+        }
+    }
     componentWillReceiveProps(nextProps) {
         const {state, endTutorial, nextTutorial, game} = nextProps;
         if (state) {

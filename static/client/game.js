@@ -67,9 +67,39 @@ class FieldCell extends React.Component {
     }
 }
 
+class TopGames extends React.Component {
+    render() {
+        const {topGames, getGame} = this.props;
+
+        var nodes = topGames.map((diffNode, i) => {
+            var subGames = diffNode.map((game, j) => {
+                var endDate = new Date(game.EndDate).toLocaleString();
+                var gameTime = Math.round((new Date(game.EndDate) - new Date(game.Date))/1000/60);
+                return <p key={'top' + 'i' + i + 'j' + j} className="top-game my-game btn" onClick={getGame.bind(this, game.Id)}>
+                    {game.UserName ? game.UserName: ""} Score: {game.Score} Game: {game.Id} Date: {endDate} Game time: {gameTime} min
+                    </p>
+            });
+            if (diffNode.length) {
+                return <div className="top-diff" key={'topdiff' + 'i' + i}>
+                    <p className="top-diff-str">Difficulty: {i + 1}</p>
+                    {subGames}
+                </div>
+            } else {
+                return ""
+            }
+        });
+
+        return <div id="topGames">
+            <h1>Top games:</h1>
+            {nodes}
+        </div>
+    }
+}
+
 class Game extends React.Component {
     render() {
-        const {game, selectChar, moveSelected, tutorialState, endTutorial, nextTutorial, moveSelectedTutorial} = this.props;
+        const {game, selectChar, moveSelected, tutorialState, endTutorial, nextTutorial, moveSelectedTutorial, showTop,
+            topGames, getGame} = this.props;
         var fieldCell = [];
         for (var row = 0; row < game.Width; row++) {
             for (var col = 0; col < game.Height; col++) {
@@ -83,11 +113,16 @@ class Game extends React.Component {
             return <Character key={charData.Img.slice(-8, -4) + charData.Col + charData.Row} char={charData}
                               selectChar={selectChar} gameTurn={game.Turn} />
         });
-
-        return <div id="game" className="window">
+        if (showTop) {
+            return <div id="game" className="window">
+                <TopGames topGames={topGames} getGame={getGame}/>
+            </div>
+        } else {
+            return <div id="game" className="window">
                 <Tutorial state={tutorialState} endTutorial={endTutorial} nextTutorial={nextTutorial} game={game} />
                 {fieldCell}
                 {characters}
             </div>
+        }
     }
 }

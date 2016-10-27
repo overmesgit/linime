@@ -24,11 +24,17 @@ const initialState = {
     fetchingAdvice: false,
     myGames: myGames,
     createGameStatus: {hidden: true},
-    tutorialState: null
+    tutorialState: null,
+    showTop: false,
+    topGames: []
 };
 
 function userState(state, action) {
     switch (action.type) {
+        case CLOSE_TOP_GAMES:
+            return {...state, showTop: false};
+        case TOP_GAMES:
+            return {...state, showTop: true, topGames: action.payload};
         case COMPLETE_GAME:
             action.payload.push.apply(state.game.Score.CompletedTitles, action.payload);
             return {...state, game: {...state.game, Score: {...state.game.Score, TotalScore: 0}}};
@@ -115,7 +121,7 @@ function viewState(state = initialState, action) {
             return {...state};
         case GET_GAME_SUCCESS:
             action.payload.creating = false;
-            return {...state, game: action.payload, createGameStatus: {...state.createGame, hidden: true}};
+            return {...state, game: action.payload, showTop: false, createGameStatus: {...state.createGame, hidden: true}};
         case GET_GAME_ERROR:
             return {...state, game: {...state.game, creating: false}};
         case ERROR:

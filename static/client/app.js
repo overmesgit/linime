@@ -31,17 +31,18 @@ class AppClass extends React.Component {
     }
 
     render() {
-        const {game, error, myGames, createGameStatus, tutorialState} = this.props.app;
+        const {game, error, myGames, createGameStatus, tutorialState, showTop, topGames} = this.props.app;
         const {createGame, completeGame, selectChar, moveSelected, getGame, toggleCreateGame, changeImage, getAdvice, startTutorial,
-            endTutorial, nextTutorial, moveSelectedTutorial} = this.props.appActions;
+            endTutorial, nextTutorial, moveSelectedTutorial, showTopGames, closeTopGames} = this.props.appActions;
 
         return <div className="content fa">
 
             <Menu createGame={createGame} completeGame={completeGame} getGame={getGame} game={game} myGames={myGames}
             toggleCreateGame={toggleCreateGame} createGameStatus={createGameStatus} changeImage={changeImage} getAdvice={getAdvice}
-            startTutorial={startTutorial}/>
+            startTutorial={startTutorial} showTopGames={showTopGames} showTop={showTop} closeTopGames={closeTopGames}/>
             <Game game={game} selectChar={selectChar} moveSelected={moveSelected} tutorialState={tutorialState}
-                  endTutorial={endTutorial} nextTutorial={nextTutorial} moveSelectedTutorial={moveSelectedTutorial}/>
+                  endTutorial={endTutorial} nextTutorial={nextTutorial} moveSelectedTutorial={moveSelectedTutorial}
+                  showTop={showTop} topGames={topGames} getGame={getGame} />
             <GameScore completedTitles={game.Score.CompletedTitles} currentTurn={game.Turn} game={game} />
             {error != "" ? <Error error={error} />: ""}
         </div>
@@ -58,7 +59,7 @@ function mapDispatchToProps(dispatch) {
     return {
         appActions: Redux.bindActionCreators({createGame, completeGame, getGame, selectChar,
             moveSelected, toggleCreateGame, changeImage, getAdvice, startTutorial,
-            endTutorial, nextTutorial, moveSelectedTutorial}, dispatch)
+            endTutorial, nextTutorial, moveSelectedTutorial, showTopGames, closeTopGames}, dispatch)
     }
 }
 
