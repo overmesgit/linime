@@ -232,9 +232,9 @@ var GameScore = function (_React$Component5) {
     }
 
     _createClass(GameScore, [{
-        key: "componentDidUpdate",
-        value: function componentDidUpdate() {
-            var selected = this.props.game.Field.filter(function (f) {
+        key: "componentWillReceiveProps",
+        value: function componentWillReceiveProps(nextProps) {
+            var selected = nextProps.game.Field.filter(function (f) {
                 return f.selected;
             });
             var titleName = "";
@@ -245,7 +245,7 @@ var GameScore = function (_React$Component5) {
                 var _iteratorError2 = undefined;
 
                 try {
-                    for (var _iterator2 = this.props.game.Score.CompletedTitles[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                    for (var _iterator2 = nextProps.game.Score.CompletedTitles[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
                         var title = _step2.value;
                         var _iteratorNormalCompletion3 = true;
                         var _didIteratorError3 = false;
@@ -289,9 +289,14 @@ var GameScore = function (_React$Component5) {
                     }
                 }
             }
+            var scoreEl = $('#score');
+            if (this.props.game.Id != nextProps.game.Id) {
+                scoreEl[0].scrollTop = 0;
+                scoreEl.perfectScrollbar('update');
+            }
             if (titleName) {
                 var titleEl = $('a:contains(' + titleName + ')');
-                var scoreEl = $('#score');
+
                 if (titleEl.length) {
                     scoreEl[0].scrollTop = scoreEl[0].scrollTop + titleEl.position()['top'] - 15;
                     scoreEl.perfectScrollbar('update');

@@ -82,14 +82,14 @@ class Advice extends React.Component {
 }
 
 class GameScore extends React.Component {
-    componentDidUpdate() {
-        var selected = this.props.game.Field.filter(f => {
+    componentWillReceiveProps(nextProps) {
+        var selected = nextProps.game.Field.filter(f => {
             return f.selected
         });
         var titleName = "";
         if (selected.length > 0) {
             var selectedChar = selected[0];
-            for (var title of this.props.game.Score.CompletedTitles) {
+            for (var title of nextProps.game.Score.CompletedTitles) {
                 for (var char of title.Characters) {
                     if (char.Img == selectedChar.Img) {
                         titleName = title.Title
@@ -97,9 +97,14 @@ class GameScore extends React.Component {
                 }
             }
         }
+        const scoreEl = $('#score');
+        if (this.props.game.Id != nextProps.game.Id) {
+            scoreEl[0].scrollTop = 0;
+            scoreEl.perfectScrollbar('update');
+        }
         if (titleName) {
             const titleEl = $('a:contains(' + titleName + ')');
-            const scoreEl = $('#score');
+
             if (titleEl.length) {
                 scoreEl[0].scrollTop = scoreEl[0].scrollTop + titleEl.position()['top'] - 15;
                 scoreEl.perfectScrollbar('update');
