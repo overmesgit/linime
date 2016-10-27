@@ -316,6 +316,9 @@ func (g *Game) AddRandomCharacterByGroup(GroupId int) (GameCharPosition, error) 
 	if errs := query.GetErrors(); len(errs) > 0 {
 		return res, errors.New(fmt.Sprint(errs))
 	}
+	if len(animeModels) == 0 {
+		return res, errors.New("error: titles not found")
+	}
 	randomTitle := animeModels.GetRandomByMembers()
 	return g.AddRandomCharacterByTitle(randomTitle)
 }

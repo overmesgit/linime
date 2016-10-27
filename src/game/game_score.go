@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"malmodel"
-	"strconv"
-	"time"
 )
 
 type CompletedChar struct {
@@ -65,15 +63,11 @@ func (g *Game) isCompleted() bool {
 	return g.Score.TotalScore != NOT_ENDED_GAME_SCORES
 }
 
-func (g *Game) GetCompletedTitles(completedChars []GameCharPosition, notInLine []GameCharPosition) ([]CompleteTitle, error) {
+func (g *Game) GetCompletedTitles(completedChars GameCharPositionSlice, notInLine []GameCharPosition, lineScore, notLineScore int) ([]CompleteTitle, error) {
 	var res []CompleteTitle
-	charactersIds := make([]string, 0)
-	for _, char := range append(completedChars, notInLine...) {
-		charactersIds = append(charactersIds, strconv.Itoa(char.Id))
-	}
 
 	var charactersData CharModelSlice
-	query := gormDB.Where("id in (?)", charactersIds).Find(&charactersData)
+	query := gormDB.Where("id in (?)", completedChars.GetIds()).Find(&charactersData)
 	err := GetGormError(query)
 	if err != nil {
 		return res, errors.New(fmt.Sprintf("error: get characters %v", err.Error()))
@@ -97,13 +91,14 @@ func (g *Game) GetCompletedTitles(completedChars []GameCharPosition, notInLine [
 		}
 		title, _ := completedTitlesMap[char.TitleId]
 		name, _ := charNames[char.Id]
-		title.Characters = append(title.Characters, CompletedChar{char.Id, name, char.Img, len(title.Characters) + 1})
+		score := (len(title.Characters) + 1) * lineScore
+		title.Characters = append(title.Characters, CompletedChar{char.Id, name, char.Img, score})
 	}
 
 	for _, char := range notInLine {
 		title, _ := completedTitlesMap[char.TitleId]
 		name, _ := charNames[char.Id]
-		title.Characters = append(title.Characters, CompletedChar{char.Id, name, char.Img, -1})
+		title.Characters = append(title.Characters, CompletedChar{char.Id, name, char.Img, notLineScore})
 	}
 
 	result := make([]CompleteTitle, 0)
@@ -113,7 +108,7 @@ func (g *Game) GetCompletedTitles(completedChars []GameCharPosition, notInLine [
 	return result, nil
 }
 
-func (g *Game) UpdateGameScore(completedChars []GameCharPosition, notInLine []GameCharPosition) ([]CompleteTitle, error) {
+func (g *Game) UpdateGameScore(completedChars GameCharPositionSlice, notInLine GameCharPositionSlice, lineScore, notLineScore int) ([]CompleteTitle, error) {
 	logger.Println("update game score")
 	res := make([]CompleteTitle, 0)
 	if len(completedChars) != 0 {
@@ -124,7 +119,7 @@ func (g *Game) UpdateGameScore(completedChars []GameCharPosition, notInLine []Ga
 		}
 		g.Score.CompletedGroups = append(g.Score.CompletedGroups, completedGroups...)
 
-		res, err = g.GetCompletedTitles(completedChars, notInLine)
+		res, err = g.GetCompletedTitles(completedChars, notInLine, lineScore, notLineScore)
 		if err != nil {
 			return res, err
 		}
@@ -132,21 +127,4 @@ func (g *Game) UpdateGameScore(completedChars []GameCharPosition, notInLine []Ga
 	}
 	g.Turn++
 	return res, nil
-}
-
-func (g *Game) CompleteCountTotalScore() {
-	totalScore := 0
-	for _, title := range g.Score.CompletedTitles {
-		for _, char := range title.Characters {
-			totalScore += char.Score
-		}
-	}
-	g.Score.TotalScore = totalScore
-	for _, change := range g.Score.ChangeImgs {
-		g.Score.TotalScore += change.Score
-	}
-	for _, advice := range g.Score.Advices {
-		g.Score.TotalScore += advice.Score
-	}
-	g.EndDate = time.Now()
 }

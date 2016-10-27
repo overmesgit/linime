@@ -30,7 +30,8 @@ const initialState = {
 function userState(state, action) {
     switch (action.type) {
         case COMPLETE_GAME:
-            return {...state, game: { ...state.game, Score: {...state.game.Score, TotalScore: 0}}};
+            action.payload.push.apply(state.game.Score.CompletedTitles, action.payload);
+            return {...state, game: {...state.game, Score: {...state.game.Score, TotalScore: 0}}};
         case GET_ADVICE:
             var images = {};
             for (var img of action.payload.Img) {

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"malmodel"
+	"malparser"
 	"math"
 	"math/rand"
 	"sort"
@@ -151,7 +152,7 @@ func (g *Game) addNewGroupChar() (GameCharPosition, error) {
 	// not found user groups
 	if len(notUsedGroups) == 0 {
 		animeLimit := 100 + 200*g.Difficulty*g.Difficulty
-		query := gormDB.Where("jsonb_array_length(chars_json) > ?", 2)
+		query := gormDB.Where("jsonb_array_length(chars_json) > ? and status = ?", 2, malparser.FINISHED_AIRING_STATUS)
 		if len(usedGroups) > 0 {
 			query = gormDB.Where("group_id not in (?)", usedGroups)
 		}

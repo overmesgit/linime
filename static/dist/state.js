@@ -36,6 +36,7 @@ var initialState = {
 function userState(state, action) {
     switch (action.type) {
         case COMPLETE_GAME:
+            action.payload.push.apply(state.game.Score.CompletedTitles, action.payload);
             return _extends({}, state, { game: _extends({}, state.game, { Score: _extends({}, state.game.Score, { TotalScore: 0 }) }) });
         case GET_ADVICE:
             var images = {};

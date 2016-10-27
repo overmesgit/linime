@@ -28,14 +28,20 @@ var CompleteTitle = function (_React$Component) {
             var title = this.props.title;
 
             var charsNodes = title.Characters.map(function (charStat, i) {
+                var score = "";
+                if (charStat.Score != 0) {
+                    if (charStat.Score > 0) {
+                        score += "+";
+                    }
+                    score += charStat.Score;
+                }
                 return React.createElement(
                     "p",
                     { key: '' + charStat.Id + i, className: "stat-char" },
                     React.createElement(
                         "span",
                         { className: "stat-char-score" },
-                        charStat.Score > 0 ? "+" : "",
-                        charStat.Score
+                        score
                     ),
                     React.createElement("img", { src: charStat.Img, className: "stat-char-img" }),
                     React.createElement(
@@ -84,8 +90,9 @@ var StatsImagesGroup = function (_React$Component2) {
     _createClass(StatsImagesGroup, [{
         key: "render",
         value: function render() {
-            var imagesArray = this.props.imagesArray;
-            var score = this.props.score;
+            var _props = this.props;
+            var imagesArray = _props.imagesArray;
+            var score = _props.score;
 
             var imagesGroup = [];
             for (var i = 0; i < imagesArray.length; i += 5) {

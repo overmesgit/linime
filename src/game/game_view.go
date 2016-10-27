@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"malmodel"
+	"time"
 )
 
 func CreateNewGame(gameParam CreateGameParam) (*Game, error) {
@@ -127,7 +128,7 @@ func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, erro
 		return res, err
 	} else {
 		completed, notInLine := g.CheckCompleted()
-		titleScoreUpdate, err := g.UpdateGameScore(completed, notInLine)
+		titleScoreUpdate, err := g.UpdateGameScore(completed, notInLine, 1, -1)
 		if err != nil {
 			return res, err
 		}
@@ -136,7 +137,11 @@ func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, erro
 			return res, err
 		}
 		if len(g.Field) >= g.Width*g.Height {
-			g.CompleteCountTotalScore()
+			notCompletedTitles, err := g.CompleteCountTotalScore()
+			if err != nil {
+				return res, err
+			}
+			titleScoreUpdate = append(titleScoreUpdate, notCompletedTitles...)
 		}
 		if g.isCompleted() {
 			// delete user list, it can be huge
@@ -149,4 +154,22 @@ func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, erro
 		}
 		return MoveResponse{path, completedIndexes, newChars.GetHidden(), g.Turn, titleScoreUpdate}, nil
 	}
+}
+
+func (g *Game) CompleteCountTotalScore() ([]CompleteTitle, error) {
+	totalScore := 0
+	for _, title := range g.Score.CompletedTitles {
+		for _, char := range title.Characters {
+			totalScore += char.Score
+		}
+	}
+	g.Score.TotalScore = totalScore
+	for _, change := range g.Score.ChangeImgs {
+		g.Score.TotalScore += change.Score
+	}
+	for _, advice := range g.Score.Advices {
+		g.Score.TotalScore += advice.Score
+	}
+	g.EndDate = time.Now()
+	return g.UpdateGameScore(g.Field, nil, 0, 0)
 }

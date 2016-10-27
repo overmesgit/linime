@@ -5,8 +5,15 @@ class CompleteTitle extends React.Component {
     render() {
         const {title} = this.props;
         var charsNodes = title.Characters.map((charStat, i) => {
+            var score = "";
+            if (charStat.Score != 0) {
+                if (charStat.Score > 0 ) {
+                    score += "+";
+                }
+                score += charStat.Score;
+            }
             return <p key={'' + charStat.Id + i} className="stat-char">
-                <span className="stat-char-score">{(charStat.Score > 0 ? "+":"")}{charStat.Score}</span>
+                <span className="stat-char-score">{score}</span>
                 <img src={charStat.Img} className="stat-char-img" />
                 <a target="_blank" className="stat-char-name" href={"http://myanimelist.net/character/" + charStat.Id}>{charStat.Name}</a>
             </p>

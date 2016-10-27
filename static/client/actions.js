@@ -92,7 +92,8 @@ var completeGame = function (gameId) {
             contentType: 'application/json'
         }).done((data) => {
             dispatch({
-                type: COMPLETE_GAME
+                type: COMPLETE_GAME,
+                payload: data
             });
         }).fail((xhr) => {
             dispatch({

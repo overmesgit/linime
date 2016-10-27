@@ -63,7 +63,7 @@ var Menu = function (_React$Component) {
                 completeNode = React.createElement(
                     "h2",
                     { className: "menu-content-button btn complete-game", onClick: this.completeGame.bind(this) },
-                    "Complete game"
+                    "Give up"
                 );
             }
 

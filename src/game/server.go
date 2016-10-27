@@ -119,12 +119,19 @@ func serveTargetGame(gameUUID string, method string, action string, body io.Read
 			if game.isCompleted() {
 				return http.StatusInternalServerError, Message{Message: "Game completed"}.AsJson()
 			}
-			game.CompleteCountTotalScore()
+			score, err := game.CompleteCountTotalScore()
+			if err != nil {
+				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
+			}
+			jsonResp, err := json.Marshal(score)
+			if err != nil {
+				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
+			}
 			err = game.Update()
 			if err != nil {
 				return http.StatusInternalServerError, Message{Message: err.Error()}.AsJson()
 			}
-			return http.StatusOK, Message{Message: "ok"}.AsJson()
+			return http.StatusOK, jsonResp
 		}
 	}
 	return http.StatusInternalServerError, Message{Message: "action not found"}.AsJson()

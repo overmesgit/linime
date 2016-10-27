@@ -22,7 +22,7 @@ class Menu extends React.Component {
 
         var completeNode = "";
         if(game.Score.TotalScore == -1000 && game.Id != 'test') {
-            completeNode = <h2 className="menu-content-button btn complete-game" onClick={this.completeGame.bind(this)}>Complete game</h2>
+            completeNode = <h2 className="menu-content-button btn complete-game" onClick={this.completeGame.bind(this)}>Give up</h2>
         }
 
         var selectedChar = game.Field.filter(field => field.selected);
