@@ -154,7 +154,7 @@ func (g *Game) addNewGroupChar() (GameCharPosition, error) {
 		animeLimit := 100 + 200*g.Difficulty*g.Difficulty
 		query := gormDB.Where("jsonb_array_length(chars_json) > ? and status = ?", 2, malparser.FINISHED_AIRING_STATUS)
 		if len(usedGroups) > 0 {
-			query = gormDB.Where("group_id not in (?)", usedGroups)
+			query = query.Where("group_id not in (?)", usedGroups)
 		}
 		query = query.Table("anime_models").Order("score_count desc").Limit(animeLimit).Pluck("group_id", &notUsedGroups)
 		if err = GetGormError(query); err != nil {
@@ -165,7 +165,7 @@ func (g *Game) addNewGroupChar() (GameCharPosition, error) {
 		return res, nil
 	}
 	uniquerGroups := GetUniqueValues(notUsedGroups)
-	logger.Printf("not used groups %v\n", len(uniquerGroups))
+	logger.Printf("not used groups len %v\n", len(uniquerGroups))
 	randomGroupId := uniquerGroups[rand.Intn(len(uniquerGroups))]
 	val, err := g.AddRandomCharacterByGroup(randomGroupId)
 	if err != nil {

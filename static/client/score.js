@@ -82,6 +82,31 @@ class Advice extends React.Component {
 }
 
 class GameScore extends React.Component {
+    componentDidUpdate() {
+        var selected = this.props.game.Field.filter(f => {
+            return f.selected
+        });
+        var titleName = "";
+        if (selected.length > 0) {
+            var selectedChar = selected[0];
+            for (var title of this.props.game.Score.CompletedTitles) {
+                for (var char of title.Characters) {
+                    if (char.Img == selectedChar.Img) {
+                        titleName = title.Title
+                    }
+                }
+            }
+        }
+        if (titleName) {
+            const titleEl = $('a:contains(' + titleName + ')');
+            const scoreEl = $('#score');
+            if (titleEl.length) {
+                scoreEl[0].scrollTop = scoreEl[0].scrollTop + titleEl.position()['top'] - 15;
+                scoreEl.perfectScrollbar('update');
+            }
+        }
+    }
+
     componentDidMount() {
         $('#score').perfectScrollbar();
     }
