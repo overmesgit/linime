@@ -382,7 +382,7 @@ img {
 }
 
 #topGames {
-    padding: 20px 40px;
+    padding: 0 40px;
 
 }
 
@@ -394,4 +394,7 @@ img {
     font-size: 20px;
     text-align: left;
     padding-left: 10px;
+    overflow: auto;
+    height: 800px;
+    margin-top: 20px;
 }
