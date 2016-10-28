@@ -76,7 +76,7 @@ class TopGames extends React.Component {
                 var endDate = new Date(game.EndDate).toLocaleString();
                 var gameTime = Math.round((new Date(game.EndDate) - new Date(game.Date))/1000/60);
                 return <p key={'top' + 'i' + i + 'j' + j} className="top-game my-game btn" onClick={getGame.bind(this, game.Id)}>
-                    {game.UserName ? game.UserName: ""} Score: {game.Score} Game: {game.Id} Date: {endDate} Game time: {gameTime} min
+                    {game.UserName ? game.UserName: ""} Score: {game.Score} {game.Id} {endDate} Game time: {gameTime} min
                     </p>
             });
             if (diffNode.length) {

@@ -229,7 +229,8 @@ func (g *Game) GetGameModel() (GameModel, error) {
 	if err != nil {
 		return res, err
 	}
-	return GameModel{Id: g.Id, GameJson: string(data)}, nil
+	return GameModel{Id: g.Id, GameJson: string(data), UserName: g.UserName, Score: g.Score.TotalScore, EndDate: g.EndDate,
+		Date: g.Date, Difficulty: g.Difficulty}, nil
 }
 
 func GetGormError(db *gorm.DB) error {

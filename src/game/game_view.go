@@ -143,11 +143,6 @@ func (g *Game) MakeTurn(char GameCharPosition, row, col int) (MoveResponse, erro
 			}
 			titleScoreUpdate = append(titleScoreUpdate, notCompletedTitles...)
 		}
-		if g.isCompleted() {
-			// delete user list, it can be huge
-			g.UserItems = make([]int, 0)
-		}
-
 		completedIndexes := make([][2]int, 0)
 		for _, char := range append(completed, notInLine...) {
 			completedIndexes = append(completedIndexes, [2]int{char.Row, char.Col})
@@ -171,6 +166,8 @@ func (g *Game) CompleteCountTotalScore() ([]CompleteTitle, error) {
 		g.Score.TotalScore += advice.Score
 	}
 	g.EndDate = time.Now()
+	// delete user list, it can be huge
+	g.UserItems = make([]int, 0)
 	return g.UpdateGameScore(g.Field, nil, 0, 0)
 }
 
@@ -185,10 +182,8 @@ type TopResult struct {
 func GetTopGames() ([][]TopResult, error) {
 	res := make([][]TopResult, 5)
 	for difficulty := 0; difficulty < 5; difficulty++ {
-		selectQs := "id, game_json::json->>'UserName' as user_name, (game_json::json->>'Date')::timestamp as date," +
-			" (game_json::json->>'EndDate')::timestamp as end_date," +
-			" (game_json::json->>'Score')::json->>'TotalScore' as score"
-		whereQs := "((game_json::json->>'Score')::json->>'TotalScore')::int > ? and (game_json::json->>'Difficulty')::int = ?"
+		selectQs := "id, user_name, date, end_date, score"
+		whereQs := "score > ? and difficulty = ?"
 		var top []TopResult
 		query := gormDB.Table("game_models").Select(selectQs).Where(whereQs, 0, difficulty).Order("score desc").Limit(10).Scan(&top)
 		if err := GetGormError(query); err != nil {

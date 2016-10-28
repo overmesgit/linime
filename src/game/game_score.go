@@ -63,11 +63,11 @@ func (g *Game) isCompleted() bool {
 	return g.Score.TotalScore != NOT_ENDED_GAME_SCORES
 }
 
-func (g *Game) GetCompletedTitles(completedChars GameCharPositionSlice, notInLine []GameCharPosition, lineScore, notLineScore int) ([]CompleteTitle, error) {
+func (g *Game) GetCompletedTitles(completedChars GameCharPositionSlice, notInLine GameCharPositionSlice, lineScore, notLineScore int) ([]CompleteTitle, error) {
 	var res []CompleteTitle
 
 	var charactersData CharModelSlice
-	query := gormDB.Where("id in (?)", completedChars.GetIds()).Find(&charactersData)
+	query := gormDB.Where("id in (?)", append(completedChars.GetIds(), notInLine.GetIds()...)).Find(&charactersData)
 	err := GetGormError(query)
 	if err != nil {
 		return res, errors.New(fmt.Sprintf("error: get characters %v", err.Error()))
