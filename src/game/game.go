@@ -352,8 +352,12 @@ func (g *Game) AddUserScores() error {
 	}
 	logger.Println("add user scores")
 	userList, err := malparser.GetUserScoresByName(g.UserName, 2)
+	logger.Println("scores loaded", len(userList.AnimeList))
 	if err != nil {
 		return err
+	}
+	if len(userList.AnimeList) == 0 {
+		return errors.New("Empty user list")
 	}
 	userListSlice := AnimeTitleSlice(userList.AnimeList)
 	sort.Sort(sort.Reverse(userListSlice))
