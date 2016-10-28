@@ -139,7 +139,7 @@ func (g *Game) addNewGroupChar() (GameCharPosition, error) {
 			return res, err
 		}
 		if len(notUsedTitles) > 0 {
-			randomTitleId := notUsedTitles[rand.Intn(len(notUsedTitles)+1)]
+			randomTitleId := notUsedTitles[rand.Intn(len(notUsedTitles))]
 			title := malmodel.AnimeModel{Id: randomTitleId}
 			query := gormDB.First(&title)
 			if err = GetGormError(query); err != nil {
