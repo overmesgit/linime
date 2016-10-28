@@ -381,7 +381,14 @@ func (g *Game) GetMoreLineTitles() []int {
 	titleMap := g.getTitleMap()
 	targetTitles := make([]int, 0)
 	for key, titlesChars := range titleMap {
-		if len(titlesChars) >= g.Line && len(titlesChars) < MAX_FROM_ONE_TITLE {
+		maxFromTitle := MAX_FROM_ONE_TITLE
+		if g.Difficulty == 3 {
+			maxFromTitle = MAX_FROM_ONE_TITLE - 1
+		}
+		if g.Difficulty == 4 {
+			maxFromTitle = MAX_FROM_ONE_TITLE - 2
+		}
+		if len(titlesChars) >= g.Line && len(titlesChars) < maxFromTitle {
 			targetTitles = append(targetTitles, key)
 		}
 	}
