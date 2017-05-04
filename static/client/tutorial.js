@@ -11,7 +11,7 @@ var initialTutorial = {
     "Field": [
         {"Img": "http://cdn.myanimelist.net/images/characters/10/240997.jpg", "Row": 2, "Col": 0},
         {"Img": "http://cdn.myanimelist.net/images/characters/12/292611.jpg", "Row": 2, "Col": 4},
-        {"Img": "http://cdn.myanimelist.net/images/characters/6/83657.jpg", "Row": 7, "Col": 4},
+        {"Img": "https://myanimelist.cdn-dena.com/images/characters/5/302315.jpg", "Row": 7, "Col": 4},
         {"Img": "http://cdn.myanimelist.net/images/characters/11/200455.jpg", "Row": 1, "Col": 5},
         {"Img": "http://cdn.myanimelist.net/images/characters/10/103220.jpg", "Row": 4, "Col": 1},
         {"Img": "http://cdn.myanimelist.net/images/characters/3/55714.jpg", "Row": 8, "Col": 0},
