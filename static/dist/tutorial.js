@@ -12,7 +12,7 @@ var initialTutorialMove = {
     7: { "Path": [[0, 6], [0, 5], [0, 4], [0, 3], [1, 3], [2, 3], [2, 2], [2, 1]],
         "Completed": [[2, 4], [1, 5], [0, 6]],
         "NewChars": [], "NextTurn": 2,
-        "GameScore": [{ "Id": 17265, "Title": "Log Horizon", "English": "Log Horizon", "Turn": 2, "Characters": [{ "Id": 81371, "Name": "Naotsugu", "Img": "http://cdn.myanimelist.net/images/characters/11/200455.jpg", "Score": 1 }, { "Id": 81369, "Name": "Akatsuki", "Img": "http://cdn.myanimelist.net/images/characters/12/292611.jpg", "Score": 2 }, { "Id": 81367, "Name": "Shiroe", "Img": "http://cdn.myanimelist.net/images/characters/10/240997.jpg",
+        "GameScore": [{ "Id": 17265, "Title": "Log Horizon", "English": "Log Horizon", "Turn": 2, "Characters": [{ "Id": 81371, "Name": "Naotsugu", "Img": "http://myanimelist.cdn-dena.com/images/characters/11/200455.jpg", "Score": 1 }, { "Id": 81369, "Name": "Akatsuki", "Img": "http://myanimelist.cdn-dena.com/images/characters/12/292611.jpg", "Score": 2 }, { "Id": 81367, "Name": "Shiroe", "Img": "http://myanimelist.cdn-dena.com/images/characters/10/240997.jpg",
                 "Score": 3 }] }] }
 };
 
